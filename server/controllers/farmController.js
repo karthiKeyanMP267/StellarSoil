@@ -1,0 +1,203 @@
+import Farm from '../models/Farm.js';
+import User from '../models/User.js';
+
+// Get farm profile
+export const getFarmProfile = async (req, res) => {
+  try {
+    const farm = await Farm.findOne({ owner: req.user.id })
+      .populate('owner', 'name email phone');
+    
+    if (!farm) {
+      return res.status(404).json({ msg: 'Farm profile not found' });
+    }
+
+    res.json(farm);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error fetching farm profile' });
+  }
+};
+
+// Update farm profile
+export const updateFarmProfile = async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      address,
+      contactPhone,
+      businessHours,
+      certifications
+    } = req.body;
+
+    const farm = await Farm.findOne({ owner: req.user.id });
+    if (!farm) {
+      return res.status(404).json({ msg: 'Farm profile not found' });
+    }
+
+    // Update fields
+    if (name) farm.name = name;
+    if (description) farm.description = description;
+    if (address) farm.address = address;
+    if (contactPhone) farm.contactPhone = contactPhone;
+    if (businessHours) farm.businessHours = businessHours;
+    if (certifications) farm.certifications = certifications;
+
+    await farm.save();
+    res.json(farm);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error updating farm profile' });
+  }
+};
+
+// Farm image upload handler
+export const uploadFarmImages = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ msg: 'No files uploaded' });
+    }
+
+    const farm = await Farm.findOne({ owner: req.user.id });
+    if (!farm) {
+      return res.status(404).json({ msg: 'Farm profile not found' });
+    }
+
+    // Get file paths
+    const imagePaths = req.files.map(file => file.path.replace(/\\/g, '/'));
+
+    // Add new images to farm's images array
+    farm.images = [...farm.images, ...imagePaths];
+    await farm.save();
+
+    res.json({ 
+      msg: 'Images uploaded successfully',
+      images: imagePaths
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error uploading farm images' });
+  }
+};
+
+// Farm image delete handler
+export const deleteFarmImage = async (req, res) => {
+  try {
+    const { imagePath } = req.body;
+    if (!imagePath) {
+      return res.status(400).json({ msg: 'Image path is required' });
+    }
+
+    const farm = await Farm.findOne({ owner: req.user.id });
+    if (!farm) {
+      return res.status(404).json({ msg: 'Farm profile not found' });
+    }
+
+    // Remove image from farm's images array
+    farm.images = farm.images.filter(img => img !== imagePath);
+    await farm.save();
+
+    // You might want to also delete the file from the filesystem
+    // This requires the fs module and proper error handling
+    // fs.unlink(imagePath, (err) => {
+    //   if (err) console.error('Error deleting file:', err);
+    // });
+
+    res.json({ msg: 'Image deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error deleting farm image' });
+  }
+};
+// Get nearby farms
+export const getNearbyFarms = async (req, res) => {
+  try {
+    const { longitude, latitude, radius = 10000 } = req.query; // radius in meters
+
+    const farms = await Farm.find({
+      location: {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [parseFloat(longitude), parseFloat(latitude)]
+          },
+          $maxDistance: parseInt(radius)
+        }
+      }
+    }).populate('owner', 'name');
+
+    res.json(farms);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error fetching nearby farms' });
+  }
+};
+
+// Get farm by ID (public route)
+export const getFarmById = async (req, res) => {
+  try {
+    const farm = await Farm.findById(req.params.id)
+      .populate('owner', 'name')
+      .select('-businessHours.monday -businessHours.tuesday -businessHours.wednesday -businessHours.thursday -businessHours.friday -businessHours.saturday -businessHours.sunday');
+
+    if (!farm) {
+      return res.status(404).json({ msg: 'Farm not found' });
+    }
+
+    res.json(farm);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error fetching farm' });
+  }
+};
+
+// Add/update farm review
+export const addFarmReview = async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const farm = await Farm.findById(req.params.id);
+
+    if (!farm) {
+      return res.status(404).json({ msg: 'Farm not found' });
+    }
+
+    // Check if user has already reviewed
+    const reviewIndex = farm.reviews.findIndex(
+      review => review.user.toString() === req.user.id
+    );
+
+    if (reviewIndex > -1) {
+      // Update existing review
+      farm.reviews[reviewIndex].rating = rating;
+      farm.reviews[reviewIndex].comment = comment;
+    } else {
+      // Add new review
+      farm.reviews.push({
+        user: req.user.id,
+        rating,
+        comment
+      });
+    }
+
+    // Update average rating
+    const totalRating = farm.reviews.reduce((sum, review) => sum + review.rating, 0);
+    farm.rating = totalRating / farm.reviews.length;
+
+    await farm.save();
+    res.json(farm);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error adding review' });
+  }
+};
+
+export const getAllFarms = async (req, res) => {
+  try {
+    const farms = await Farm.find();
+    res.json(farms);
+  } catch (err) {
+    res.status(500).json({ msg: 'Failed to load farms' });
+  }
+};
+
+// End of file
