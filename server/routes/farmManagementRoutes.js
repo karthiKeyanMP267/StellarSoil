@@ -1,22 +1,23 @@
-const express = require('express');
+import express from 'express';
+import { protect } from '../middleware/authMiddleware.js';
+import * as farmManagementController from '../controllers/farmManagementController.js';
+
 const router = express.Router();
-const { authMiddleware } = require('../middleware/authMiddleware');
-const farmManagementController = require('../controllers/farmManagementController');
 
 // Sensor Data Routes
-router.get('/sensor-data/:farmId', authMiddleware, farmManagementController.getSensorData);
-router.post('/sensor-data', authMiddleware, farmManagementController.addSensorData);
+router.get('/sensor-data/:farmId', protect, farmManagementController.getSensorData);
+router.post('/sensor-data', protect, farmManagementController.addSensorData);
 
 // Pest Alert Routes
-router.post('/pest-alert', authMiddleware, farmManagementController.reportPestAlert);
-router.get('/pest-alerts', authMiddleware, farmManagementController.getPestAlerts);
+router.post('/pest-alert', protect, farmManagementController.reportPestAlert);
+router.get('/pest-alerts', protect, farmManagementController.getPestAlerts);
 
 // Crop Health Routes
-router.put('/crop-health/:cropId', authMiddleware, farmManagementController.updateCropHealth);
-router.post('/analyze-crop', authMiddleware, farmManagementController.analyzeCropImage);
+router.put('/crop-health/:cropId', protect, farmManagementController.updateCropHealth);
+router.post('/analyze-crop', protect, farmManagementController.analyzeCropImage);
 
 // Recommendation Routes
-router.get('/recommendations', authMiddleware, farmManagementController.getRecommendations);
-router.get('/seasonal-guide', authMiddleware, farmManagementController.getSeasonalGuide);
+router.get('/recommendations', protect, farmManagementController.getRecommendations);
+router.get('/seasonal-guide', protect, farmManagementController.getSeasonalGuide);
 
-module.exports = router;
+export default router;

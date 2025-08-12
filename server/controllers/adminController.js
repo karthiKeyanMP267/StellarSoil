@@ -1,3 +1,6 @@
+import User from '../models/User.js';
+import Farm from '../models/Farm.js';
+
 // Admin functions for managing farmer verifications
 export const getPendingFarmers = async (req, res) => {
   try {
@@ -15,6 +18,42 @@ export const getPendingFarmers = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Error fetching pending farmers' });
+  }
+};
+
+// Get all farms for admin management
+export const getAllFarmsAdmin = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Not authorized' });
+    }
+
+    const farms = await Farm.find()
+      .populate('owner', 'name email phone isVerified')
+      .sort({ createdAt: -1 });
+
+    res.json(farms);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error fetching farms' });
+  }
+};
+
+// Get all users for admin management
+export const getAllUsersAdmin = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Not authorized' });
+    }
+
+    const users = await User.find()
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error fetching users' });
   }
 };
 

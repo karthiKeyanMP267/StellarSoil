@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const sensorDataSchema = new mongoose.Schema({
   farmId: {
@@ -109,14 +109,7 @@ cropHealthSchema.index({ farmId: 1 });
 recommendationSchema.index({ location: '2dsphere' });
 recommendationSchema.index({ userId: 1, type: 1 });
 
-const SensorData = mongoose.model('SensorData', sensorDataSchema);
-const PestAlert = mongoose.model('PestAlert', pestAlertSchema);
-const CropHealth = mongoose.model('CropHealth', cropHealthSchema);
-const Recommendation = mongoose.model('Recommendation', recommendationSchema);
-
-module.exports = {
-  SensorData,
-  PestAlert,
-  CropHealth,
-  Recommendation
-};
+export const SensorData = mongoose.model('SensorData', sensorDataSchema);
+export const PestAlert = mongoose.model('PestAlert', pestAlertSchema);
+export const CropHealth = mongoose.model('CropHealth', cropHealthSchema);
+export const Recommendation = mongoose.model('Recommendation', recommendationSchema);

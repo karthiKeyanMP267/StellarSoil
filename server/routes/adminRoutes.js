@@ -3,7 +3,9 @@ import {
   getPendingFarmers,
   approveFarmer,
   rejectFarmer,
-  toggleUserStatus
+  toggleUserStatus,
+  getAllFarmsAdmin,
+  getAllUsersAdmin
 } from '../controllers/adminController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -14,6 +16,8 @@ router.use(protect);
 router.use(admin);
 
 router.get('/pending-farmers', getPendingFarmers);
+router.get('/farms', getAllFarmsAdmin);
+router.get('/users', getAllUsersAdmin);
 router.put('/approve-farmer/:id', approveFarmer);
 router.put('/reject-farmer/:id', rejectFarmer);
 router.put('/toggle-user-status/:id', toggleUserStatus);

@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, getAllUsers, deleteUser, approveFarmer } from '../controllers/authController.js';
+import { register, login, getAllUsers, deleteUser, approveFarmer, refreshToken } from '../controllers/authController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
 
@@ -8,6 +8,7 @@ const router = express.Router();
 // Auth routes
 router.post('/register', upload.single('kisanId'), register);
 router.post('/login', login);
+router.post('/refresh-token', refreshToken);
 
 // Admin: manage users
 router.get('/users', protect, admin, getAllUsers);

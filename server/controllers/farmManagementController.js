@@ -1,6 +1,6 @@
-const { SensorData, PestAlert, CropHealth, Recommendation } = require('../models/FarmManagement');
-const User = require('../models/User');
-const Order = require('../models/Order');
+import { SensorData, PestAlert, CropHealth, Recommendation } from '../models/FarmManagement.js';
+import User from '../models/User.js';
+import Order from '../models/Order.js';
 
 // AI-based recommendation engine
 const generateRecommendations = async (userId, location) => {
@@ -78,7 +78,7 @@ const generateRecommendations = async (userId, location) => {
 };
 
 // Farm management controllers
-exports.getSensorData = async (req, res) => {
+export const getSensorData = async (req, res) => {
   try {
     const { farmId } = req.params;
     const data = await SensorData.find({ farmId })
@@ -91,7 +91,7 @@ exports.getSensorData = async (req, res) => {
   }
 };
 
-exports.addSensorData = async (req, res) => {
+export const addSensorData = async (req, res) => {
   try {
     const data = new SensorData(req.body);
     await data.save();
@@ -101,7 +101,7 @@ exports.addSensorData = async (req, res) => {
   }
 };
 
-exports.reportPestAlert = async (req, res) => {
+export const reportPestAlert = async (req, res) => {
   try {
     const alert = new PestAlert({
       ...req.body,
@@ -114,7 +114,7 @@ exports.reportPestAlert = async (req, res) => {
   }
 };
 
-exports.getPestAlerts = async (req, res) => {
+export const getPestAlerts = async (req, res) => {
   try {
     const alerts = await PestAlert.find({ farmId: req.user._id })
       .sort({ detectedAt: -1 });
@@ -124,7 +124,7 @@ exports.getPestAlerts = async (req, res) => {
   }
 };
 
-exports.updateCropHealth = async (req, res) => {
+export const updateCropHealth = async (req, res) => {
   try {
     const { cropId } = req.params;
     const update = await CropHealth.findByIdAndUpdate(
@@ -138,7 +138,7 @@ exports.updateCropHealth = async (req, res) => {
   }
 };
 
-exports.analyzeCropImage = async (req, res) => {
+export const analyzeCropImage = async (req, res) => {
   try {
     // Implement AI image analysis
     // This would connect to a machine learning service
@@ -155,7 +155,7 @@ exports.analyzeCropImage = async (req, res) => {
 };
 
 // Recommendation controllers
-exports.getRecommendations = async (req, res) => {
+export const getRecommendations = async (req, res) => {
   try {
     const { lat, lng } = req.query;
     const recommendations = await generateRecommendations(
@@ -171,7 +171,7 @@ exports.getRecommendations = async (req, res) => {
   }
 };
 
-exports.getSeasonalGuide = async (req, res) => {
+export const getSeasonalGuide = async (req, res) => {
   try {
     const { lat, lng } = req.query;
     // Implement seasonal recommendations based on location and time

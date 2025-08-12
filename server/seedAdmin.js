@@ -13,7 +13,7 @@ const createAdmin = async () => {
   const admin = new User({
     name: 'Admin',
     email: 'admin@stellarsoil.com',
-    password: 'yourStrongPassword', // Use a strong password!
+    password: 'admin@123', // Use a strong password!
     role: 'admin',
     isActive: true,
     isVerified: true

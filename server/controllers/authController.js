@@ -2,11 +2,35 @@ import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 
 const generateToken = (user) => {
-  return jwt.sign(
-    { id: user._id, role: user.role },
+  // Access token with shorter expiry (1 hour)
+  const accessToken = jwt.sign(
+    { 
+      id: user._id, 
+      role: user.role,
+      email: user.email,
+      version: user.tokenVersion || 0
+    },
     process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    { 
+      expiresIn: '1h',
+      algorithm: 'HS256'
+    }
   );
+
+  // Refresh token with longer expiry (7 days)
+  const refreshToken = jwt.sign(
+    { 
+      id: user._id,
+      version: user.tokenVersion || 0
+    },
+    process.env.JWT_SECRET,
+    { 
+      expiresIn: '7d',
+      algorithm: 'HS256'
+    }
+  );
+
+  return { accessToken, refreshToken };
 };
 
 export const register = async (req, res) => {
@@ -93,13 +117,23 @@ export const login = async (req, res) => {
       return res.status(401).json({ msg: 'Your account is pending admin approval' });
     }
 
-    const token = generateToken(user);
+    const { accessToken, refreshToken } = generateToken(user);
+
+    // Set refresh token in HTTP-only cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     res.status(200).json({
-      token,
+      success: true,
+      accessToken,
       user: {
         id: user._id,
         name: user.name,
+        email: user.email,
         role: user.role,
         isVerified: user.isVerified
       }
@@ -149,5 +183,40 @@ export const deleteUser = async (req, res) => {
     res.json({ msg: 'User deleted' });
   } catch (err) {
     res.status(500).json({ msg: 'Error deleting user' });
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(401).json({ msg: 'No refresh token provided' });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+
+    if (!user) {
+      return res.status(401).json({ msg: 'Invalid refresh token' });
+    }
+
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateToken(user);
+
+    res.json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        role: user.role,
+        isVerified: user.isVerified
+      }
+    });
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ msg: 'Refresh token expired, please login again' });
+    }
+    res.status(401).json({ msg: 'Invalid refresh token' });
   }
 };

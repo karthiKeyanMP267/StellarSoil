@@ -4,7 +4,14 @@ import bcrypt from 'bcryptjs';
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { 
+      type: String, 
+      required: [true, 'Email is required'],
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email address']
+    },
     password: { type: String, required: true },
     role: { type: String, enum: ['user', 'admin', 'farmer'], default: 'user' },
     farmId: { type: mongoose.Schema.Types.ObjectId, ref: 'Farm', default: null },
@@ -38,6 +45,11 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// Add indexes for better query performance
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ "location.coordinates": "2dsphere" });
 
 const User = mongoose.model('User', userSchema);
 export default User;

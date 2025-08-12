@@ -1,13 +1,26 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+// Create Razorpay instance only when needed
+const getRazorpayInstance = () => {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    console.warn('Razorpay credentials not found in environment variables. Payment functionality will not work.');
+    return null;
+  }
+  
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+  });
+};
 
 // Create payment order
 export const createPaymentOrder = async (amount) => {
+  const razorpay = getRazorpayInstance();
+  if (!razorpay) {
+    throw new Error('Payment service not configured');
+  }
+
   const options = {
     amount: amount * 100, // Razorpay expects amount in paise
     currency: 'INR',
@@ -26,6 +39,10 @@ export const createPaymentOrder = async (amount) => {
 
 // Verify payment signature
 export const verifyPaymentSignature = (orderId, paymentId, signature) => {
+  if (!process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error('Payment verification not configured');
+  }
+  
   const text = orderId + '|' + paymentId;
   const generated_signature = crypto
     .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -35,4 +52,4 @@ export const verifyPaymentSignature = (orderId, paymentId, signature) => {
   return generated_signature === signature;
 };
 
-export default razorpay;
+export default getRazorpayInstance;

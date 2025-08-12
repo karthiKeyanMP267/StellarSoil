@@ -10,7 +10,7 @@ export default function AdminFarms() {
     const fetchFarms = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await API.get('/api/farms', {
+        const res = await API.get('/api/admin/farms', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setFarms(res.data);

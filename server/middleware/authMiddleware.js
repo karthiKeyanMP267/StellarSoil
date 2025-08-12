@@ -4,27 +4,84 @@ import User from '../models/User.js';
 // Authentication middleware
 export const protect = async (req, res, next) => {
   try {
+    // Check for token in various places
     let token;
-    if (req.headers.authorization?.startsWith('Bearer')) {
+    if (req.headers.authorization?.startsWith('Bearer ')) {
+      // Get token from Bearer token in header
       token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies?.token) {
+      // Get token from cookie
+      token = req.cookies.token;
+    } else if (req.headers['x-access-token']) {
+      // Get token from x-access-token header
+      token = req.headers['x-access-token'];
     }
 
     if (!token) {
-      return res.status(401).json({ msg: 'Not authorized, no token' });
+      return res.status(401).json({ 
+        success: false,
+        msg: 'Access denied. No token provided.'
+      });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
+    try {
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Check if token is about to expire (within 5 minutes)
+      const tokenExp = new Date(decoded.exp * 1000);
+      const now = new Date();
+      const fiveMinutes = 5 * 60 * 1000;
+      
+      if (tokenExp - now < fiveMinutes) {
+        res.set('X-Token-Expiring', 'true');
+      }
 
-    if (!user || !user.isActive) {
-      return res.status(401).json({ msg: 'User not found or account deactivated' });
+      // Get user from token
+      const user = await User.findById(decoded.id)
+        .select('-password')
+        .lean(); // Use lean() for better performance
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          msg: 'Token is valid but user no longer exists.'
+        });
+      }
+
+      if (!user.isActive) {
+        return res.status(401).json({
+          success: false,
+          msg: 'Your account has been deactivated.'
+        });
+      }
+
+      // Add user info to request
+      req.user = user;
+      next();
+    } catch (tokenError) {
+      if (tokenError.name === 'TokenExpiredError') {
+        return res.status(401).json({
+          success: false,
+          msg: 'Token has expired. Please log in again.',
+          isExpired: true
+        });
+      }
+      if (tokenError.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+          success: false,
+          msg: 'Invalid token. Please log in again.',
+          isInvalid: true
+        });
+      }
+      throw tokenError;
     }
-
-    req.user = user;
-    next();
   } catch (err) {
-    console.error(err);
-    res.status(401).json({ msg: 'Not authorized, invalid token' });
+    console.error('Auth Middleware Error:', err);
+    return res.status(500).json({
+      success: false,
+      msg: 'An error occurred while authenticating.'
+    });
   }
 };
 
