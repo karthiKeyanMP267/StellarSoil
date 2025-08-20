@@ -36,7 +36,7 @@ export default function FarmProfile({ onComplete }) {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:5000/api/farms/profile`,
+        `http://localhost:5000/api/farms/profile/me`,
         form,
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );

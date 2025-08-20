@@ -46,11 +46,11 @@ const sampleFarms = [
   {
     name: 'Green Valley Farm',
     description: 'Organic vegetables and fresh produce',
-    address: '123 Farm Road, Rural Area, State 12345',
+    address: 'Koramangala, Bangalore',
     contactPhone: '9876543210',
     location: {
       type: 'Point',
-      coordinates: [77.5946, 12.9716] // Bangalore coordinates
+      coordinates: [77.6244, 12.9351] // Koramangala
     },
     businessHours: {
       monday: { open: '06:00', close: '18:00' },
@@ -62,6 +62,90 @@ const sampleFarms = [
       sunday: { open: '08:00', close: '12:00' }
     },
     certifications: ['Organic', 'ISO 9001'],
+    isVerified: true
+  },
+  {
+    name: 'Fresh Harvest Farm',
+    description: 'Fresh fruits and seasonal vegetables',
+    address: 'Indiranagar, Bangalore',
+    contactPhone: '9876543213',
+    location: {
+      type: 'Point',
+      coordinates: [77.6410, 12.9716] // Indiranagar
+    },
+    businessHours: {
+      monday: { open: '07:00', close: '19:00' },
+      tuesday: { open: '07:00', close: '19:00' },
+      wednesday: { open: '07:00', close: '19:00' },
+      thursday: { open: '07:00', close: '19:00' },
+      friday: { open: '07:00', close: '19:00' },
+      saturday: { open: '07:00', close: '17:00' },
+      sunday: { open: '07:00', close: '13:00' }
+    },
+    certifications: ['GAP Certified'],
+    isVerified: true
+  },
+  {
+    name: 'Urban Greens',
+    description: 'Hydroponic vegetables and microgreens',
+    address: 'Whitefield, Bangalore',
+    contactPhone: '9876543214',
+    location: {
+      type: 'Point',
+      coordinates: [77.7480, 12.9698] // Whitefield
+    },
+    businessHours: {
+      monday: { open: '08:00', close: '20:00' },
+      tuesday: { open: '08:00', close: '20:00' },
+      wednesday: { open: '08:00', close: '20:00' },
+      thursday: { open: '08:00', close: '20:00' },
+      friday: { open: '08:00', close: '20:00' },
+      saturday: { open: '08:00', close: '18:00' },
+      sunday: { open: '09:00', close: '15:00' }
+    },
+    certifications: ['Hydroponic Certified'],
+    isVerified: true
+  },
+  {
+    name: 'Nature\'s Bounty Farm',
+    description: 'Traditional farming with modern techniques',
+    address: 'Electronic City, Bangalore',
+    contactPhone: '9876543215',
+    location: {
+      type: 'Point',
+      coordinates: [77.6818, 12.8458] // Electronic City
+    },
+    businessHours: {
+      monday: { open: '06:30', close: '18:30' },
+      tuesday: { open: '06:30', close: '18:30' },
+      wednesday: { open: '06:30', close: '18:30' },
+      thursday: { open: '06:30', close: '18:30' },
+      friday: { open: '06:30', close: '18:30' },
+      saturday: { open: '06:30', close: '16:30' },
+      sunday: { open: '08:30', close: '14:30' }
+    },
+    certifications: ['Organic'],
+    isVerified: true
+  },
+  {
+    name: 'Tech Garden Farm',
+    description: 'Smart farming with IoT integration',
+    address: 'HSR Layout, Bangalore',
+    contactPhone: '9876543216',
+    location: {
+      type: 'Point',
+      coordinates: [77.6501, 12.9140] // HSR Layout
+    },
+    businessHours: {
+      monday: { open: '07:00', close: '19:00' },
+      tuesday: { open: '07:00', close: '19:00' },
+      wednesday: { open: '07:00', close: '19:00' },
+      thursday: { open: '07:00', close: '19:00' },
+      friday: { open: '07:00', close: '19:00' },
+      saturday: { open: '07:00', close: '17:00' },
+      sunday: { open: '08:00', close: '14:00' }
+    },
+    certifications: ['Smart Farm Certified'],
     isVerified: true
   }
 ];
@@ -108,8 +192,11 @@ const seedDatabase = async () => {
 
     // Create farms
     const farmer = users.find(u => u.role === 'farmer');
-    sampleFarms[0].owner = farmer._id;
-    const farms = await Farm.insertMany(sampleFarms);
+    const farmData = sampleFarms.map(farm => ({
+      ...farm,
+      owner: farmer._id
+    }));
+    const farms = await Farm.insertMany(farmData);
     console.log('Created sample farms');
 
     // Create products

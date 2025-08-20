@@ -17,6 +17,7 @@ function Marketplace() {
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({ query: '', category: '', minPrice: '', maxPrice: '' });
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
     fetchAllProducts();
@@ -38,6 +39,7 @@ function Marketplace() {
   const handleAddToCart = async (product) => {
     try {
       await API.post('/cart/add', { productId: product._id, quantity: 1 });
+      setToastMessage('Product added to cart!');
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2000);
       console.log('Product added to cart successfully');
@@ -51,7 +53,7 @@ function Marketplace() {
     setLoading(true);
     setError('');
     try {
-  const res = await API.get('/products/search', { params: filters });
+      const res = await API.get('/products/search', { params: filters });
       setProducts(res.data);
     } catch (err) {
       setError('Error searching products');
@@ -60,11 +62,34 @@ function Marketplace() {
     }
   };
 
+
+  // Add to favorites handler
+  const handleAddToFavorites = async (product) => {
+    try {
+      await API.post('/favorites/add', { productId: product._id });
+      setToastMessage('Product added to favorites!');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
+      console.log('Product added to favorites successfully');
+    } catch (err) {
+      let errorMsg = 'Error adding to favorites';
+      if (err.response && err.response.data && err.response.data.msg) {
+        errorMsg = err.response.data.msg;
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      setToastMessage(errorMsg);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      console.error('Error adding to favorites:', err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 pt-20">
       {showToast && (
         <div className="fixed top-6 right-6 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transition-all animate-bounce-in">
-          Product added to cart!
+          {toastMessage}
         </div>
       )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -149,6 +174,13 @@ function Marketplace() {
                   className="mt-2 px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all"
                 >
                   Add to Cart
+                </button>
+                <button
+                  onClick={() => handleAddToFavorites(product)}
+                  className="mt-2 px-4 py-2 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition-all"
+                  title="Add to Favorite"
+                >
+                  ♥ Add to Favorite
                 </button>
               </div>
             ))}

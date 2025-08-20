@@ -25,6 +25,7 @@ import appointmentRoutes from './routes/appointmentRoutes.js';
 import weatherRoutes from './routes/weatherRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import favoritesRoutes from './routes/favoritesRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -72,6 +73,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/favorites', favoritesRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

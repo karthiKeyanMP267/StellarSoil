@@ -11,6 +11,7 @@ export default function AuthOverlay({ isOpen, onClose }) {
     name: '',
     email: '',
     password: '',
+    role: 'user', // default to user, can be changed by UI
   });
   const [error, setError] = useState('');
   const { login } = useAuth();
@@ -19,12 +20,12 @@ export default function AuthOverlay({ isOpen, onClose }) {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
     try {
       if (isLogin) {
         const res = await authApi.login({
           email: form.email,
           password: form.password,
+          role: form.role,
         });
         login(res.data.user, res.data.accessToken);
         onClose();
@@ -118,6 +119,19 @@ export default function AuthOverlay({ isOpen, onClose }) {
                     </div>
                   )}
 
+                  <div className="flex gap-2 mb-2">
+                    <label className="block text-sm font-medium text-gray-700">Account Type:</label>
+                    <button
+                      type="button"
+                      className={`px-3 py-1 rounded-lg border ${form.role === 'user' ? 'bg-green-100 border-green-400' : 'bg-white border-gray-300'}`}
+                      onClick={() => setForm(f => ({ ...f, role: 'user' }))}
+                    >User</button>
+                    <button
+                      type="button"
+                      className={`px-3 py-1 rounded-lg border ${form.role === 'farmer' ? 'bg-green-100 border-green-400' : 'bg-white border-gray-300'}`}
+                      onClick={() => setForm(f => ({ ...f, role: 'farmer' }))}
+                    >Farmer</button>
+                  </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                       Email Address

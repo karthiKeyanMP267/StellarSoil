@@ -49,6 +49,8 @@ const App = () => {
           <Route path="/favorites" element={<UserRoute><Favorites /></UserRoute>} />
           <Route path="/orders" element={<UserRoute><OrderHistory /></UserRoute>} />
           <Route path="/checkout" element={<UserRoute><Checkout /></UserRoute>} />
+          {/* Farmer Earnings Route (add if you have an Earnings page) */}
+          <Route path="/earnings" element={<FarmerRoute><div>Earnings Page</div></FarmerRoute>} />
           
           <Route path="*" element={<HomeRedirect />} />
         </Routes>

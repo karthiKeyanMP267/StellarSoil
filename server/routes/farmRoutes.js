@@ -9,13 +9,15 @@ import {
   addFarmReview,
   uploadFarmImages,
   deleteFarmImage,
-  getAllFarms
+  getAllFarms,
+  getFarmStats
 } from '../controllers/farmController.js';
 
 const router = express.Router();
 
 // Public routes
 router.get('/nearby', getNearbyFarms);
+router.get('/stats', getFarmStats);
 router.get('/', getAllFarms);
 router.get('/:id', getFarmById);
 

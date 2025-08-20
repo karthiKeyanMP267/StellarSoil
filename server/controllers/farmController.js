@@ -1,3 +1,16 @@
+// Get farm stats
+// ...existing code...
+export const getFarmStats = async (req, res) => {
+  try {
+    const totalFarms = await Farm.countDocuments();
+    const farms = await Farm.find({}, 'rating');
+    const avgRating = farms.length > 0 ? (farms.reduce((sum, f) => sum + (f.rating || 0), 0) / farms.length) : 0;
+    res.json({ totalFarms, avgRating });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error fetching farm stats' });
+  }
+};
 import Farm from '../models/Farm.js';
 import User from '../models/User.js';
 
