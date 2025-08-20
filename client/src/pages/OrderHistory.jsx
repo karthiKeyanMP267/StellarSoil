@@ -28,7 +28,7 @@ const OrderHistory = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await API.get('/orders');
+  const response = await API.get('/orders');
       setOrders(response.data);
     } catch (err) {
       setError('Error loading orders');

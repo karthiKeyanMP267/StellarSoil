@@ -12,7 +12,8 @@ export default function UserRoute({ children }) {
     );
   }
 
-  if (!user || user.role !== 'user') {
+
+  if (!user || (user.role !== 'user' && user.role !== 'farmer')) {
     return <Navigate to="/" replace />;
   }
 

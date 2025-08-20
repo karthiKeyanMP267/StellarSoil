@@ -48,16 +48,17 @@ export const getNearbyProducts = async (req, res) => {
 
 // Search products
 export const searchProducts = async (req, res) => {
+
   const { query, category, minPrice, maxPrice, isOrganic } = req.query;
   try {
     let searchQuery = {};
 
-    if (query) {
-      searchQuery.$text = { $search: query };
+    if (query && query.trim() !== '') {
+      searchQuery.name = { $regex: query, $options: 'i' };
     }
 
-    if (category) {
-      searchQuery.category = category;
+    if (category && category.trim() !== '') {
+      searchQuery.category = { $regex: `^${category}$`, $options: 'i' };
     }
 
     if (minPrice || maxPrice) {
@@ -66,7 +67,7 @@ export const searchProducts = async (req, res) => {
       if (maxPrice) searchQuery.price.$lte = parseFloat(maxPrice);
     }
 
-    if (isOrganic !== undefined) {
+    if (isOrganic !== undefined && isOrganic !== '') {
       searchQuery.isOrganic = isOrganic === 'true';
     }
 

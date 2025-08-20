@@ -9,11 +9,8 @@ export default function AdminFarms() {
   useEffect(() => {
     const fetchFarms = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await API.get('/api/admin/farms', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setFarms(res.data);
+  const res = await API.get('/admin/farms');
+  setFarms(res.data);
       } catch (err) {
         setError('Failed to load farms');
       } finally {

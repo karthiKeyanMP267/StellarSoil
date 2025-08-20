@@ -9,13 +9,10 @@ export default function AdminUsers() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await API.get('/api/auth/users', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  const res = await API.get('/admin/users');
         setUsers(res.data);
       } catch (err) {
-        setError('Failed to load users');
+        setError(err.response?.data?.msg || err.message || 'Failed to load users');
       } finally {
         setLoading(false);
       }
@@ -26,25 +23,19 @@ export default function AdminUsers() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      const token = localStorage.getItem('token');
-      await API.delete(`/api/auth/users/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  await API.delete(`/admin/users/${id}`);
       setUsers(users.filter(u => u._id !== id));
     } catch (err) {
-      alert('Failed to delete user');
+      alert(err.response?.data?.msg || err.message || 'Failed to delete user');
     }
   };
 
   const handleApprove = async (id) => {
     try {
-      const token = localStorage.getItem('token');
-      await API.put(`/api/auth/approve-farmer/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  await API.put(`/admin/approve-farmer/${id}`);
       setUsers(users.map(u => u._id === id ? { ...u, isVerified: true } : u));
     } catch (err) {
-      alert('Failed to approve farmer');
+      alert(err.response?.data?.msg || err.message || 'Failed to approve farmer');
     }
   };
 

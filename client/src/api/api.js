@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL + '/api',
 });
 
 // Add auth token to requests if available
@@ -21,6 +21,9 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      const msg = error.response?.data?.msg || error.message || 'Unauthorized';
+      alert('Authentication error: ' + msg);
+      console.error('API 401 error:', error.response?.data || error.message); // Log backend error
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/';

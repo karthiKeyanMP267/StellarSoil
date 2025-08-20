@@ -2,7 +2,7 @@ import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { authApi } from '../api/api';
 
 export default function AuthOverlay({ isOpen, onClose }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,14 +22,14 @@ export default function AuthOverlay({ isOpen, onClose }) {
     
     try {
       if (isLogin) {
-        const res = await axios.post('http://localhost:5000/api/auth/login', {
+        const res = await authApi.login({
           email: form.email,
           password: form.password,
         });
-        login(res.data.user, res.data.token);
+        login(res.data.user, res.data.accessToken);
         onClose();
       } else {
-        await axios.post('http://localhost:5000/api/auth/register', form);
+        await authApi.register(form);
         setIsLogin(true);
         setForm({ ...form, password: '' });
         setError('Registration successful! Please log in.');

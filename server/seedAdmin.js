@@ -4,7 +4,7 @@ import User from './models/User.js';
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const createAdmin = async () => {
   // Remove any existing admin with this email

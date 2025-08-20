@@ -1,16 +1,11 @@
 // hashPassword.js
 import bcrypt from 'bcryptjs';
+/*
+bcrypt.hash('admin@123', 10, (err, hash) => {
+  console.log(hash);
+});
+*/
 
-const password = 'admin@123';
-if (!password) {
-  console.log('Usage: node hashPassword.js <password>');
-  process.exit(1);
-}
-
-bcrypt.genSalt(10, (err, salt) => {
-  if (err) throw err;
-  bcrypt.hash(password, salt, (err, hash) => {
-    if (err) throw err;
-    console.log('Hashed password:', hash);
-  });
+bcrypt.hash('user@123', 10, (err, hash) => {
+  console.log(hash);
 });

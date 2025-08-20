@@ -22,26 +22,41 @@ const Cart = () => {
   const fetchCart = async () => {
     try {
       const response = await API.get('/cart');
-      setCart(response.data);
+      // Flatten all items from all carts
+      const carts = response.data;
+      const allItems = carts.flatMap(cart =>
+        cart.items.map(item => ({
+          cartId: cart._id,
+          productId: item.product._id,
+          name: item.product.name,
+          image: item.product.image,
+          price: item.product.price,
+          unit: item.product.unit,
+          quantity: item.quantity,
+          farmName: cart.farm?.name || '',
+        }))
+      );
+      setCart(allItems);
     } catch (err) {
+      console.log('Cart fetch error:', err);
       setError('Error loading cart');
     } finally {
       setLoading(false);
     }
   };
 
-  const updateQuantity = async (productId, newQuantity) => {
+  const updateQuantity = async (productId, newQuantity, cartId) => {
     try {
-      await API.put(`/cart/${productId}`, { quantity: newQuantity });
+      await API.put(`/cart/${cartId}/items/${productId}`, { quantity: newQuantity });
       fetchCart();
     } catch (err) {
       setError('Error updating quantity');
     }
   };
 
-  const removeItem = async (productId) => {
+  const removeItem = async (productId, cartId) => {
     try {
-      await API.delete(`/cart/${productId}`);
+      await API.delete(`/cart/${cartId}/items/${productId}`);
       fetchCart();
     } catch (err) {
       setError('Error removing item');
@@ -99,7 +114,7 @@ const Cart = () => {
             <>
               <div className="border-b border-gray-200 pb-6 space-y-4">
                 {cart.map((item) => (
-                  <div key={item.productId} className="flex items-center justify-between py-4">
+                  <div key={item.cartId + '-' + item.productId} className="flex items-center justify-between py-4">
                     <div className="flex items-center space-x-4">
                       <img
                         src={item.image || '/placeholder.jpg'}
@@ -112,25 +127,24 @@ const Cart = () => {
                         <p className="text-sm font-medium text-green-600">₹{item.price}/{item.unit}</p>
                       </div>
                     </div>
-                    
                     <div className="flex items-center space-x-6">
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => item.quantity > 1 && updateQuantity(item.productId, item.quantity - 1)}
+                          onClick={() => item.quantity > 1 && updateQuantity(item.productId, item.quantity - 1, item.cartId)}
                           className="p-1 rounded-full border border-gray-300 hover:border-green-500 transition-all duration-200"
                         >
                           <MinusIcon className="h-4 w-4 text-gray-500" />
                         </button>
                         <span className="w-8 text-center">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.productId, item.quantity + 1, item.cartId)}
                           className="p-1 rounded-full border border-gray-300 hover:border-green-500 transition-all duration-200"
                         >
                           <PlusIcon className="h-4 w-4 text-gray-500" />
                         </button>
                       </div>
                       <button
-                        onClick={() => removeItem(item.productId)}
+                        onClick={() => removeItem(item.productId, item.cartId)}
                         className="text-red-500 hover:text-red-600 transition-colors duration-200"
                       >
                         <TrashIcon className="h-5 w-5" />

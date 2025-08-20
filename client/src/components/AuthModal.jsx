@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { authApi } from '../api/api';
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
   const [mode, setMode] = useState(initialMode);
@@ -38,30 +38,25 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
     
     try {
       if (mode === 'login') {
-        const res = await axios.post('http://localhost:5000/api/auth/login', {
+        const res = await authApi.login({
           email: form.email,
           password: form.password,
           role: role
         });
-        login(res.data.user, res.data.token);
+        login(res.data.user, res.data.accessToken);
         onClose();
       } else if (mode === 'register') {
-        const formData = new FormData();
-        formData.append('name', form.name);
-        formData.append('email', form.email);
-        formData.append('password', form.password);
-        formData.append('role', role);
-        
+        // Build data object for registration
+        const data = {
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          role: role,
+        };
         if (role === 'farmer' && kisanIdFile) {
-          formData.append('kisanId', kisanIdFile);
+          data.kisanId = kisanIdFile;
         }
-
-        const res = await axios.post('http://localhost:5000/api/auth/register', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
+        await authApi.register(data);
         // If registration successful, switch to login mode
         setMode('login');
         setForm({ ...form, password: '' });

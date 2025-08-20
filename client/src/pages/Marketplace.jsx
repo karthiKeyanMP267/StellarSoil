@@ -1,54 +1,35 @@
+
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import API from '../api/api';
+
+const CATEGORIES = [
+  'Vegetables',
+  'Fruits',
+  'Leafy Vegetables',
+  // Add more categories as needed
+];
+
+
 
 function Marketplace() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [location, setLocation] = useState(null);
-  const [filters, setFilters] = useState({
-    query: '',
-    category: '',
-    minPrice: '',
-    maxPrice: '',
-    isOrganic: false
-  });
+  const [error, setError] = useState('');
+  const [filters, setFilters] = useState({ query: '', category: '', minPrice: '', maxPrice: '' });
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
-    // Get user's location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-        }
-      );
-    }
+    fetchAllProducts();
   }, []);
 
-  useEffect(() => {
-    if (location) {
-      loadNearbyProducts();
-    }
-  }, [location]);
-
-  const loadNearbyProducts = async () => {
+  const fetchAllProducts = async () => {
+    setLoading(true);
+    setError('');
     try {
-      const res = await API.get(`/api/products/nearby`, {
-        params: {
-          latitude: location.latitude,
-          longitude: location.longitude,
-          radius: 10000 // 10km
-        }
-      });
+  const res = await API.get('/products/search');
       setProducts(res.data);
     } catch (err) {
-      console.error('Error loading products:', err);
+      setError('Error loading products');
     } finally {
       setLoading(false);
     }
@@ -56,26 +37,36 @@ function Marketplace() {
 
   const handleAddToCart = async (product) => {
     try {
-      await API.post('/api/cart/add', { productId: product._id });
-      // You can add toast notification here
+      await API.post('/cart/add', { productId: product._id, quantity: 1 });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
       console.log('Product added to cart successfully');
     } catch (err) {
-      console.error('Error adding product to cart:', err);
+      console.error('Error adding to cart:', err);
     }
   };
 
   const handleSearch = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     try {
-      const res = await API.get('/api/products/search', { params: filters });
+  const res = await API.get('/products/search', { params: filters });
       setProducts(res.data);
     } catch (err) {
-      console.error('Error searching products:', err);
+      setError('Error searching products');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 pt-20">
+      {showToast && (
+        <div className="fixed top-6 right-6 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transition-all animate-bounce-in">
+          Product added to cart!
+        </div>
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="max-w-3xl mx-auto text-center mb-12">
@@ -89,27 +80,27 @@ function Marketplace() {
 
         {/* Search and Filter Section */}
         <div className="mb-8 bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl p-6 border border-green-100">
-        <form onSubmit={handleSearch} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={filters.query}
-              onChange={(e) => setFilters({ ...filters, query: e.target.value })}
-              className="w-full rounded-full px-4 py-2 border border-green-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-            />
-            <select
-              value={filters.category}
-              onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-              className="w-full rounded-full px-4 py-2 border border-green-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-            >
-              <option value="">All Categories</option>
-              <option value="vegetables">Vegetables</option>
-              <option value="fruits">Fruits</option>
-              <option value="dairy">Dairy</option>
-              <option value="grains">Grains</option>
-            </select>
-            <div className="flex space-x-2">
+          <form onSubmit={handleSearch} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={filters.query}
+                onChange={(e) => setFilters({ ...filters, query: e.target.value })}
+                className="w-full rounded-full px-4 py-2 border border-green-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+              />
+              <select
+                value={filters.category}
+                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                className="w-full rounded-full px-4 py-2 border border-green-200 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+              >
+                <option value="">All Categories</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Fruits">Fruits</option>
+                <option value="Leafy Vegetables">Leafy Vegetables</option>
+                <option value="Dairy">Dairy</option>
+                <option value="Grains">Grains</option>
+              </select>
               <input
                 type="number"
                 placeholder="Min Price"
@@ -127,50 +118,42 @@ function Marketplace() {
             </div>
             <button
               type="submit"
-              className="rounded-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-2 hover:from-green-700 hover:to-emerald-700 transition-all duration-300"
+              className="mt-2 px-6 py-2 bg-green-600 text-white rounded-full font-semibold hover:bg-green-700 transition-all"
             >
               Search
             </button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
 
-      {/* Products Grid */}
-      {loading ? (
-        <div className="text-center">Loading products...</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <div key={product._id} className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-green-100">
-              <img
-                src={product.images[0] || '/placeholder.jpg'}
-                alt={product.name}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900">{product.name}</h3>
-                <p className="text-gray-600 mt-1">{product.farm.name}</p>
-                <div className="mt-4 flex justify-between items-center">
-                  <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                    ₹{product.price}/{product.unit}
-                  </span>
-                  {product.isOrganic && (
-                    <span className="bg-green-100 text-green-600 text-sm font-medium px-3 py-1 rounded-full border border-green-200">
-                      Organic
-                    </span>
-                  )}
-                </div>
+  {/* Category Buttons removed as per user request */}
+
+        {/* Product Grid */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-500">{error}</div>
+        ) : products.length === 0 ? (
+          <div className="text-center text-gray-500">No products found in this category.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <div key={product._id} className="bg-white rounded-xl shadow p-4 flex flex-col items-center">
+                <img src={product.images?.[0] || '/placeholder.jpg'} alt={product.name} className="w-24 h-24 object-cover rounded mb-2" />
+                <h3 className="text-lg font-semibold mb-1">{product.name}</h3>
+                <p className="text-gray-500 text-sm mb-2">{product.category}</p>
+                <span className="text-green-600 font-bold">₹{product.price}</span>
                 <button
                   onClick={() => handleAddToCart(product)}
-                  className="mt-6 w-full rounded-full bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 font-medium hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-[1.02]"
+                  className="mt-2 px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all"
                 >
                   Add to Cart
                 </button>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,22 +1,20 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import API, { adminApi } from '../api/api';
+
 
 export default function AdminPanel() {
   const [pendingFarmers, setPendingFarmers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { token } = useAuth();
+  const [actionLoading, setActionLoading] = useState(false);
 
   const fetchPendingFarmers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/admin/pending-farmers', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await adminApi.getPendingFarmers();
       setPendingFarmers(res.data);
     } catch (err) {
-      setError(err.response?.data?.msg || 'Failed to fetch pending farmers');
+      setError(err.response?.data?.msg || err.message || 'Failed to fetch pending farmers');
     } finally {
       setLoading(false);
     }
@@ -24,16 +22,17 @@ export default function AdminPanel() {
 
   useEffect(() => {
     fetchPendingFarmers();
-  }, [token]);
+  }, []);
 
   const handleApprove = async (farmerId) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/approve-farmer/${farmerId}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchPendingFarmers(); // Refresh list after approval
+      setActionLoading(true);
+      await adminApi.approveFarmer(farmerId);
+      fetchPendingFarmers();
     } catch (err) {
-      setError(err.response?.data?.msg || 'Failed to approve farmer');
+      setError(err.response?.data?.msg || err.message || 'Failed to approve farmer');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -41,16 +40,16 @@ export default function AdminPanel() {
     try {
       const reason = prompt('Please enter a reason for rejection:');
       if (!reason) return;
-
-      await axios.put(`http://localhost:5000/api/admin/reject-farmer/${farmerId}`, 
-        { reason },
-        { headers: { Authorization: `Bearer ${token}` }}
-      );
-      fetchPendingFarmers(); // Refresh list after rejection
+      setActionLoading(true);
+      await adminApi.rejectFarmer(farmerId, reason);
+      fetchPendingFarmers();
     } catch (err) {
-      setError(err.response?.data?.msg || 'Failed to reject farmer');
+      setError(err.response?.data?.msg || err.message || 'Failed to reject farmer');
+    } finally {
+      setActionLoading(false);
     }
   };
+
 
   if (loading) {
     return (
@@ -102,15 +101,17 @@ export default function AdminPanel() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button
                           onClick={() => handleApprove(farmer._id)}
-                          className="text-green-600 hover:text-green-900 bg-green-100 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200"
+                          className="text-green-600 hover:text-green-900 bg-green-100 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 disabled:opacity-50"
+                          disabled={actionLoading}
                         >
-                          Approve
+                          {actionLoading ? 'Processing...' : 'Approve'}
                         </button>
                         <button
                           onClick={() => handleReject(farmer._id)}
-                          className="text-red-600 hover:text-red-900 bg-red-100 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200"
+                          className="text-red-600 hover:text-red-900 bg-red-100 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 disabled:opacity-50"
+                          disabled={actionLoading}
                         >
-                          Reject
+                          {actionLoading ? 'Processing...' : 'Reject'}
                         </button>
                       </td>
                     </tr>

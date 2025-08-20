@@ -4,6 +4,8 @@ import Product from '../models/Product.js';
 // Add item to cart
 export const addToCart = async (req, res) => {
   try {
+    console.log('Add to cart headers:', req.headers);
+    console.log('Add to cart req.user:', req.user);
     const { productId, quantity } = req.body;
 
     // Validate product exists and has enough stock
@@ -17,13 +19,13 @@ export const addToCart = async (req, res) => {
 
     // Find or create cart for this user and farm
     let cart = await Cart.findOne({
-      user: req.user.id,
+      user: req.user._id,
       farm: product.farm
     });
 
     if (!cart) {
       cart = await Cart.create({
-        user: req.user.id,
+        user: req.user._id,
         farm: product.farm,
         items: [{ product: productId, quantity }]
       });
@@ -49,15 +51,15 @@ export const addToCart = async (req, res) => {
 
     res.json(cart);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: 'Error adding to cart' });
+    console.error('Add to cart error:', err, 'Request body:', req.body);
+    res.status(500).json({ msg: 'Error adding to cart', error: err.message });
   }
 };
 
 // Get user's carts
 export const getCarts = async (req, res) => {
   try {
-    const carts = await Cart.find({ user: req.user.id })
+  const carts = await Cart.find({ user: req.user._id })
       .populate('items.product')
       .populate('farm', 'name');
     
@@ -80,7 +82,7 @@ export const updateCartItem = async (req, res) => {
 
     const cart = await Cart.findOne({
       _id: cartId,
-      user: req.user.id
+      user: req.user._id
     });
 
     if (!cart) {
@@ -121,7 +123,7 @@ export const removeFromCart = async (req, res) => {
 
     const cart = await Cart.findOne({
       _id: cartId,
-      user: req.user.id
+      user: req.user._id
     });
 
     if (!cart) {

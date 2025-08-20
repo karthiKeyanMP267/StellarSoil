@@ -100,8 +100,8 @@ const Navbar = () => {
       ? [
           { 
             name: 'Dashboard', 
-            href: '/admin', 
-            current: location.pathname === '/admin',
+            href: '/admin/verifications', 
+            current: location.pathname === '/admin/verifications',
             icon: HomeIcon
           },
           {
