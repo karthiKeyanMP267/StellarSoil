@@ -24,11 +24,34 @@ function AuthProvider({ children }) {
   }, []);
 
   const login = (userData, tokenValue) => {
+    console.log('Login called with:', { userData, tokenValue }); // Debug
+    
+    if (!userData || !tokenValue) {
+      console.error('Login called with missing data:', { userData, tokenValue });
+      return;
+    }
+
     setUser(userData);
     setToken(tokenValue);
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', tokenValue);
-    console.log('Logged in user:', userData); // Debug: see what user is stored
+    
+    try {
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', tokenValue);
+      
+      // Verify the data was stored correctly
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      console.log('Storage verification:', {
+        tokenStored: !!storedToken,
+        userStored: !!storedUser,
+        token: storedToken,
+        user: storedUser
+      });
+    } catch (error) {
+      console.error('Error storing auth data:', error);
+    }
+
+    console.log('Logged in user:', userData);
     // Redirect to the correct dashboard based on role
     if (userData.role === 'admin') {
       navigate('/admin/verifications');

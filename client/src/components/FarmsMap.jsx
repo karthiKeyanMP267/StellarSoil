@@ -56,22 +56,35 @@ const FarmsMap = ({ farms, userLocation }) => {
     }
     // Farm markers
     farms.forEach(farm => {
-      if (farm.location && farm.location.coordinates) {
-        const [lng, lat] = farm.location.coordinates;
-        const marker = new window.google.maps.Marker({
-          position: { lat, lng },
-          map: mapInstance.current,
-          title: farm.name,
-          icon: {
-            url: 'https://cdn-icons-png.flaticon.com/512/616/616408.png',
-            scaledSize: new window.google.maps.Size(36, 36),
-          },
-          animation: window.google.maps.Animation.DROP,
-        });
-        const info = new window.google.maps.InfoWindow({
-          content: `<div style='font-family:sans-serif'><strong>${farm.name}</strong><br/>${farm.address || ''}</div>`
-        });
-        marker.addListener('click', () => info.open(mapInstance.current, marker));
+      // Add null check and type validation for coordinates
+      if (farm.location && Array.isArray(farm.location.coordinates) && farm.location.coordinates.length === 2) {
+        try {
+          const [lng, lat] = farm.location.coordinates;
+          // Validate coordinates are numbers and within valid ranges
+          if (typeof lat === 'number' && typeof lng === 'number' &&
+              lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            const marker = new window.google.maps.Marker({
+              position: { lat, lng },
+              map: mapInstance.current,
+              title: farm.name,
+              icon: {
+                url: 'https://cdn-icons-png.flaticon.com/512/616/616408.png',
+                scaledSize: new window.google.maps.Size(36, 36),
+              },
+              animation: window.google.maps.Animation.DROP,
+            });
+            const info = new window.google.maps.InfoWindow({
+              content: `<div style='font-family:sans-serif'><strong>${farm.name}</strong><br/>${farm.address || ''}</div>`
+            });
+            marker.addListener('click', () => info.open(mapInstance.current, marker));
+          } else {
+            console.warn('Invalid coordinates for farm:', farm.name, { lat, lng });
+          }
+        } catch (error) {
+          console.warn('Error processing farm location:', farm.name, error);
+        }
+      } else {
+        console.warn('Missing or invalid location data for farm:', farm.name);
       }
     });
   }

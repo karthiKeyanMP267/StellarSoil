@@ -43,7 +43,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
           password: form.password,
           role: role
         });
+        console.log('Login response:', res.data);
         login(res.data.user, res.data.accessToken);
+        console.log('Stored token after login:', localStorage.getItem('token'));
         onClose();
       } else if (mode === 'register') {
         // Build data object for registration

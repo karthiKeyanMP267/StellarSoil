@@ -5,7 +5,8 @@ import {
   rejectFarmer,
   toggleUserStatus,
   getAllFarmsAdmin,
-  getAllUsersAdmin
+  getAllUsersAdmin,
+  deleteUser
 } from '../controllers/adminController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -21,5 +22,6 @@ router.get('/users', getAllUsersAdmin);
 router.put('/approve-farmer/:id', approveFarmer);
 router.put('/reject-farmer/:id', rejectFarmer);
 router.put('/toggle-user-status/:id', toggleUserStatus);
+router.delete('/users/:id', deleteUser);
 
 export default router;

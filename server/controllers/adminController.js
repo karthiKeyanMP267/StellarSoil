@@ -146,3 +146,34 @@ export const toggleUserStatus = async (req, res) => {
     res.status(500).json({ msg: 'Error toggling user status' });
   }
 };
+
+export const deleteUser = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Not authorized' });
+    }
+
+    const userId = req.params.id;
+
+    // Don't allow admin to delete themselves
+    if (req.user._id.toString() === userId) {
+      return res.status(400).json({ msg: 'Admin cannot delete their own account' });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    await User.deleteOne({ _id: userId });
+
+    res.json({
+      msg: 'User deleted successfully',
+      userId: userId
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error deleting user' });
+  }
+};

@@ -34,33 +34,70 @@ export const getFarmProfile = async (req, res) => {
 // Update farm profile
 export const updateFarmProfile = async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      address,
-      contactPhone,
-      businessHours,
-      certifications
-    } = req.body;
-
-    const farm = await Farm.findOne({ owner: req.user.id });
-    if (!farm) {
-      return res.status(404).json({ msg: 'Farm profile not found' });
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ msg: 'User not authenticated' });
     }
 
-    // Update fields
-    if (name) farm.name = name;
-    if (description) farm.description = description;
-    if (address) farm.address = address;
-    if (contactPhone) farm.contactPhone = contactPhone;
-    if (businessHours) farm.businessHours = businessHours;
-    if (certifications) farm.certifications = certifications;
+    const {
+      farmName,
+      farmType,
+      description,
+      location,
+      address,
+      contactPhone,
+      specialties,
+      certifications,
+      images
+    } = req.body;
 
-    await farm.save();
-    res.json(farm);
+    let farm = await Farm.findOne({ owner: req.user.id });
+    
+    const farmData = {
+      owner: req.user.id, // Explicitly set the owner
+      name: farmName,
+      type: farmType,
+      description,
+      location,
+      address,
+      contactPhone,
+      specialties,
+      certifications,
+      images: images || []
+    };
+
+    if (!farm) {
+      // Create new farm if it doesn't exist
+      farm = new Farm(farmData);
+    } else {
+      // Update existing farm
+      farm.name = farmName;
+      farm.type = farmType;
+      farm.description = description;
+      farm.location = location;
+      farm.address = address;
+      farm.contactPhone = contactPhone;
+      farm.specialties = specialties;
+      farm.certifications = certifications;
+      farm.owner = req.user.id; // Ensure owner is set
+      if (images) {
+        farm.images = images;
+      }
+    }
+
+    const updatedFarm = await farm.save();
+    
+    // Update user's farmName if it's different
+    if (req.user.farmName !== farmName) {
+      await User.findByIdAndUpdate(req.user.id, { farmName });
+    }
+
+    res.json({
+      msg: 'Farm profile updated successfully',
+      farm: updatedFarm
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: 'Error updating farm profile' });
+    console.error('Farm profile update error:', err);
+    res.status(500).json({ msg: 'Error updating farm profile: ' + err.message });
   }
 };
 

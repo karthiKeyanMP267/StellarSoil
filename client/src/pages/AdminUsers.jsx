@@ -21,12 +21,16 @@ export default function AdminUsers() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    
     try {
-  await API.delete(`/admin/users/${id}`);
+      const response = await API.delete(`/admin/users/${id}`);
       setUsers(users.filter(u => u._id !== id));
+      alert(response.data.msg || 'User deleted successfully');
     } catch (err) {
-      alert(err.response?.data?.msg || err.message || 'Failed to delete user');
+      console.error('Delete error:', err);
+      const errorMessage = err.response?.data?.msg || err.message || 'Failed to delete user';
+      alert(`Error: ${errorMessage}`);
     }
   };
 
