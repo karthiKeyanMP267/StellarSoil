@@ -35,15 +35,15 @@ const Checkout = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 pt-20 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 pt-20 flex items-center justify-center">
         <div className="text-red-600 text-center">
           <p className="text-xl font-semibold mb-2">Error</p>
           <p>{error}</p>
@@ -54,12 +54,12 @@ const Checkout = () => {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 pt-20 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-xl font-semibold mb-4">Your cart is empty</p>
+          <p className="text-xl font-semibold mb-4 text-amber-800">Your cart is empty</p>
           <button
-            onClick={() => navigate('/products')}
-            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
+            onClick={() => navigate('/marketplace')}
+            className="px-6 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-colors duration-200"
           >
             Browse Products
           </button>
@@ -69,48 +69,50 @@ const Checkout = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-8">Checkout</h1>
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 pt-20">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-8 text-amber-800">Checkout</h1>
 
-      {/* Order Summary */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-        
-        <div className="space-y-4">
-          {cart.items.map((item) => (
-            <div key={item._id} className="flex justify-between items-center">
-              <div>
-                <p className="font-medium">{item.product.name}</p>
-                <p className="text-sm text-gray-600">
-                  Quantity: {item.quantity} {item.product.unit}
+        {/* Order Summary */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-amber-200/20 p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-amber-800">Order Summary</h2>
+          
+          <div className="space-y-4">
+            {cart.items.map((item) => (
+              <div key={item._id} className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium text-amber-900">{item.product.name}</p>
+                  <p className="text-sm text-amber-700">
+                    Quantity: {item.quantity} {item.product.unit}
+                  </p>
+                </div>
+                <p className="font-medium text-amber-800">
+                  ₹{item.product.price * item.quantity}
                 </p>
               </div>
-              <p className="font-medium">
-                ₹{item.product.price * item.quantity}
-              </p>
-            </div>
-          ))}
+            ))}
 
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center font-semibold">
-              <p>Total Amount</p>
-              <p>₹{cart.items.reduce(
-                (sum, item) => sum + (item.product.price * item.quantity),
-                0
-              )}</p>
+            <div className="border-t border-amber-200 pt-4">
+              <div className="flex justify-between items-center font-semibold">
+                <p className="text-amber-800">Total Amount</p>
+                <p className="text-amber-800">₹{cart.items.reduce(
+                  (sum, item) => sum + (item.product.price * item.quantity),
+                  0
+                )}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Payment Form */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Payment Details</h2>
-        <PaymentForm
-          cart={cart}
-          onSuccess={handlePaymentSuccess}
-          onError={handlePaymentError}
-        />
+        {/* Payment Form */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-amber-200/20 p-6">
+          <h2 className="text-xl font-semibold mb-4 text-amber-800">Payment Details</h2>
+          <PaymentForm
+            cart={cart}
+            onSuccess={handlePaymentSuccess}
+            onError={handlePaymentError}
+          />
+        </div>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ const getStatusColor = (status) => {
     case 'in transit':
       return 'text-amber-600 bg-amber-100';
     case 'processing':
-      return 'text-blue-600 bg-blue-100';
+      return 'text-amber-600 bg-amber-100';
     default:
       return 'text-gray-600 bg-gray-100';
   }

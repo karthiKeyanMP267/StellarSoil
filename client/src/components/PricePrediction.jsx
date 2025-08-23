@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChartBarIcon, TrendingUpIcon, CurrencyRupeeIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, TrendingUpIcon, CurrencyDollarIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { Line } from 'react-chartjs-2';
 import { mlApi } from '../api/mlApi';
 import { toast } from 'react-toastify';
@@ -205,31 +205,31 @@ const PricePrediction = () => {
             <div className="bg-green-50 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-green-800">Current Price</h3>
-                <CurrencyRupeeIcon className="h-5 w-5 text-green-600" />
+                <CurrencyDollarIcon className="h-5 w-5 text-green-600" />
               </div>
               <p className="text-2xl font-bold text-green-900 mt-2">
                 ₹{predictions.predictions[0]?.price?.toFixed(2)}/kg
               </p>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-4">
+            <div className="bg-amber-50 rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-blue-800">Predicted High</h3>
-                <TrendingUpIcon className="h-5 w-5 text-blue-600" />
+                <h3 className="text-lg font-medium text-amber-800">Predicted High</h3>
+                <TrendingUpIcon className="h-5 w-5 text-amber-600" />
               </div>
-              <p className="text-2xl font-bold text-blue-900 mt-2">
+              <p className="text-2xl font-bold text-amber-900 mt-2">
                 ₹{Math.max(...predictions.predictions.map(p => p.price))?.toFixed(2)}/kg
               </p>
             </div>
 
-            <div className="bg-purple-50 rounded-lg p-4">
+            <div className="bg-orange-50 rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-purple-800">Average Price</h3>
-                <span className="text-sm font-medium text-purple-600">
+                <h3 className="text-lg font-medium text-orange-800">Average Price</h3>
+                <span className="text-sm font-medium text-orange-600">
                   {predictions.average_price?.toFixed(2)} ₹/kg
                 </span>
               </div>
-              <div className="mt-4 text-sm text-purple-600">
+              <div className="mt-4 text-sm text-orange-600">
                 Confidence Interval: ±₹{predictions.confidence_interval?.toFixed(2)}
               </div>
             </div>
@@ -256,7 +256,7 @@ const PricePrediction = () => {
                           ? 'bg-red-100 text-red-800' 
                           : factor.impact === 'Medium'
                           ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-blue-100 text-blue-800'
+                          : 'bg-amber-100 text-amber-800'
                       }`}>
                         {factor.impact}
                       </span>

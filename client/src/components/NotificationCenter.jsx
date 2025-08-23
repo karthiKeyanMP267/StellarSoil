@@ -125,7 +125,7 @@ const NotificationCenter = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'order':
-        return <ShoppingCartIcon className="h-6 w-6 text-blue-500" />;
+        return <ShoppingCartIcon className="h-6 w-6 text-amber-500" />;
       case 'payment':
         return <CurrencyDollarIcon className="h-6 w-6 text-green-500" />;
       case 'weather':
@@ -133,7 +133,7 @@ const NotificationCenter = () => {
       // case 'pest_alert': - HIDDEN FOR NOW
       //   return <BugAntIcon className="h-6 w-6 text-red-500" />;
       case 'price_update':
-        return <CurrencyDollarIcon className="h-6 w-6 text-purple-500" />;
+        return <CurrencyDollarIcon className="h-6 w-6 text-orange-500" />;
       case 'system':
         return <InformationCircleIcon className="h-6 w-6 text-gray-500" />;
       case 'appointment':
@@ -152,7 +152,7 @@ const NotificationCenter = () => {
       case 'medium':
         return 'border-l-yellow-500 bg-yellow-50';
       case 'low':
-        return 'border-l-blue-500 bg-blue-50';
+        return 'border-l-amber-500 bg-amber-50';
       default:
         return 'border-l-gray-500 bg-gray-50';
     }
@@ -183,7 +183,7 @@ const NotificationCenter = () => {
       {/* Notification Bell */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
+        className="relative p-2 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-lg"
       >
         <BellIcon className="h-6 w-6" />
         {unreadCount > 0 && (
@@ -203,7 +203,7 @@ const NotificationCenter = () => {
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-sm text-blue-600 hover:text-blue-800"
+                  className="text-sm text-amber-600 hover:text-amber-800"
                 >
                   Mark all read
                 </button>
@@ -225,7 +225,7 @@ const NotificationCenter = () => {
                 onClick={() => setFilter(tab)}
                 className={`flex-1 py-2 px-4 text-sm font-medium capitalize ${
                   filter === tab
-                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    ? 'text-amber-600 border-b-2 border-amber-600'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -254,7 +254,7 @@ const NotificationCenter = () => {
                   <div
                     key={notification._id}
                     className={`p-4 hover:bg-gray-50 transition-colors ${
-                      !notification.isRead ? 'bg-blue-50' : ''
+                      !notification.isRead ? 'bg-amber-50' : ''
                     } border-l-4 ${getPriorityColor(notification.priority)}`}
                   >
                     <div className="flex items-start space-x-3">
@@ -280,7 +280,7 @@ const NotificationCenter = () => {
                             {!notification.isRead && (
                               <button
                                 onClick={() => markAsRead(notification._id)}
-                                className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                                className="p-1 text-amber-600 hover:bg-amber-100 rounded"
                                 title="Mark as read"
                               >
                                 <CheckIcon className="h-4 w-4" />
@@ -298,7 +298,7 @@ const NotificationCenter = () => {
                       </div>
                     </div>
                     {!notification.isRead && (
-                      <div className="absolute left-0 top-1/2 w-2 h-2 bg-blue-600 rounded-full transform -translate-y-1/2"></div>
+                      <div className="absolute left-0 top-1/2 w-2 h-2 bg-amber-600 rounded-full transform -translate-y-1/2"></div>
                     )}
                   </div>
                 ))}
@@ -313,7 +313,7 @@ const NotificationCenter = () => {
                 setIsOpen(false);
                 // Navigate to notifications page if it exists
               }}
-              className="w-full text-center text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="w-full text-center text-sm text-amber-600 hover:text-amber-800 font-medium"
             >
               View all notifications
             </button>

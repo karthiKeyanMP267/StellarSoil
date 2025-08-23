@@ -220,3 +220,43 @@ export const refreshToken = async (req, res) => {
     res.status(401).json({ msg: 'Invalid refresh token' });
   }
 };
+
+// Update user profile
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, email, phone, address } = req.body;
+    const userId = req.user.id;
+
+    // Check if email is already taken by another user
+    if (email) {
+      const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+      if (existingUser) {
+        return res.status(400).json({ msg: 'Email is already in use' });
+      }
+    }
+
+    // Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { 
+        name: name || undefined,
+        email: email || undefined,
+        phone: phone || undefined,
+        address: address || undefined
+      },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    res.json({
+      msg: 'Profile updated successfully',
+      user: updatedUser
+    });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+};

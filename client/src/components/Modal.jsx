@@ -11,11 +11,11 @@ const sizeClasses = {
 };
 
 const variantClasses = {
-  default: 'bg-white/80 backdrop-blur-xl border-green-100/50',
-  solid: 'bg-white border-gray-200',
-  warning: 'bg-yellow-50 border-yellow-200',
-  danger: 'bg-red-50 border-red-200',
-  success: 'bg-green-50 border-green-200'
+  default: 'bg-white/95 backdrop-blur-2xl border-yellow-200/50 shadow-3xl',
+  solid: 'bg-white border-gray-200 shadow-2xl',
+  warning: 'bg-yellow-50/95 backdrop-blur-xl border-yellow-300/50 shadow-3xl',
+  danger: 'bg-red-50/95 backdrop-blur-xl border-red-300/50 shadow-3xl',
+  success: 'bg-green-50/95 backdrop-blur-xl border-green-300/50 shadow-3xl'
 };
 
 export default function Modal({
@@ -66,11 +66,11 @@ export default function Modal({
                 <div className="sm:flex sm:items-start">
                   {title && (
                     <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                      <Dialog.Title className="text-lg font-semibold leading-6 text-gray-900">
+                      <Dialog.Title className="text-2xl font-black leading-tight text-amber-900 tracking-wide drop-shadow-lg">
                         {title}
                       </Dialog.Title>
                       {description && (
-                        <Dialog.Description className="mt-2 text-sm text-gray-500">
+                        <Dialog.Description className="mt-3 text-amber-700 font-medium tracking-wide">
                           {description}
                         </Dialog.Description>
                       )}

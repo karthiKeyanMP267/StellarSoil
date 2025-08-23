@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CurrencyRupeeIcon, ExclamationTriangleIcon, CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { CurrencyDollarIcon, ExclamationTriangleIcon, CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 
 const MarketPriceGuide = ({ onPriceValidation }) => {
@@ -84,7 +84,7 @@ const MarketPriceGuide = ({ onPriceValidation }) => {
       case 'optimal':
         return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
       default:
-        return <InformationCircleIcon className="h-5 w-5 text-blue-500" />;
+        return <InformationCircleIcon className="h-5 w-5 text-amber-500" />;
     }
   };
 
@@ -108,7 +108,7 @@ const MarketPriceGuide = ({ onPriceValidation }) => {
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-gray-900">Market Price Guide</h2>
-        <CurrencyRupeeIcon className="h-8 w-8 text-green-600" />
+        <CurrencyDollarIcon className="h-8 w-8 text-green-600" />
       </div>
 
       {/* Current Market Prices Grid */}
@@ -203,7 +203,7 @@ const MarketPriceGuide = ({ onPriceValidation }) => {
                   </div>
                   <div>
                     <span className="font-medium">Suggested Range: </span>
-                    <span className="text-blue-600">₹{validation.minAllowed} - ₹{validation.maxAllowed}/kg</span>
+                    <span className="text-amber-600">₹{validation.minAllowed} - ₹{validation.maxAllowed}/kg</span>
                   </div>
                 </div>
               </div>
@@ -212,9 +212,9 @@ const MarketPriceGuide = ({ onPriceValidation }) => {
         )}
 
         {/* Market Insights */}
-        <div className="mt-6 bg-blue-50 rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-2">💡 Pricing Tips</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
+        <div className="mt-6 bg-amber-50 rounded-lg p-4">
+          <h4 className="font-medium text-amber-900 mb-2">💡 Pricing Tips</h4>
+          <ul className="text-sm text-amber-800 space-y-1">
             <li>• Keep prices within 30% of market rates for better sales</li>
             <li>• Consider quality premiums for organic/premium products</li>
             <li>• Monitor prices regularly as they change with supply and demand</li>

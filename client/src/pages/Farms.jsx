@@ -123,7 +123,7 @@ const Farms = () => {
                 </p>
                 <p className="text-gray-700 mb-2 italic">{farm.description || 'No description provided.'}</p>
                 <button
-                  className="mt-auto px-5 py-2 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-full font-semibold shadow hover:from-green-500 hover:to-blue-500 hover:scale-105 transition-all duration-200"
+                  className="mt-auto px-5 py-2 bg-gradient-to-r from-amber-500 to-green-500 text-white rounded-full font-semibold shadow hover:from-green-500 hover:to-amber-500 hover:scale-105 transition-all duration-200"
                   onClick={() => {
                     if (farm.location && farm.location.coordinates) {
                       const url = `https://www.google.com/maps/search/?api=1&query=${farm.location.coordinates[1]},${farm.location.coordinates[0]}`;
@@ -163,7 +163,7 @@ const Farms = () => {
             </p>
             <p className="text-gray-700 mb-2 italic">{farm.description || 'No description provided.'}</p>
             <button
-              className="mt-auto px-5 py-2 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-full font-semibold shadow hover:from-green-500 hover:to-blue-500 hover:scale-105 transition-all duration-200"
+              className="mt-auto px-5 py-2 bg-gradient-to-r from-amber-500 to-green-500 text-white rounded-full font-semibold shadow hover:from-green-500 hover:to-amber-500 hover:scale-105 transition-all duration-200"
               onClick={() => {
                 if (farm.location && farm.location.coordinates) {
                   const url = `https://www.google.com/maps/search/?api=1&query=${farm.location.coordinates[1]},${farm.location.coordinates[0]}`;

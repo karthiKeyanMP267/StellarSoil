@@ -26,7 +26,7 @@ const insights = [
     title: 'Community Hub',
     description: 'Connect and share knowledge with other farmers',
     icon: UserGroupIcon,
-    color: 'bg-gradient-to-br from-blue-500 to-indigo-600'
+    color: 'bg-gradient-to-br from-amber-500 to-orange-600'
   }
 ];
 
@@ -138,11 +138,11 @@ function FarmerInsights() {
                   <div key={index} className="p-4 bg-blue-50 rounded-xl">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        <ChatBubbleLeftRightIcon className="h-6 w-6 text-blue-600" />
+                        <ChatBubbleLeftRightIcon className="h-6 w-6 text-amber-600" />
                       </div>
                       <div>
                         <p className="text-blue-900">{tip.tip}</p>
-                        <div className="mt-2 flex items-center gap-2 text-sm text-blue-600">
+                        <div className="mt-2 flex items-center gap-2 text-sm text-amber-600">
                           <span className="font-medium">{tip.author}</span>
                           <span>•</span>
                           <span>{tip.likes} likes</span>

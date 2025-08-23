@@ -11,8 +11,8 @@ export const limiter = rateLimit({
 // CORS configuration
 export const corsOptions = {
     origin: process.env.NODE_ENV === 'production' 
-        ? process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173']
-        : ['http://localhost:5173'],
+        ? process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176']
+        : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -24,7 +24,7 @@ export const helmetConfig = helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            connectSrc: ["'self'", "http://localhost:5000", "http://localhost:5173", "ws://localhost:*"],
+            connectSrc: ["'self'", "http://localhost:5000", "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176", "ws://localhost:*"],
             imgSrc: ["'self'", "data:", "https:", "blob:"],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https:"],

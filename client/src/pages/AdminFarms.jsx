@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react';
 import API from '../api/api';
-import FarmsMap from '../components/FarmsMap';
+import { 
+  MapPinIcon, 
+  CheckCircleIcon, 
+  ClockIcon,
+  EyeIcon,
+  TrashIcon 
+} from '@heroicons/react/24/outline';
 
 export default function AdminFarms() {
   const [farms, setFarms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedFarm, setSelectedFarm] = useState(null);
 
   useEffect(() => {
     const fetchFarms = async () => {
@@ -13,12 +20,6 @@ export default function AdminFarms() {
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         
-        console.log('Debug - Auth state:', { 
-          hasToken: !!token, 
-          userRole: user?.role,
-          user: user
-        });
-
         if (!token) {
           setError('Not authenticated. Please login again.');
           return;
@@ -29,16 +30,10 @@ export default function AdminFarms() {
           return;
         }
 
-        console.log('Making API request to /admin/farms');
         const res = await API.get('/admin/farms');
-        console.log('Farms API response:', res.data);
         setFarms(res.data);
       } catch (err) {
-        console.error('Error fetching farms:', {
-          error: err,
-          response: err.response,
-          message: err.message
-        });
+        console.error('Error fetching farms:', err);
         setError(err.response?.data?.msg || err.message || 'Failed to load farms');
       } finally {
         setLoading(false);
@@ -47,68 +42,248 @@ export default function AdminFarms() {
     fetchFarms();
   }, []);
 
+  const handleToggleVerification = async (farmId, currentStatus) => {
+    try {
+      await API.patch(`/admin/farms/${farmId}/verify`, { 
+        isVerified: !currentStatus 
+      });
+      
+      setFarms(farms.map(farm => 
+        farm._id === farmId 
+          ? { ...farm, owner: { ...farm.owner, isVerified: !currentStatus } }
+          : farm
+      ));
+    } catch (err) {
+      console.error('Error updating verification:', err);
+      alert('Failed to update verification status');
+    }
+  };
+
+
   if (loading) return (
-    <div className="flex items-center justify-center p-8">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-      <span className="ml-2">Loading farms...</span>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-25 to-orange-50 pt-20">
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400"></div>
+        <span className="ml-2 text-amber-700">Loading farms...</span>
+      </div>
     </div>
   );
   
   if (error) return (
-    <div className="p-8">
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-        <p className="font-bold">Error</p>
-        <p>{error}</p>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-25 to-orange-50 pt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-gradient-to-br from-red-500/20 to-pink-500/20 backdrop-blur-sm border border-red-400/30 text-red-300 px-6 py-4 rounded-2xl">
+          <h3 className="font-bold text-lg">Error</h3>
+          <p>{error}</p>
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Manage Farms</h1>
-      {farms.length === 0 ? (
-        <div className="bg-gray-100 p-4 rounded-lg text-gray-600">
-          No farms found in the system.
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-25 to-orange-50 pt-20">
+      {/* Decorative Elements */}
+      <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-amber-400/20 to-orange-400/20 rounded-full blur-xl"></div>
+      <div className="absolute bottom-20 right-10 w-48 h-48 bg-gradient-to-r from-orange-400/20 to-yellow-400/20 rounded-full blur-xl"></div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-700 via-orange-600 to-amber-700 mb-4">
+            Farm Management
+          </h1>
+          <p className="text-xl text-amber-700">Monitor and manage all registered farms</p>
         </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded-xl shadow-lg">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Owner</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Location</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Description</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {farms.map(farm => (
-                <tr key={farm._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm">{farm.name}</td>
-                  <td className="px-4 py-3 text-sm">{farm.owner?.name || 'N/A'}</td>
-                  <td className="px-4 py-3 text-sm">
-                    {farm.location?.coordinates ? 
-                      `${farm.location.coordinates[1].toFixed(6)}, ${farm.location.coordinates[0].toFixed(6)}` 
-                      : 'N/A'}
-                  </td>
-                  <td className="px-4 py-3 text-sm">{farm.description || 'No description'}</td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className={`px-2 py-1 rounded text-xs ${farm.owner?.isVerified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                      {farm.owner?.isVerified ? 'Verified' : 'Pending'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20 transition-all duration-300 hover:scale-105">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="flex items-center relative z-10">
+              <div className="p-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full">
+                <CheckCircleIcon className="h-8 w-8 text-green-300" />
+              </div>
+              <div className="ml-4">
+                <p className="text-3xl font-bold text-white">
+                  {farms.filter(f => f.owner?.isVerified).length}
+                </p>
+                <p className="text-gray-300">Verified Farms</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20 transition-all duration-300 hover:scale-105">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="flex items-center relative z-10">
+              <div className="p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-full">
+                <ClockIcon className="h-8 w-8 text-yellow-300" />
+              </div>
+              <div className="ml-4">
+                <p className="text-3xl font-bold text-white">
+                  {farms.filter(f => !f.owner?.isVerified).length}
+                </p>
+                <p className="text-gray-300">Pending Verification</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20 transition-all duration-300 hover:scale-105">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="flex items-center relative z-10">
+              <div className="p-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-full">
+                <MapPinIcon className="h-8 w-8 text-amber-300" />
+              </div>
+              <div className="ml-4">
+                <p className="text-3xl font-bold text-white">{farms.length}</p>
+                <p className="text-gray-300">Total Farms</p>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
-      <div className="mt-8">
-        <FarmsMap 
-          farms={farms.filter(farm => farm.location && Array.isArray(farm.location.coordinates))} 
-          userLocation={null}
-        />
+
+        {farms.length === 0 ? (
+          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-12 text-center">
+            <MapPinIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">No farms found</h3>
+            <p className="text-gray-300">No farms have been registered in the system yet.</p>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/10">
+                <thead className="bg-gradient-to-r from-amber-800/50 to-orange-800/50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Farm Details
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Owner
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Location
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {farms.map(farm => (
+                    <tr key={farm._id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-white">{farm.name}</div>
+                          <div className="text-sm text-gray-300 truncate max-w-xs">
+                            {farm.description || 'No description provided'}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-white">{farm.owner?.name || 'N/A'}</div>
+                        <div className="text-sm text-gray-300">{farm.owner?.email || 'N/A'}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                        {farm.location?.coordinates ? 
+                          `${farm.location.coordinates[1].toFixed(4)}, ${farm.location.coordinates[0].toFixed(4)}` 
+                          : 'Not provided'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border ${
+                          farm.owner?.isVerified 
+                            ? 'bg-green-500/20 border-green-400/30 text-green-300' 
+                            : 'bg-yellow-500/20 border-yellow-400/30 text-yellow-300'
+                        }`}>
+                          {farm.owner?.isVerified ? (
+                            <>
+                              <CheckCircleIcon className="h-4 w-4 mr-1" />
+                              Verified
+                            </>
+                          ) : (
+                            <>
+                              <ClockIcon className="h-4 w-4 mr-1" />
+                              Pending
+                            </>
+                          )}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-3">
+                          <button
+                            onClick={() => setSelectedFarm(farm)}
+                            className="text-amber-300 hover:text-amber-100 flex items-center transition-colors"
+                          >
+                            <EyeIcon className="h-4 w-4 mr-1" />
+                            View
+                          </button>
+                          <button
+                            onClick={() => handleToggleVerification(farm._id, farm.owner?.isVerified)}
+                            className={`flex items-center transition-colors ${
+                              farm.owner?.isVerified 
+                                ? 'text-red-300 hover:text-red-100' 
+                                : 'text-green-300 hover:text-green-100'
+                            }`}
+                          >
+                            {farm.owner?.isVerified ? 'Revoke' : 'Verify'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Farm Detail Modal */}
+        {selectedFarm && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+            <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 w-full max-w-lg shadow-2xl rounded-2xl overflow-hidden">
+              <div className="p-6">
+                <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-700 to-orange-700 mb-6">
+                  Farm Details
+                </h3>
+                <div className="space-y-4">
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                    <label className="text-sm font-medium text-gray-300 block mb-1">Name:</label>
+                    <p className="text-white font-semibold">{selectedFarm.name}</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                    <label className="text-sm font-medium text-gray-300 block mb-1">Owner:</label>
+                    <p className="text-white">{selectedFarm.owner?.name || 'N/A'}</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                    <label className="text-sm font-medium text-gray-300 block mb-1">Email:</label>
+                    <p className="text-white">{selectedFarm.owner?.email || 'N/A'}</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                    <label className="text-sm font-medium text-gray-300 block mb-1">Description:</label>
+                    <p className="text-white">{selectedFarm.description || 'No description provided'}</p>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                    <label className="text-sm font-medium text-gray-300 block mb-1">Location:</label>
+                    <p className="text-white">
+                      {selectedFarm.location?.coordinates 
+                        ? `Lat: ${selectedFarm.location.coordinates[1].toFixed(6)}, Lng: ${selectedFarm.location.coordinates[0].toFixed(6)}`
+                        : 'Not provided'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex justify-end mt-8">
+                  <button
+                    onClick={() => setSelectedFarm(null)}
+                    className="px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-300 hover:scale-105"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -95,7 +95,7 @@ const FarmsMap = ({ farms, userLocation }) => {
       {/* Floating Legend */}
       <div className="absolute top-4 left-4 bg-white/90 rounded-xl shadow-lg px-4 py-2 flex items-center gap-4 z-20 border border-green-100">
         <span className="flex items-center gap-1 text-green-700 font-semibold"><img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Farm" className="w-6 h-6" /> Farm</span>
-        <span className="flex items-center gap-1 text-blue-700 font-semibold"><svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5 text-blue-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'><circle cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='2' fill='#2196f3' /></svg> You</span>
+        <span className="flex items-center gap-1 text-amber-700 font-semibold"><svg xmlns='http://www.w3.org/2000/svg' className='w-5 h-5 text-amber-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'><circle cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='2' fill='#D97706' /></svg> You</span>
       </div>
     </div>
   );

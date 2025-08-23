@@ -76,58 +76,58 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-500 bg-clip-text text-transparent">
+        <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-purple-300 to-indigo-300">
           {mode === 'login' ? 'Welcome Back!' : 'Create Your Account'}
         </span>
       }
-      overlayClassName="fixed inset-0 bg-gradient-to-b from-[#7BE0B0]/90 to-[#2EAEF0]/90 backdrop-blur-sm z-50 flex items-center justify-center"
+      overlayClassName="fixed inset-0 bg-gradient-to-br from-amber-900/90 via-orange-900/90 to-red-900/90 backdrop-blur-sm z-50 flex items-center justify-center"
     >
-      <div className="mt-4 bg-gradient-to-br from-green-50 via-blue-50 to-emerald-50 rounded-2xl shadow-2xl p-8 text-gray-900">
+      <div className="mt-4 bg-gradient-to-br from-white/90 to-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-amber-200/20 p-8 text-amber-900">
         
-      <div className="flex justify-center mb-6 gap-2">
-  <button
-    type="button"
-    onClick={() => setRole('user')}
-    className={`px-4 py-2 text-sm font-medium border border-secondary-500 rounded-lg focus:outline-none transition-colors duration-200
-      ${role === 'user' ? 'bg-secondary-500 text-white shadow-lg' : 'bg-white text-secondary-600 hover:bg-secondary-600 hover:text-white hover:shadow-lg'}`}
-  >
-    User
-  </button>
-  <button
-    type="button"
-    onClick={() => setRole('farmer')}
-    className={`px-4 py-2 text-sm font-medium border border-secondary-500 rounded-lg focus:outline-none transition-colors duration-200
-      ${role === 'farmer' ? 'bg-secondary-500 text-white shadow-lg' : 'bg-white text-secondary-600 hover:bg-secondary-600 hover:text-white hover:shadow-lg'}`}
-  >
-    Farmer
-  </button>
-  {mode === 'login' && (
-    <button
-      type="button"
-      onClick={() => setRole('admin')}
-      className={`px-4 py-2 text-sm font-medium border border-secondary-500 rounded-lg focus:outline-none transition-colors duration-200
-        ${role === 'admin' ? 'bg-secondary-500 text-white shadow-lg' : 'bg-white text-secondary-600 hover:bg-secondary-600 hover:text-white hover:shadow-lg'}`}
-    >
-      Admin
-    </button>
-  )}
-</div>
+        <div className="flex justify-center mb-8 gap-4">
+          <button
+            type="button"
+            onClick={() => setRole('user')}
+            className={`px-8 py-4 text-base font-black border border-amber-200 rounded-2xl backdrop-blur-lg focus:outline-none transition-all duration-300 hover:scale-110 shadow-xl tracking-wide
+              ${role === 'user' 
+                ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-2xl border-amber-400/50 drop-shadow-lg' 
+                : 'bg-white/80 text-amber-800 hover:bg-amber-500/30 hover:border-amber-400/50'}`}
+          >
+            User
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole('farmer')}
+            className={`px-8 py-4 text-base font-black border border-amber-200 rounded-2xl backdrop-blur-lg focus:outline-none transition-all duration-300 hover:scale-110 shadow-xl tracking-wide
+              ${role === 'farmer' 
+                ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-2xl border-amber-400/50 drop-shadow-lg' 
+                : 'bg-white/80 text-amber-800 hover:bg-amber-500/30 hover:border-amber-400/50'}`}
+          >
+            Farmer
+          </button>
+          {mode === 'login' && (
+            <button
+              type="button"
+              onClick={() => setRole('admin')}
+              className={`px-8 py-4 text-base font-black border border-amber-200 rounded-2xl backdrop-blur-lg focus:outline-none transition-all duration-300 hover:scale-110 shadow-xl tracking-wide
+                ${role === 'admin' 
+                  ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-2xl border-red-400/50 drop-shadow-lg' 
+                  : 'bg-white/80 text-amber-800 hover:bg-red-500/30 hover:border-red-400/50'}`}
+            >
+              Admin
+            </button>
+          )}
+        </div>
         
         {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 text-sm rounded-lg shadow-sm">
+          <div className="mb-6 p-4 bg-gradient-to-r from-red-500/20 to-red-600/20 backdrop-blur-sm border border-red-400/30 text-red-700 text-sm rounded-xl shadow-sm">
             {error}
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 text-sm rounded-lg">
-              {error}
-            </div>
-          )}
-          
           {mode === 'register' && (
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-amber-800 mb-2">
                 Full Name
               </label>
               <input
@@ -137,14 +137,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
                 required
                 value={form.name}
                 onChange={handleChange}
-                className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 sm:text-sm"
+                className="appearance-none block w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-amber-200 rounded-xl shadow-sm placeholder-amber-600 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 sm:text-sm"
                 placeholder="John Doe"
               />
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-amber-800 mb-2">
               Email address
             </label>
             <input
@@ -154,13 +154,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
               required
               value={form.email}
               onChange={handleChange}
-              className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 sm:text-sm"
+              className="appearance-none block w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-amber-200 rounded-xl shadow-sm placeholder-amber-600 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 sm:text-sm"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-amber-800 mb-2">
               Password
             </label>
             <input
@@ -170,14 +170,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
               required
               value={form.password}
               onChange={handleChange}
-              className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 sm:text-sm"
+              className="appearance-none block w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-amber-200 rounded-xl shadow-sm placeholder-amber-600 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 sm:text-sm"
               placeholder="••••••••"
             />
           </div>
 
           {mode === 'register' && role === 'farmer' && (
             <div>
-              <label htmlFor="kisanId" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="kisanId" className="block text-sm font-medium text-amber-800 mb-2">
                 Kisan ID Document
               </label>
               <input
@@ -186,20 +186,20 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png"
                 onChange={handleFileChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                className="block w-full text-sm text-amber-700 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-amber-500/20 file:text-amber-700 hover:file:bg-amber-500/30 file:backdrop-blur-sm"
                 required
               />
-              <p className="mt-1 text-xs text-gray-500">Upload your Kisan ID card (PDF, JPG, JPEG, or PNG)</p>
+              <p className="mt-2 text-xs text-gray-400">Upload your Kisan ID card (PDF, JPG, JPEG, or PNG)</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 px-4 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200
+            className={`w-full py-4 px-6 rounded-2xl text-white font-black text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400 transition-all duration-300 hover:scale-105 shadow-2xl tracking-wide drop-shadow-lg
               ${loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+                ? 'bg-amber-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 shadow-2xl'
               }`}
           >
             {loading ? (
@@ -216,8 +216,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
           </button>
         </form>
         
-        <div className="mt-6 text-center text-sm">
-          <span className="text-gray-600">
+        <div className="mt-8 text-center text-sm">
+          <span className="text-amber-700">
             {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
           </span>
           <button
@@ -234,7 +234,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
               });
               setRole('user'); // Reset role when switching modes
             }}
-            className="text-green-600 font-medium hover:text-emerald-600 focus:outline-none focus:underline transition-colors duration-200 ml-1"
+            className="text-amber-600 font-medium hover:text-amber-800 focus:outline-none focus:underline transition-colors duration-200 ml-1"
           >
             {mode === 'login' ? 'Sign up here' : 'Sign in here'}
           </button>

@@ -4,7 +4,7 @@ import { components } from '../styles/theme';
 import {
   ChartBarIcon,
   UserGroupIcon,
-  CurrencyRupeeIcon,
+  CurrencyDollarIcon,
   ArrowTrendingUpIcon,
   ChartPieIcon,
   ShoppingCartIcon
@@ -61,7 +61,7 @@ function AnalyticsDashboard() {
     {
       name: 'Total Revenue',
       value: `₹${stats.totalRevenue.toLocaleString()}`,
-      icon: CurrencyRupeeIcon,
+      icon: CurrencyDollarIcon,
       change: '+12%',
       color: 'bg-green-500'
     },

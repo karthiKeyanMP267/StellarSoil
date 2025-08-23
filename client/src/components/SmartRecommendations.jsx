@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { MapPinIcon, ClockIcon, FireIcon, SparklesIcon, CurrencyRupeeIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, ClockIcon, FireIcon, SparklesIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 
 const SmartRecommendations = () => {
@@ -127,7 +127,7 @@ const SmartRecommendations = () => {
         {marketPrice && (
           <div className="mb-3">
             <div className="flex items-center text-green-600 font-medium text-sm mb-1">
-              <CurrencyRupeeIcon className="h-4 w-4 mr-1" />
+              <CurrencyDollarIcon className="h-4 w-4 mr-1" />
               ₹{marketPrice.current}/kg
             </div>
             <div className="text-xs text-gray-500">
@@ -154,9 +154,9 @@ const SmartRecommendations = () => {
 
   const getTypeColor = (type) => {
     switch (type) {
-      case 'frequent': return 'bg-blue-100 text-blue-800';
+      case 'frequent': return 'bg-amber-100 text-amber-800';
       case 'nearby': return 'bg-green-100 text-green-800';
-      case 'popular': return 'bg-purple-100 text-purple-800';
+      case 'popular': return 'bg-orange-100 text-orange-800';
       case 'collaborative': return 'bg-orange-100 text-orange-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -196,7 +196,7 @@ const SmartRecommendations = () => {
       {Object.keys(marketPrices).length > 0 && (
         <section className="bg-green-50 rounded-lg p-6">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4 flex items-center">
-            <CurrencyRupeeIcon className="h-6 w-6 mr-2 text-green-600" />
+            <CurrencyDollarIcon className="h-6 w-6 mr-2 text-green-600" />
             Today's Market Prices
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -217,7 +217,7 @@ const SmartRecommendations = () => {
       {grouped.frequent.length > 0 && (
         <section>
           <h2 className="text-2xl font-semibold text-gray-900 mb-4 flex items-center">
-            <ClockIcon className="h-6 w-6 mr-2 text-blue-600" />
+            <ClockIcon className="h-6 w-6 mr-2 text-amber-600" />
             Your Frequent Purchases
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
