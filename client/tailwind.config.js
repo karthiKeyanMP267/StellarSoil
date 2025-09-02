@@ -4,111 +4,171 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  theme: {    extend: {      colors: {
-        primary: {
-          50: '#eef8ff',
-          100: '#d9efff',
-          200: '#bce3ff',
-          300: '#8ed4ff',
-          400: '#56baff',
-          500: '#2596ff',  // Modern medical blue
-          600: '#0073e6',
-          700: '#0059b3',
-          800: '#004a94',
-          900: '#003e7a',
+  theme: {
+    extend: {
+      colors: {
+        // Professional Beige & Earth Tones
+        beige: {
+          50: '#fefdfb',
+          100: '#fef9f0',
+          200: '#fcf1e0',
+          300: '#f9e6c8',
+          400: '#f5d7a5',
+          500: '#efc373',  // Primary beige
+          600: '#d4a958',
+          700: '#b08d46',
+          800: '#8f7138',
+          900: '#745d2f',
         },
-        secondary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#b9e5fe',
-          300: '#7cd4fd',
-          400: '#36bffa',
-          500: '#0da2e7',  // Bright cyan
-          600: '#0284c7',
-          700: '#036ba1',
-          800: '#075985',
-          900: '#0c4a6e',
+        cream: {
+          50: '#fffef9',
+          100: '#fffcf0',
+          200: '#fef7de',
+          300: '#fdefc4',
+          400: '#fbe49f',
+          500: '#f7d572',  // Warm cream
+          600: '#e6c045',
+          700: '#c9a338',
+          800: '#a4852f',
+          900: '#856c29',
         },
-        accent: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#8b5cf6',  // Soft purple
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
-          900: '#4c1d95',
+        sage: {
+          50: '#f6f8f6',
+          100: '#e8f0e8',
+          200: '#d1e0d1',
+          300: '#acc9ac',
+          400: '#7da87d',
+          500: '#5a8a5a',  // Sage green
+          600: '#4a734a',
+          700: '#3e5e3e',
+          800: '#344d34',
+          900: '#2b3f2b',
         },
-        teal: {
-          50: '#f0fdfa',
-          100: '#ccfbf1',
-          200: '#99f6e4',
-          300: '#5eead4',
-          400: '#2dd4bf',
-          500: '#14b8a6',  // Medical teal
-          600: '#0d9488',
-          700: '#0f766e',
-          800: '#115e59',
-          900: '#134e4a',
+        terracotta: {
+          50: '#fdf6f4',
+          100: '#fbeae6',
+          200: '#f6d7d0',
+          300: '#efb8a9',
+          400: '#e59078',
+          500: '#d86d4f',  // Terracotta
+          600: '#c4542f',
+          700: '#a44325',
+          800: '#883a23',
+          900: '#713424',
         },
-        accent: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#a855f7',  // Calming purple
-          600: '#9333ea',
-          700: '#7e22ce',
-          800: '#6b21a8',
-          900: '#581c87',
+        sand: {
+          50: '#fefcfa',
+          100: '#fdf7f0',
+          200: '#faede0',
+          300: '#f5dcc6',
+          400: '#edc49f',
+          500: '#e1a574',  // Sand
+          600: '#d18951',
+          700: '#af6d3b',
+          800: '#8f5832',
+          900: '#75492b',
         },
-        warm: {
-          50: '#fefce8',
-          100: '#fef9c3',
-          200: '#fef08a',
-          300: '#fde047',
-          400: '#facc15',
-          500: '#eab308',  // Warm gold
-          600: '#ca8a04',
-          700: '#a16207',
-          800: '#854d0e',
-          900: '#713f12',
-        },
-        secondary: {
-          50: '#f5f7fa',
-          100: '#ebeef3',
-          200: '#d7dce5',
-          300: '#b3bcd0',
-          400: '#8996b8',
-          500: '#2c4875',  // Medical navy
-          600: '#1e325c',
-          700: '#162543',
-          800: '#0f1a2e',
-          900: '#080d19',
-        },
-        accent: {
-          50: '#f3f8f9',
-          100: '#daf5f3',
-          200: '#b0ebe7',
-          300: '#7ed3d1',
-          400: '#20b2aa',  // Medical teal
-          500: '#17a2a2',
-          600: '#0f8080',
-          700: '#0a6666',
-          800: '#064d4d',
-          900: '#033333',
+        earth: {
+          50: '#f9f7f4',
+          100: '#f0ebe3',
+          200: '#e0d5c7',
+          300: '#ccb8a3',
+          400: '#b39478',
+          500: '#9d7955',  // Earth brown
+          600: '#856147',
+          700: '#6f4e3d',
+          800: '#5d4136',
+          900: '#4f3730',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Montserrat', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Montserrat', 'Inter', 'system-ui', 'sans-serif'],
+        serif: ['Playfair Display', 'Georgia', 'serif'],
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.6s ease-in-out',
+        'fade-in-up': 'fadeInUp 0.8s ease-out',
+        'fade-in-down': 'fadeInDown 0.8s ease-out',
+        'slide-in-left': 'slideInLeft 0.8s ease-out',
+        'slide-in-right': 'slideInRight 0.8s ease-out',
+        'scale-in': 'scaleIn 0.5s ease-out',
+        'bounce-gentle': 'bounceGentle 2s infinite',
+        'float': 'float 3s ease-in-out infinite',
+        'glow': 'glow 2s ease-in-out infinite alternate',
+        'shimmer': 'shimmer 2s linear infinite',
+        'wiggle': 'wiggle 1s ease-in-out infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'spin-slow': 'spin 3s linear infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeInDown: {
+          '0%': { opacity: '0', transform: 'translateY(-20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideInLeft: {
+          '0%': { opacity: '0', transform: 'translateX(-30px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        slideInRight: {
+          '0%': { opacity: '0', transform: 'translateX(30px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0.9)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        bounceGentle: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+        glow: {
+          '0%': { boxShadow: '0 0 20px rgba(239, 195, 115, 0.3)' },
+          '100%': { boxShadow: '0 0 30px rgba(239, 195, 115, 0.6)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        wiggle: {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
+        },
+      },
+      backdropBlur: {
+        'xs': '2px',
+      },
+      boxShadow: {
+        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+        'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.04)',
+        'strong': '0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+        'glow-beige': '0 0 30px rgba(239, 195, 115, 0.3)',
+        'glow-sage': '0 0 30px rgba(90, 138, 90, 0.3)',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'beige-gradient': 'linear-gradient(135deg, #fef9f0 0%, #f9e6c8 100%)',
+        'earth-gradient': 'linear-gradient(135deg, #f0ebe3 0%, #e0d5c7 50%, #ccb8a3 100%)',
+        'sage-gradient': 'linear-gradient(135deg, #f6f8f6 0%, #e8f0e8 100%)',
       },
     },
   },
   plugins: [
     require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'),
   ],
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChartBarIcon, TrendingUpIcon, CurrencyDollarIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, ArrowTrendingUpIcon, CurrencyDollarIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { Line } from 'react-chartjs-2';
 import { mlApi } from '../api/mlApi';
 import { toast } from 'react-toastify';
@@ -215,7 +215,7 @@ const PricePrediction = () => {
             <div className="bg-amber-50 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-amber-800">Predicted High</h3>
-                <TrendingUpIcon className="h-5 w-5 text-amber-600" />
+                <ArrowTrendingUpIcon className="h-5 w-5 text-amber-600" />
               </div>
               <p className="text-2xl font-bold text-amber-900 mt-2">
                 ₹{Math.max(...predictions.predictions.map(p => p.price))?.toFixed(2)}/kg

@@ -1,12 +1,23 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Modal from './Modal';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/api';
+import { 
+  UserIcon, 
+  EnvelopeIcon, 
+  LockClosedIcon, 
+  EyeIcon, 
+  EyeSlashIcon,
+  SparklesIcon,
+  ArrowRightIcon
+} from '@heroicons/react/24/outline';
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
   const [mode, setMode] = useState(initialMode);
   const [role, setRole] = useState('user');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -84,96 +95,209 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
     >
       <div className="mt-4 bg-gradient-to-br from-white/90 to-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-amber-200/20 p-8 text-amber-900">
         
-        <div className="flex justify-center mb-8 gap-4">
-          <button
-            type="button"
-            onClick={() => setRole('user')}
-            className={`px-8 py-4 text-base font-black border border-amber-200 rounded-2xl backdrop-blur-lg focus:outline-none transition-all duration-300 hover:scale-110 shadow-xl tracking-wide
-              ${role === 'user' 
-                ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-2xl border-amber-400/50 drop-shadow-lg' 
-                : 'bg-white/80 text-amber-800 hover:bg-amber-500/30 hover:border-amber-400/50'}`}
-          >
-            User
-          </button>
-          <button
-            type="button"
-            onClick={() => setRole('farmer')}
-            className={`px-8 py-4 text-base font-black border border-amber-200 rounded-2xl backdrop-blur-lg focus:outline-none transition-all duration-300 hover:scale-110 shadow-xl tracking-wide
-              ${role === 'farmer' 
-                ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-2xl border-amber-400/50 drop-shadow-lg' 
-                : 'bg-white/80 text-amber-800 hover:bg-amber-500/30 hover:border-amber-400/50'}`}
-          >
-            Farmer
-          </button>
-          {mode === 'login' && (
-            <button
+        {/* Enhanced Role Selection */}
+        <motion.div 
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <h3 className="text-lg font-bold text-earth-800 mb-4 text-center">
+            Choose your role
+          </h3>
+          <div className="flex justify-center gap-4">
+            <motion.button
               type="button"
-              onClick={() => setRole('admin')}
-              className={`px-8 py-4 text-base font-black border border-amber-200 rounded-2xl backdrop-blur-lg focus:outline-none transition-all duration-300 hover:scale-110 shadow-xl tracking-wide
-                ${role === 'admin' 
-                  ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-2xl border-red-400/50 drop-shadow-lg' 
-                  : 'bg-white/80 text-amber-800 hover:bg-red-500/30 hover:border-red-400/50'}`}
+              onClick={() => setRole('user')}
+              className={`px-6 py-4 text-sm font-bold border-2 rounded-2xl backdrop-blur-lg focus:outline-none transition-all duration-300 relative overflow-hidden group ${
+                role === 'user' 
+                  ? 'bg-gradient-to-r from-beige-500 to-sage-600 text-white border-beige-400 shadow-xl' 
+                  : 'bg-white/80 text-earth-700 border-beige-200 hover:bg-beige-50 hover:border-beige-300'
+              }`}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
             >
-              Admin
-            </button>
-          )}
-        </div>
+              {role === 'user' && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"
+                  initial={{ x: '-100%' }}
+                  animate={{ x: '100%' }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+              )}
+              <span className="relative z-10 flex items-center justify-center">
+                <UserIcon className="h-5 w-5 mr-2" />
+                🛍️ Customer
+              </span>
+            </motion.button>
+            
+            <motion.button
+              type="button"
+              onClick={() => setRole('farmer')}
+              className={`px-6 py-4 text-sm font-bold border-2 rounded-2xl backdrop-blur-lg focus:outline-none transition-all duration-300 relative overflow-hidden group ${
+                role === 'farmer' 
+                  ? 'bg-gradient-to-r from-sage-500 to-earth-600 text-white border-sage-400 shadow-xl' 
+                  : 'bg-white/80 text-earth-700 border-beige-200 hover:bg-sage-50 hover:border-sage-300'
+              }`}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {role === 'farmer' && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"
+                  initial={{ x: '-100%' }}
+                  animate={{ x: '100%' }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+              )}
+              <span className="relative z-10 flex items-center justify-center">
+                <SparklesIcon className="h-5 w-5 mr-2" />
+                👨‍🌾 Farmer
+              </span>
+            </motion.button>
+            
+            {mode === 'login' && (
+              <motion.button
+                type="button"
+                onClick={() => setRole('admin')}
+                className={`px-6 py-4 text-sm font-bold border-2 rounded-2xl backdrop-blur-lg focus:outline-none transition-all duration-300 relative overflow-hidden group ${
+                  role === 'admin' 
+                    ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-400 shadow-xl' 
+                    : 'bg-white/80 text-earth-700 border-beige-200 hover:bg-red-50 hover:border-red-300'
+                }`}
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.4 }}
+              >
+                {role === 'admin' && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"
+                    initial={{ x: '-100%' }}
+                    animate={{ x: '100%' }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center justify-center">
+                  <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M9.504 1.132a1 1 0 01.992 0l1.75 1a1 1 0 11-.992 1.736L10 3.152l-1.254.716a1 1 0 11-.992-1.736l1.75-1zM5.618 4.504a1 1 0 01-.372 1.364L5.016 6l.23.132a1 1 0 11-.992 1.736L3 7.723V8a1 1 0 01-2 0V6a.996.996 0 01.52-.878l1.734-.99a1 1 0 011.364.372zm8.764 0a1 1 0 011.364-.372l1.733.99A1.002 1.002 0 0118 6v2a1 1 0 11-2 0v-.277l-1.254.145a1 1 0 11-.992-1.736L14.984 6l-.23-.132a1 1 0 01-.372-1.364zm-7 4a1 1 0 011.364-.372L10 8.848l1.254-.716a1 1 0 11.992 1.736L11 10.723V12a1 1 0 11-2 0v-1.277l-1.246-.855a1 1 0 01-.372-1.364zM3 11a1 1 0 011 1v1.277l1.246.855a1 1 0 11-.992 1.736l-1.75-1A1 1 0 012 14v-2a1 1 0 011-1zm14 0a1 1 0 011 1v2a1 1 0 01-.504.868l-1.75 1a1 1 0 11-.992-1.736L16 13.277V12a1 1 0 011-1zm-9.618 5.504a1 1 0 011.364-.372l.254.145V16a1 1 0 112 0v.277l.254-.145a1 1 0 11.992 1.736l-1.735.992a.995.995 0 01-1.022 0l-1.735-.992a1 1 0 01-.372-1.364z" clipRule="evenodd" />
+                  </svg>
+                  🔧 Admin
+                </span>
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
         
         {error && (
-          <div className="mb-6 p-4 bg-gradient-to-r from-red-500/20 to-red-600/20 backdrop-blur-sm border border-red-400/30 text-red-700 text-sm rounded-xl shadow-sm">
-            {error}
-          </div>
+          <motion.div 
+            className="mb-6 p-4 bg-gradient-to-r from-red-100 to-red-50 border border-red-200 text-red-700 text-sm rounded-xl shadow-sm"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                {error}
+              </div>
+            </div>
+          </motion.div>
         )}
+        
         <form onSubmit={handleSubmit} className="space-y-6">
           {mode === 'register' && (
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-amber-800 mb-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <label htmlFor="name" className="block text-sm font-semibold text-earth-700 mb-2">
                 Full Name
               </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={form.name}
-                onChange={handleChange}
-                className="appearance-none block w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-amber-200 rounded-xl shadow-sm placeholder-amber-600 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 sm:text-sm"
-                placeholder="John Doe"
-              />
-            </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <UserIcon className="h-5 w-5 text-beige-500" />
+                </div>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={form.name}
+                  onChange={handleChange}
+                  className="block w-full pl-10 pr-4 py-3 bg-white/80 backdrop-blur-sm border border-beige-200 rounded-xl shadow-sm placeholder-beige-500 text-earth-800 focus:outline-none focus:ring-2 focus:ring-beige-400 focus:border-transparent transition-all duration-300 sm:text-sm hover:bg-white/90"
+                  placeholder="Enter your full name"
+                />
+              </div>
+            </motion.div>
           )}
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-amber-800 mb-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: mode === 'register' ? 0.1 : 0 }}
+          >
+            <label htmlFor="email" className="block text-sm font-semibold text-earth-700 mb-2">
               Email address
             </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              value={form.email}
-              onChange={handleChange}
-              className="appearance-none block w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-amber-200 rounded-xl shadow-sm placeholder-amber-600 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 sm:text-sm"
-              placeholder="you@example.com"
-            />
-          </div>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <EnvelopeIcon className="h-5 w-5 text-beige-500" />
+              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                value={form.email}
+                onChange={handleChange}
+                className="block w-full pl-10 pr-4 py-3 bg-white/80 backdrop-blur-sm border border-beige-200 rounded-xl shadow-sm placeholder-beige-500 text-earth-800 focus:outline-none focus:ring-2 focus:ring-beige-400 focus:border-transparent transition-all duration-300 sm:text-sm hover:bg-white/90"
+                placeholder="Enter your email"
+              />
+            </div>
+          </motion.div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-amber-800 mb-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: mode === 'register' ? 0.2 : 0.1 }}
+          >
+            <label htmlFor="password" className="block text-sm font-semibold text-earth-700 mb-2">
               Password
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={form.password}
-              onChange={handleChange}
-              className="appearance-none block w-full px-4 py-3 bg-white/60 backdrop-blur-sm border border-amber-200 rounded-xl shadow-sm placeholder-amber-600 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 sm:text-sm"
-              placeholder="••••••••"
-            />
-          </div>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <LockClosedIcon className="h-5 w-5 text-beige-500" />
+              </div>
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                required
+                value={form.password}
+                onChange={handleChange}
+                className="block w-full pl-10 pr-12 py-3 bg-white/80 backdrop-blur-sm border border-beige-200 rounded-xl shadow-sm placeholder-beige-500 text-earth-800 focus:outline-none focus:ring-2 focus:ring-beige-400 focus:border-transparent transition-all duration-300 sm:text-sm hover:bg-white/90"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5 text-beige-500 hover:text-beige-600 transition-colors duration-200" />
+                ) : (
+                  <EyeIcon className="h-5 w-5 text-beige-500 hover:text-beige-600 transition-colors duration-200" />
+                )}
+              </button>
+            </div>
+          </motion.div>
 
           {mode === 'register' && role === 'farmer' && (
             <div>

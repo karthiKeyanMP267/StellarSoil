@@ -8,6 +8,7 @@ import {
   CheckCircleIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
+import RealTimeDeliveryTracking from '../components/RealTimeDeliveryTracking';
 
 const orderStatuses = {
   'placed': { color: 'text-yellow-600', bgColor: 'bg-yellow-50', icon: ClockIcon },
@@ -23,6 +24,7 @@ const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [trackingOrder, setTrackingOrder] = useState(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -145,8 +147,19 @@ const OrderHistory = () => {
                           <div className="text-sm text-gray-500">
                             Ordered on {new Date(order.createdAt).toLocaleDateString()}
                           </div>
-                          <div className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                            Total: ₹{order.totalAmount}
+                          <div className="flex items-center space-x-4">
+                            {['processing', 'ready', 'out_for_delivery'].includes(order.orderStatus) && (
+                              <button
+                                onClick={() => setTrackingOrder(order)}
+                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                              >
+                                <TruckIcon className="h-4 w-4 mr-2 inline" />
+                                Track Order
+                              </button>
+                            )}
+                            <div className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                              Total: ₹{order.totalAmount}
+                            </div>
                           </div>
                         </div>
                         
@@ -181,6 +194,14 @@ const OrderHistory = () => {
             </div>
           )}
         </div>
+        
+        {/* Real-time Delivery Tracking Modal */}
+        {trackingOrder && (
+          <RealTimeDeliveryTracking
+            order={trackingOrder}
+            onClose={() => setTrackingOrder(null)}
+          />
+        )}
       </div>
     </div>
   );

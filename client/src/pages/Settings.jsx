@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  CogIcon,
+  Cog6ToothIcon,
   BellIcon,
   ShieldCheckIcon,
   PaintBrushIcon,
@@ -59,7 +59,7 @@ const Settings = () => {
   const [saveStatus, setSaveStatus] = useState(null);
 
   const sections = [
-    { id: 'general', name: '⚙️ General', icon: CogIcon },
+    { id: 'general', name: '⚙️ General', icon: Cog6ToothIcon },
     { id: 'notifications', name: '🔔 Notifications', icon: BellIcon },
     { id: 'privacy', name: '🔒 Privacy', icon: ShieldCheckIcon },
     { id: 'appearance', name: '🎨 Appearance', icon: PaintBrushIcon },
@@ -103,12 +103,12 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-25 to-orange-50 pt-20 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-beige-50 via-cream-50 to-sage-50 pt-20 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-yellow-400/10 to-amber-400/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-80 h-80 bg-gradient-to-r from-orange-400/10 to-yellow-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-64 h-64 bg-gradient-to-r from-amber-400/10 to-orange-400/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-beige-400/10 to-cream-400/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-80 h-80 bg-gradient-to-r from-sage-400/10 to-earth-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-64 h-64 bg-gradient-to-r from-cream-400/10 to-beige-400/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
 
       <div className="relative z-10">
@@ -116,14 +116,14 @@ const Settings = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center mb-12">
             <div className="flex justify-center mb-8">
-              <div className="p-8 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full shadow-2xl animate-bounce-gentle">
-                <CogIcon className="h-20 w-20 text-white drop-shadow-lg" />
+              <div className="p-8 bg-gradient-to-r from-beige-500 to-sage-600 rounded-full shadow-2xl animate-bounce-gentle">
+                <Cog6ToothIcon className="h-20 w-20 text-white drop-shadow-lg" />
               </div>
             </div>
-            <h1 className="text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-700 via-orange-600 to-amber-700 mb-6 tracking-tight drop-shadow-2xl">
+            <h1 className="text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-beige-700 via-sage-600 to-earth-700 mb-6 tracking-tight drop-shadow-2xl">
               ⚙️ Settings
             </h1>
-            <p className="text-2xl text-amber-700 max-w-4xl mx-auto font-bold tracking-wide leading-relaxed">
+            <p className="text-2xl text-earth-700 max-w-4xl mx-auto font-bold tracking-wide leading-relaxed">
               ✨ Customize your StellarSoil experience to your preferences
             </p>
           </div>
@@ -132,8 +132,8 @@ const Settings = () => {
           {saveStatus && (
             <div className="fixed top-24 right-6 z-50">
               <div className={`p-4 rounded-2xl shadow-xl flex items-center space-x-3 ${
-                saveStatus === 'saving' ? 'bg-gradient-to-r from-amber-500 to-orange-600' :
-                saveStatus === 'success' ? 'bg-gradient-to-r from-amber-400 to-orange-500' :
+                saveStatus === 'saving' ? 'bg-gradient-to-r from-beige-500 to-sage-600' :
+                saveStatus === 'success' ? 'bg-gradient-to-r from-sage-400 to-earth-500' :
                 'bg-gradient-to-r from-red-500 to-pink-600'
               } text-white animate-bounce`}>
                 {saveStatus === 'saving' && <SparklesIcon className="h-6 w-6 animate-spin" />}

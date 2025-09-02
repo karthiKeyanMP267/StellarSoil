@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/api';
 import {
@@ -95,78 +96,145 @@ const Cart = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-25 to-orange-50 pt-20 relative overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-yellow-400/10 to-amber-400/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-r from-orange-400/10 to-yellow-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        </div>
-        
-        <div className="flex justify-center items-center p-12 relative z-10">
-          <div className="text-center space-y-8">
-            <div className="relative mx-auto w-24 h-24">
-              <div className="animate-spin rounded-full h-24 w-24 border-8 border-amber-200 border-t-amber-700 shadow-2xl"></div>
-              <ShoppingBagIcon className="absolute inset-0 h-12 w-12 m-auto text-amber-700 animate-pulse drop-shadow-lg" />
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-4xl font-black text-amber-800 animate-pulse">🛒 Loading Your Cart...</h3>
-              <p className="text-xl text-amber-600 font-medium">Gathering your fresh selections...</p>
-              <div className="flex space-x-2 justify-center">
-                <div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce"></div>
-                <div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce delay-75"></div>
-                <div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce delay-150"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen bg-gradient-to-br from-beige-50 via-cream-50 to-sage-50 pt-20 flex items-center justify-center"
+      >
+        <motion.div 
+          className="text-center"
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.div 
+            className="relative mb-6"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          >
+            <div className="w-16 h-16 border-4 border-beige-300 border-t-sage-500 rounded-full shadow-lg"></div>
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            >
+              <ShoppingBagIcon className="w-6 h-6 text-beige-600" />
+            </motion.div>
+          </motion.div>
+          <h3 className="text-lg font-semibold text-beige-700 mb-2">Loading Your Cart</h3>
+          <p className="text-beige-600">Gathering your fresh selections...</p>
+        </motion.div>
+      </motion.div>
     );
   }
 
+  // Main render
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-25 to-orange-50 pt-20 relative overflow-hidden">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+      className="min-h-screen bg-gradient-to-br from-white via-beige-50 to-cream-100 pt-20 relative overflow-hidden"
+    >
       {/* Enhanced Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-40 left-20 w-96 h-96 bg-gradient-to-r from-yellow-400/10 to-amber-400/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-40 right-10 w-80 h-80 bg-gradient-to-r from-orange-400/10 to-yellow-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-60 right-1/3 w-64 h-64 bg-gradient-to-r from-amber-400/10 to-orange-400/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <motion.div
+          animate={{ 
+            scale: [1, 1.1, 1],
+            rotate: [0, 180, 360]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute top-40 left-20 w-96 h-96 bg-gradient-to-r from-beige-400/20 to-cream-400/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ 
+            scale: [1.1, 1, 1.1],
+            rotate: [360, 180, 0]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-40 right-10 w-80 h-80 bg-gradient-to-r from-sage-400/20 to-earth-400/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ 
+            scale: [1, 1.2, 1],
+            rotate: [0, -180, -360]
+          }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute top-60 right-1/3 w-64 h-64 bg-gradient-to-r from-cream-400/20 to-beige-400/20 rounded-full blur-3xl"
+        />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-        <div className="bg-gradient-to-br from-white/98 to-white/95 backdrop-blur-2xl rounded-3xl shadow-3xl border border-amber-200/50 p-12 hover:shadow-4xl transition-all duration-500 relative overflow-hidden">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="bg-gradient-to-br from-white/98 to-beige-50/95 backdrop-blur-2xl rounded-3xl shadow-3xl border border-beige-200/50 p-12 hover:shadow-4xl transition-all duration-500 relative overflow-hidden"
+        >
           {/* Header Glow Effect */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 rounded-t-3xl"></div>
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-beige-500 via-cream-500 to-sage-500 rounded-t-3xl"></div>
           
-          <div className="flex items-center space-x-6 mb-16">
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="flex items-center space-x-6 mb-16"
+          >
             <div className="relative group">
-              <div className="p-6 bg-gradient-to-r from-amber-500 to-orange-600 rounded-3xl shadow-2xl hover:scale-110 transition-transform duration-500 group-hover:shadow-amber-500/30">
+              <motion.div 
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                className="p-6 bg-gradient-to-r from-earth-500 to-sage-600 rounded-3xl shadow-2xl group-hover:shadow-earth-500/30 transition-all duration-500"
+              >
                 <ShoppingBagIcon className="h-12 w-12 text-white drop-shadow-lg" />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-600/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+              </motion.div>
+              <div className="absolute inset-0 bg-gradient-to-r from-earth-500/20 to-sage-600/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
             </div>
             <div className="space-y-3">
-              <h1 className="text-7xl md:text-8xl font-black bg-gradient-to-r from-amber-800 via-orange-700 to-amber-800 bg-clip-text text-transparent tracking-tight drop-shadow-2xl animate-pulse">
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-earth-700 via-sage-600 to-earth-700 bg-clip-text text-transparent tracking-tight drop-shadow-2xl"
+              >
                 🛒 Shopping Cart
-              </h1>
-              <p className="text-amber-700 text-2xl font-bold tracking-wide drop-shadow-sm">Review your handpicked fresh produce</p>
-              <div className="flex items-center space-x-4 text-lg">
-                <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-amber-400/20 to-orange-400/20 text-amber-800 rounded-full border border-amber-400/30 font-bold">
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
+                className="text-earth-600 text-2xl font-semibold tracking-wide drop-shadow-sm"
+              >
+                Review your handpicked fresh produce
+              </motion.p>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 1.0 }}
+                className="flex items-center space-x-4 text-lg"
+              >
+                <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-beige-400/20 to-cream-400/20 text-earth-700 rounded-full border border-beige-300/50 font-semibold">
                   <CheckBadgeIcon className="h-5 w-5 mr-2" />
                   ✅ Farm Verified
                 </span>
-                <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-400/20 to-yellow-400/20 text-orange-800 rounded-full border border-orange-400/30 font-bold">
+                <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-sage-400/20 to-earth-400/20 text-earth-700 rounded-full border border-sage-300/50 font-semibold">
                   <TruckIcon className="h-5 w-5 mr-2" />
                   🚚 Free Delivery
                 </span>
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
           {error && (
-            <div className="mb-8 p-6 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-300/50 rounded-2xl flex items-center shadow-lg animate-shake">
-              <ExclamationTriangleIcon className="h-8 w-8 text-red-600 mr-4 flex-shrink-0 animate-pulse" />
-              <span className="text-red-800 font-bold text-lg">{error}</span>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-8 p-6 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-200 rounded-2xl shadow-lg"
+            >
+              <div className="flex items-center space-x-3">
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-500" />
+                <span className="text-red-700 font-semibold">{error}</span>
+              </div>
+            </motion.div>
           )}
 
           {cart.length === 0 ? (
@@ -381,9 +449,9 @@ const Cart = () => {
               </div>
             </>
           )}
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
