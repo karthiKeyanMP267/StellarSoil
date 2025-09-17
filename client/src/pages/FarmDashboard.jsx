@@ -265,7 +265,7 @@ export default function FarmDashboard() {
           />
           <StatCard
             icon={CurrencyRupeeIcon}
-            value={`₹${stats.totalRevenue.toLocaleString()}`}
+            value={`₹${stats.totalRevenue ? stats.totalRevenue.toLocaleString() : '0'}`}
             label="Total Revenue"
             color="text-green-700"
             trend="up"

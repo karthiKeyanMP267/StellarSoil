@@ -32,7 +32,6 @@ import EnhancedLanguageSelector from './EnhancedLanguageSelector';
 import EnhancedThemeToggle from './EnhancedThemeToggle';
 import FocusKiller from './FocusKiller';
 import ThemeToggle from './ThemeToggle';
-import FocusKiller from './FocusKiller';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -111,9 +110,8 @@ const EnhancedNavbar = () => {
 
   // Nuclear focus prevention
   const preventFocus = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
+  e.preventDefault();
+  e.stopPropagation();
     if (e.target && e.target.blur) {
       e.target.blur();
     }
@@ -137,9 +135,8 @@ const EnhancedNavbar = () => {
   // Enhanced global focus prevention
   const ultraFocusPrevention = (e) => {
     if (e.target.closest('nav') || e.target.closest('.navbar')) {
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
+  e.preventDefault();
+  e.stopPropagation();
       
       // Remove all focus attributes
       e.target.removeAttribute('tabindex');
@@ -327,19 +324,17 @@ const EnhancedNavbar = () => {
   navigation = navigation.filter(item => !item.requiresAuth || (item.requiresAuth && user));
 
   return (
-    <>
-      <FocusKiller
-        as={motion.div}
-        className="fixed top-0 left-0 right-0 w-full z-50"
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        <Disclosure as="nav" className="backdrop-blur-xl bg-white/90 border-b border-gray-200/30 shadow-lg">
-          {({ open }) => (
-            <>
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex h-16 items-center justify-between">
+    <motion.div
+      className="fixed top-0 left-0 right-0 w-full z-50"
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      <Disclosure as="nav" className="backdrop-blur-xl bg-white/90 border-b border-gray-200/30 shadow-lg">
+        {({ open }) => (
+          <>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="flex h-16 items-center justify-between">
                   {/* Enhanced Logo */}
                   <motion.div 
                     className="flex items-center"
@@ -1212,19 +1207,18 @@ const EnhancedNavbar = () => {
             </>
           )}
         </Disclosure>
-      </FocusKiller>
-
-      <AnimatePresence>
-        {showAuthModal && (
-          <AuthModal
-            isOpen={showAuthModal}
-            onClose={handleCloseModal}
-            mode={authMode}
-          />
-        )}
-      </AnimatePresence>
-    </>
+        {/* FocusKiller removed for troubleshooting input issues */}
+        <AnimatePresence>
+          {showAuthModal && (
+            <AuthModal
+              isOpen={showAuthModal}
+              onClose={handleCloseModal}
+              mode={authMode}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
   );
-};
+}
 
 export default EnhancedNavbar;

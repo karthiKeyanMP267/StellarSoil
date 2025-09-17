@@ -46,14 +46,14 @@ import SmartNotificationSystem from './components/SmartNotificationSystem';
 import './i18n/i18n';
 
 // Import Focus Test Component (for testing only)
-import FocusTestComponent from './components/FocusTestComponent';
+// import FocusTestComponent from './components/FocusTestComponent';
 
 const App = () => {
   const location = useLocation();
   
   // Apply global focus prevention
-  useFocusPrevention(true);
-  useActiveElementBlur();
+  // useFocusPrevention(true);
+  // useActiveElementBlur();
   
   return (
     <ThemeProvider>
@@ -124,7 +124,7 @@ const App = () => {
           <AIChatbotAssistant />
           
           {/* Focus Test Component - Testing Only */}
-          <FocusTestComponent />
+          {/* <FocusTestComponent /> */}
         </div>
       </div>
     </NotificationProvider>
