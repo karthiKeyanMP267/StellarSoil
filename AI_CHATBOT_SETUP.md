@@ -1,4 +1,4 @@
-# 🤖 Google AI Chatbot Setup Guide
+# 🤖 Google Gemini AI Chatbot Setup Guide
 
 ## 🎯 Overview
 Your StellarSoil platform now includes an intelligent AI chatbot powered by Google's Gemini API that can:
@@ -7,13 +7,23 @@ Your StellarSoil platform now includes an intelligent AI chatbot powered by Goog
 - Process natural language orders: "I need 2kg tomatoes"
 - Find nearby farmers and products
 - Add items to cart automatically
-- Provide recipe suggestions and nutritional info
+- Provide farming and gardening advice
 
 **For Farmers:**
 - Process product listings: "I have 10kg tomatoes for 30 rupees"
 - Update inventory automatically
 - Suggest optimal pricing
-- Market insights and farming advice
+- Provide agricultural insights and advice
+
+## 🚀 Updated Implementation
+
+The AI chatbot has been enhanced with:
+
+- ✅ **Fixed Environment Loading**: Properly loads environment variables using absolute paths
+- ✅ **Updated Model**: Now using `gemini-1.5-flash-latest` for improved responses
+- ✅ **Enhanced Error Handling**: Better fallback mechanisms if API fails
+- ✅ **Interactive Demo Script**: Easy testing in terminal environment
+- ✅ **Comprehensive Documentation**: Testing guide and demo scripts
 
 ## 🔧 Setup Instructions
 
@@ -25,60 +35,101 @@ Your StellarSoil platform now includes an intelligent AI chatbot powered by Goog
 
 2. **Create API Key:**
    - Click "Create API Key"
-   - Select a project or create new one
    - Copy the generated API key
 
 3. **Add to Environment:**
    - Open `server/.env` file
-   - Replace `your-google-gemini-api-key` with your actual API key:
+   - Update with your API key and model name:
    ```env
    GOOGLE_GEMINI_API_KEY=your_actual_api_key_here
+   GOOGLE_GEMINI_MODEL=gemini-1.5-flash-latest
    ```
 
-### Step 2: Test the Integration
+### Step 2: Test the Implementation
 
-1. **Start the application:**
-   ```bash
-   # Terminal 1 - Server
-   cd server
-   npm start
+#### Method 1: Interactive Terminal Demo
+```bash
+cd server
+node demo-chatbot.js
+```
 
-   # Terminal 2 - Client  
-   cd client
-   npm run dev
-   ```
+This interactive demo allows you to:
+- Test both customer and farmer roles
+- See intent recognition in action
+- View extracted data from natural language
+- Test different queries easily
 
-2. **Test Customer Orders:**
-   - Open chatbot as customer
-   - Try: "I need 2kg fresh tomatoes"
-   - Try: "Order 1kg onions for delivery tomorrow"
-   - Try: "What organic vegetables are available?"
+#### Method 2: Web Application
+```bash
+# Terminal 1 - Server
+cd server
+npm start
 
-3. **Test Farmer Listings:**
-   - Login as farmer
-   - Open chatbot 
-   - Try: "I have 50kg tomatoes for 25 rupees per kg"
-   - Try: "Fresh organic carrots, 30kg available, 40 rupees per kg"
+# Terminal 2 - Client  
+cd client
+npm run dev
+```
 
-## 🚀 Features Available
+Then test in the web interface with sample queries like:
+- "I need 2kg tomatoes"
+- "I want to sell 50kg potatoes at 30 rupees per kg"
+- "What is the current market price for onions?"
 
-### 🛒 Customer Features
-- **Smart Product Search**: Natural language queries find nearby products
-- **Instant Ordering**: Voice/text orders automatically processed
-- **Location-Based**: Shows products from farmers within 50km
-- **Cart Integration**: Direct add-to-cart from chat
-- **Recipe Suggestions**: AI-powered meal planning
+## 🔍 Technical Implementation
 
-### 🌱 Farmer Features  
-- **Voice Product Listing**: Speak to list products instantly
-- **Inventory Management**: Auto-updates existing products
-- **Market Insights**: AI-powered pricing suggestions
-- **Order Notifications**: Get notified when customers order your products
+### Environment Variable Loading
 
-### 🎙️ Voice Recognition
-- **Speech-to-Text**: Built-in browser voice recognition
-- **Hands-Free Operation**: Perfect for farmers with dirty hands
-- **Multi-Language Support**: Currently English, expandable
+We've implemented a robust environment loading system:
+
+```javascript
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Set up proper environment loading
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.resolve(__dirname, '../.env');
+dotenv.config({ path: envPath });
+```
+
+This pattern has been implemented across:
+- server/index.js
+- server/services/aiChatService.js
+- server/controllers/chatController.js
+- server/services/weatherService.js
+- server/services/marketPriceService.js
+- server/utils/payment.js
+
+### Google Gemini Integration
+
+The AI service uses Google's Gemini 1.5 Flash model:
+
+```javascript
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+// Initialize the API
+this.genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY);
+this.model = this.genAI.getGenerativeModel({ 
+  model: process.env.GOOGLE_GEMINI_MODEL || 'gemini-1.5-flash-latest' 
+});
+```
+
+### Robust Error Handling
+
+The system gracefully handles API failures:
+
+```javascript
+try {
+  // Attempt to get AI response
+  const aiResponse = await this.generateGeminiResponse(message, context);
+  return aiResponse;
+} catch (error) {
+  console.error('AI response generation error:', error);
+  // Use fallback responses if AI fails
+  return this.generateFallbackResponse(message, userRole);
+}
+```
 
 ## 📱 Usage Examples
 
@@ -87,11 +138,11 @@ Your StellarSoil platform now includes an intelligent AI chatbot powered by Goog
 "I need 2kg tomatoes" 
 → Shows nearby farmers with tomatoes, allows instant ordering
 
-"Order fresh vegetables for dinner party tomorrow"
-→ Suggests seasonal vegetables, provides quantity recommendations
+"How do I grow tomatoes in my balcony garden?"
+→ Provides gardening advice specific to balcony conditions
 
-"What's good for making pasta sauce?"
-→ Recommends tomatoes, herbs, shows recipes
+"What vegetables are in season now?"
+→ Lists seasonal vegetables available from nearby farmers
 ```
 
 ### Farmer Examples:
@@ -99,54 +150,31 @@ Your StellarSoil platform now includes an intelligent AI chatbot powered by Goog
 "I have 50kg organic tomatoes, 30 rupees per kg"
 → Creates/updates product listing automatically
 
-"Fresh spinach ready, 20kg available"
-→ Prompts for pricing, lists product when complete
-
-"What's the market price for onions?"
+"What is the current market price for onions?"
 → Provides current market rates and pricing suggestions
+
+"When is the best time to harvest wheat?"
+→ Offers agricultural guidance based on crop type
 ```
 
-## 🔍 Technical Details
+## 🧪 Testing Tools
 
-### API Endpoints:
-- `POST /api/chat/message` - Main chat endpoint
-- `POST /api/chat/add-to-cart` - Cart integration  
-- `GET /api/chat/nearby-products` - Product search
+### Interactive Demo Script
 
-### Data Processing:
-- **Intent Recognition**: Detects order_request, product_listing, general_query
-- **Entity Extraction**: Pulls product names, quantities, prices
-- **Location Matching**: Connects customers with nearby farmers
-- **Inventory Updates**: Real-time stock management
+The `demo-chatbot.js` script provides:
 
-### Security:
-- **API Rate Limiting**: Prevents abuse
-- **Input Validation**: Sanitizes all user inputs
-- **Auth Integration**: Works with existing user system
+- Color-coded messages for better readability
+- Role switching between customer and farmer
+- Example suggestions for each role
+- Detailed debug information (intents, extracted data)
+- Simulated user locations for testing proximity features
 
-## 🛠️ Customization Options
+### Example Commands:
 
-### Modify AI Behavior:
-Edit `server/services/aiChatService.js`:
-- Change system prompts for different personalities
-- Add new product categories
-- Modify price detection patterns
-- Customize response styles
-
-### Add New Languages:
-Update voice recognition in `client/src/components/AISmartChatbot.jsx`:
-```javascript
-recognition.current.lang = 'hi-IN'; // Hindi
-recognition.current.lang = 'ta-IN'; // Tamil
 ```
-
-### Extend Product Detection:
-Add to `extractProductListing()` and `extractOrderRequest()` methods:
-```javascript
-const products = [
-  'tomato', 'potato', 'onion', 'carrot', 
-  'rice', 'wheat', 'millet', 'quinoa'  // Add more
-];
+/switch   - Toggle between customer and farmer modes
+/examples - Show example queries for the current role
+/exit     - End the demo
 ```
 
 ## 🐛 Troubleshooting
@@ -155,73 +183,67 @@ const products = [
 
 1. **"API key not found" error:**
    - Check `.env` file has correct API key
-   - Restart server after adding key
-   - Verify no extra spaces in environment variable
+   - Verify environment loading is working (check server logs)
+   - Ensure the key has proper permissions
 
-2. **Voice recognition not working:**
-   - Ensure HTTPS connection (required for microphone)
-   - Check browser permissions for microphone
-   - Try different browsers (Chrome works best)
+2. **Environment variables not loading:**
+   - Make sure all services use the absolute path loading pattern
+   - Check console logs for environment loading confirmations
+   - Restart the server after making changes
 
-3. **Orders not processing:**
-   - Verify user is logged in for cart operations
-   - Check product availability in database
-   - Ensure location permissions granted
+3. **AI responses not working:**
+   - Verify Google Gemini API key is valid and has sufficient quota
+   - Check if the model name is correct (gemini-1.5-flash-latest)
+   - Look for any HTTP errors in the server logs
 
-4. **Products not found:**
-   - Check farmers have products listed in database
-   - Verify location detection working
-   - Try different product names
+### Testing the Environment:
 
-### Fallback Mode:
-If Google API is unavailable, the system automatically switches to:
-- Rule-based responses
-- Pattern matching for orders/listings  
-- Basic intent detection
-- Local processing (no external API calls)
+Run this test script to verify environment loading:
 
-## 💰 Cost Considerations
+```javascript
+// test-env.js
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-### Google Gemini API Pricing:
-- **Free Tier**: 60 requests per minute
-- **Paid Tier**: $0.00025 per 1K characters
-- **Typical Usage**: ~2-5 cents per conversation
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.resolve(__dirname, '.env');
+dotenv.config({ path: envPath });
 
-### Optimization Tips:
-- Cache common responses
-- Use shorter prompts when possible
-- Implement conversation context limits
-- Consider hybrid approach (AI + rules)
+console.log('Environment path:', envPath);
+console.log('GOOGLE_GEMINI_API_KEY available:', !!process.env.GOOGLE_GEMINI_API_KEY);
+console.log('GOOGLE_GEMINI_MODEL:', process.env.GOOGLE_GEMINI_MODEL || 'gemini-1.5-flash-latest');
+```
 
-## 🔮 Future Enhancements
+## 📊 Performance Considerations
+
+- Initial response time: 1-3 seconds (API dependent)
+- Fallback mode: Instant responses (no API call)
+- Model selection: gemini-1.5-flash-latest balances speed and quality
+- Caching: Common responses cached to reduce API calls
+
+## � Additional Resources
+
+### Documentation:
+- [Google Gemini API Docs](https://ai.google.dev/gemini-api/docs)
+- [StellarSoil Chatbot Testing Guide](./CHATBOT_TESTING_GUIDE.md)
+- [StellarSoil Chatbot Demo Script](./CHATBOT_DEMO_SCRIPT.md)
+
+### Key Files:
+- `server/services/aiChatService.js` - Core AI integration
+- `server/controllers/chatController.js` - Request handling
+- `server/demo-chatbot.js` - Interactive testing tool
+
+## � Future Enhancements
 
 ### Planned Features:
 - **Multi-language support** (Hindi, Tamil, Telugu)
+- **Voice interaction** for hands-free operation
 - **Image recognition** for crop health analysis
-- **Voice ordering** with order confirmation
 - **Smart notifications** for price alerts
-- **Farmer-customer direct chat**
-- **Integration with blockchain verification**
-
-### Advanced AI Features:
-- **Sentiment analysis** for customer satisfaction
-- **Predictive ordering** based on purchase history
-- **Dynamic pricing** recommendations
-- **Seasonal planning** assistance
-
-## 📞 Support
-
-### Getting Help:
-- Check server logs for detailed error messages
-- Test in browser developer console for client issues
-- Verify API key has proper permissions in Google Cloud Console
-- Ensure MongoDB is running for data operations
-
-### Contact Points:
-- API Issues: Check Google AI Studio dashboard
-- Integration Issues: Review server logs and error responses
-- UI Issues: Check browser console for JavaScript errors
+- **Enhanced context handling** for multi-turn conversations
 
 ---
 
-🎉 **You're all set!** Your intelligent agricultural chatbot is ready to help customers order products and farmers manage inventory through natural conversation!
+🎉 **You're all set!** Your intelligent agricultural chatbot is now properly configured with Google Gemini and ready to help both farmers and customers through natural conversation!

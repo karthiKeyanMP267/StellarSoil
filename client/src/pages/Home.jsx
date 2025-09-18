@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import AuthModal from '../components/AuthModal';
 import {
   ShieldCheckIcon,
@@ -18,6 +19,7 @@ const Home = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   // Enhanced features with color gradients and emojis
   const features = [
@@ -133,7 +135,7 @@ const Home = () => {
                 </motion.div>
               </div>
               
-              <motion.h1 
+                <motion.h1 
                 className="mt-10 text-5xl lg:text-7xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-beige-700 via-sage-600 to-earth-700"
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -154,21 +156,16 @@ const Home = () => {
                     WebkitBackgroundClip: 'text'
                   }}
                 >
-                  Discover Fresh <br />
-                  Local Produce
+                  {t('landing.hero.title')}
                 </motion.span>
-              </motion.h1>
-              
-              <motion.p 
+              </motion.h1>                <motion.p 
                 className="mt-6 text-lg lg:text-xl leading-8 text-earth-600 font-medium"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
               >
-                Connect directly with local farmers, discover fresh produce, and support sustainable farming practices. Experience the farm-to-table difference with StellarSoil.
-              </motion.p>
-              
-              <motion.div 
+                {t('landing.hero.subtitle')}
+              </motion.p>              <motion.div 
                 className="mt-10 flex items-center lg:justify-start justify-center gap-x-6"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -182,7 +179,7 @@ const Home = () => {
                       whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      🚀 Get started
+                      🚀 {t('common.getStarted')}
                       <span className="ml-2 inline-block">→</span>
                     </motion.button>
                     <motion.button
@@ -190,7 +187,7 @@ const Home = () => {
                       className="text-base font-semibold leading-6 text-earth-700 hover:text-beige-600 transition-colors duration-300"
                       whileHover={{ scale: 1.02 }}
                     >
-                      Sign in <span aria-hidden="true">→</span>
+                      {t('auth.login.submit')} <span aria-hidden="true">→</span>
                     </motion.button>
                   </>
                 ) : (
@@ -202,7 +199,7 @@ const Home = () => {
                       to="/marketplace"
                       className="rounded-2xl bg-gradient-to-r from-beige-500 to-sage-500 px-8 py-4 text-base font-bold text-white shadow-xl shadow-beige-500/25 hover:from-beige-600 hover:to-sage-600 hover:shadow-beige-500/35 transition-all duration-300 inline-block"
                     >
-                      🛒 Shop Now
+                      🛒 {t('common.getStarted')}
                       <span className="ml-2 inline-block">→</span>
                     </Link>
                   </motion.div>
@@ -326,7 +323,7 @@ const Home = () => {
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              Why Choose StellarSoil
+              {t('landing.features.title')}
             </motion.h2>
             <motion.p 
               className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl bg-clip-text text-transparent bg-gradient-to-r from-beige-700 to-sage-700"

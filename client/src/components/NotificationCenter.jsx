@@ -24,12 +24,36 @@ const NotificationCenter = () => {
     fetchNotifications();
     fetchUnreadCount();
     
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(() => {
-      fetchUnreadCount();
-    }, 30000);
+    // Auto-refresh using setTimeout with debouncing
+    let timeoutId;
+    let lastFetchTime = Date.now();
+    
+    const debouncedFetch = () => {
+      const now = Date.now();
+      // Don't fetch if less than 5 seconds have passed since last fetch
+      // This prevents excessive API calls if filter changes rapidly
+      if (now - lastFetchTime < 5000) {
+        timeoutId = setTimeout(debouncedFetch, 30000);
+        return;
+      }
+      
+      // Use requestIdleCallback for better performance if available
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(() => {
+          fetchUnreadCount();
+          lastFetchTime = Date.now();
+          timeoutId = setTimeout(debouncedFetch, 30000);
+        }, { timeout: 2000 });
+      } else {
+        fetchUnreadCount();
+        lastFetchTime = Date.now();
+        timeoutId = setTimeout(debouncedFetch, 30000);
+      }
+    };
+    
+    timeoutId = setTimeout(debouncedFetch, 30000);
 
-    return () => clearInterval(interval);
+    return () => clearTimeout(timeoutId);
   }, [filter]);
 
   const fetchNotifications = async () => {

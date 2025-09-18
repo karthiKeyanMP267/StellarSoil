@@ -63,7 +63,7 @@ npm run dev
 ### Role-Based Routes
 
 - `/admin/*` - Protected admin routes
-- `/farm-dashboard/*` - Protected farmer routes
+- `/farmer/*` - Protected farmer routes
 - `/marketplace/*` - Protected user routes
 
 ### Registration Process

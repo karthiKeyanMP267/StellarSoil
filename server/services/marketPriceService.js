@@ -1,6 +1,14 @@
 import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+
+// Set up proper environment loading
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.resolve(__dirname, '../.env');
+dotenv.config({ path: envPath });
 
 class MarketPriceService {
   constructor() {

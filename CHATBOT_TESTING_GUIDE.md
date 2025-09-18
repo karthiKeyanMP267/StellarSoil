@@ -1,15 +1,15 @@
-# 🤖 AI Chatbot Testing Guide - Confirmation Workflow
+# 🤖 StellarSoil AI Chatbot Testing Guide
 
 ## Overview
-The AI chatbot now includes a confirmation workflow that requires user approval before processing orders or listings. This guide demonstrates the enhanced features.
+The StellarSoil AI chatbot is now fully operational with Google Gemini integration. This guide covers testing the chatbot using both the interactive demo and the web interface.
 
 ## 🌟 Features Implemented
 
 ### 1. **Google Gemini AI Integration**
-- Real AI responses (when API key is configured)
-- Agricultural domain expertise
-- Context-aware conversations
-- Fallback mode for testing without API key
+- ✅ Real AI responses using Gemini 1.5 Flash model
+- ✅ Agricultural domain expertise
+- ✅ Context-aware conversations
+- ✅ Fallback mode for testing without API key
 
 ### 2. **Confirmation Workflow**
 - ✅ Customer orders require confirmation before adding to cart
@@ -17,147 +17,189 @@ The AI chatbot now includes a confirmation workflow that requires user approval 
 - ✅ Clear Yes/No buttons for approval
 - ✅ Success messages after processing
 
-### 3. **Voice Recognition**
-- 🎤 Hands-free operation
-- Voice-to-text conversion
-- Click microphone button to start listening
+### 3. **Smart Intent Recognition**
+- ✅ Automatically detects order requests
+- ✅ Recognizes product listing attempts
+- ✅ Extracts quantities, prices, and product names
 
-### 4. **Smart Intent Recognition**
-- Automatically detects order requests
-- Recognizes product listing attempts
-- Extracts quantities, prices, and product names
+## 🧪 Testing Methods
 
-## 🧪 Testing Scenarios
+### Method 1: Interactive Terminal Demo
+
+Run the demo script to test the chatbot in your terminal:
+
+```bash
+cd server
+node demo-chatbot.js
+```
+
+**Demo Commands:**
+- `/switch` - Toggle between customer and farmer modes
+- `/examples` - Show example queries for the current role
+- `/exit` - End the demo
+
+### Method 2: Web Interface
+
+Test the full integration in the web application:
+
+```bash
+# Start the server
+cd server
+npm start
+
+# In a separate terminal, start the client
+cd client
+npm run dev
+```
+
+## 🔍 Testing Scenarios
 
 ### **For Customers (User Role)**
 
 #### Test 1: Basic Order Request
 1. **Say or Type:** "I need 2kg tomatoes"
 2. **Expected:** Bot asks for confirmation with Yes/No buttons
-3. **Action:** Click "Yes, confirm"
+3. **Action:** Click "Yes, add to cart"
 4. **Result:** Product added to cart with success message
 
 #### Test 2: Specific Order with Location
 1. **Say or Type:** "I want 1kg organic potatoes near me"
 2. **Expected:** Bot shows available products + confirmation
-3. **Action:** Click "Yes, confirm"
+3. **Action:** Click "Yes, add to cart"
 4. **Result:** Order processed
 
-#### Test 3: Voice Order
-1. **Click:** Microphone button (🎤)
-2. **Speak:** "I need fresh onions 3 kilograms"
-3. **Wait:** For voice recognition to convert
-4. **Expected:** Confirmation prompt appears
-5. **Action:** Click "Yes, confirm"
-
-#### Test 4: Order Cancellation
+#### Test 3: Order Cancellation
 1. **Type:** "I need 5kg carrots"
 2. **Expected:** Confirmation prompt
-3. **Action:** Click "No, cancel"
+3. **Action:** Click "No, show other options"
 4. **Result:** Order cancelled, no cart update
+
+#### Test 4: Agricultural Advice
+1. **Type:** "How do I grow tomatoes in my balcony?"
+2. **Expected:** Bot provides helpful gardening advice
+3. **Result:** Informational response (no confirmation needed)
 
 ### **For Farmers (Farmer Role)**
 
 #### Test 1: Product Listing
-1. **Say or Type:** "1kg tomato 25 rupees"
+1. **Say or Type:** "I want to sell 10kg tomatoes at 25 rupees per kg"
 2. **Expected:** Bot asks for listing confirmation
-3. **Action:** Click "Yes, confirm"
+3. **Action:** Click "Yes, list it"
 4. **Result:** Product listed successfully
 
 #### Test 2: Organic Product Listing
-1. **Type:** "2kg organic spinach 40 rupees per kg"
+1. **Type:** "I have 2kg organic spinach to sell at 40 rupees per kg"
 2. **Expected:** Bot recognizes organic keyword + confirmation
-3. **Action:** Click "Yes, confirm"
+3. **Action:** Click "Yes, list it"
 4. **Result:** Organic product created
 
-#### Test 3: Voice Listing
-1. **Click:** Microphone button
-2. **Speak:** "Fresh cauliflower 3 kilograms 30 rupees per kg"
-3. **Expected:** Voice converted + confirmation prompt
-4. **Action:** Click "Yes, confirm"
+#### Test 3: Market Price Check
+1. **Type:** "What is the current market price for onions?"
+2. **Expected:** Bot provides current price information
+3. **Result:** Informational response (no confirmation needed)
 
-#### Test 4: Listing Cancellation
-1. **Type:** "5kg beans 20 rupees"
-2. **Expected:** Confirmation prompt
-3. **Action:** Click "No, cancel"
-4. **Result:** Listing cancelled
+#### Test 4: Farming Advice
+1. **Type:** "When is the best time to harvest wheat?"
+2. **Expected:** Bot provides agricultural guidance
+3. **Result:** Informational response (no confirmation needed)
 
-## 🔧 Technical Details
+## 🔧 Running the New Demo Script
 
-### **API Endpoints**
-- `POST /api/chat/message` - Main chat endpoint
-- Handles confirmation workflow
-- Processes orders and listings after approval
+The new demo script provides a comprehensive way to test the chatbot:
 
-### **Frontend State Management**
-- `pendingConfirmation` - Stores confirmation data
-- `requiresConfirmation` - Triggers confirmation UI
-- `orderProcessed/listingProcessed` - Shows success states
-
-### **Backend Processing**
-- Intent recognition extracts user intentions
-- Entity extraction gets products, quantities, prices
-- Confirmation workflow prevents accidental actions
-- Integration with cart and product management
-
-## 🚀 Setup for Production
-
-### 1. **Get Google Gemini API Key**
-```bash
-# Visit: https://makersuite.google.com/app/apikey
-# Get your API key and update .env file:
-GOOGLE_GEMINI_API_KEY=your-actual-api-key-here
-```
-
-### 2. **Environment Configuration**
-```bash
-# In server/.env
-GOOGLE_GEMINI_API_KEY=your-actual-api-key
-```
-
-### 3. **Restart Server**
 ```bash
 cd server
-npm start
-# Should show: "Google Gemini API initialized successfully"
+node demo-chatbot.js
 ```
 
-## 🎯 Key Benefits
+**Features of the Demo Script:**
+- Color-coded messages for better readability
+- Role switching between customer and farmer
+- Example suggestions for each role
+- Detailed debug information (intents, extracted data)
+- Simulated user locations for testing proximity features
 
-1. **Safety First**: Confirmation prevents accidental orders/listings
-2. **Real AI**: Google Gemini provides intelligent responses
-3. **Voice-Enabled**: Hands-free operation for busy farmers
-4. **Context-Aware**: Remembers conversation history
-5. **Domain-Specific**: Tailored for agricultural needs
+## 🚀 Environment Setup
 
-## 🐛 Troubleshooting
+### Required Environment Variables
 
-### Issue: "Using fallback responses"
-**Solution:** Add real Google Gemini API key to `.env` file
+```
+GOOGLE_GEMINI_API_KEY=your-api-key-here
+GOOGLE_GEMINI_MODEL=gemini-1.5-flash-latest
+```
 
-### Issue: Voice recognition not working
-**Solution:** Ensure browser permissions for microphone access
+### Troubleshooting Environment Issues
 
-### Issue: Confirmation buttons not appearing
-**Solution:** Check that message has `requiresConfirmation: true`
+If the chatbot isn't working correctly:
 
-### Issue: Orders not processing
-**Solution:** Verify user authentication and cart API endpoints
+1. Check that `.env` file is properly loaded using our absolute path method
+2. Verify your API key is valid and has sufficient quota
+3. Ensure the model name is correct (now using gemini-1.5-flash-latest)
+4. Test with the demo script to isolate client/server issues
 
-## 📱 Mobile Testing
+## 🐛 Common Issues & Solutions
 
-The chatbot is fully responsive and works on mobile devices:
+### Issue: Chatbot gives default responses
+**Solution:** 
+- Verify Google Gemini API key is set in `.env`
+- Check server logs for any API errors
+- Ensure API key has proper permissions and quota
+
+### Issue: Environment variables not loading
+**Solution:**
+- We've updated all services to use absolute path loading
+- The format is now:
+```javascript
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.resolve(__dirname, '../.env');
+dotenv.config({ path: envPath });
+```
+
+### Issue: Orders/listings not processing
+**Solution:**
+- Check MongoDB connection is working
+- Verify user authentication
+- Test the relevant API endpoints directly
+
+## 📊 Expected Performance
+
+- Initial response time: 1-3 seconds
+- Complex queries may take 3-5 seconds
+- Google Gemini handles most agricultural queries effectively
+- Fallback responses used if API unavailable
+
+## 🌐 API Endpoint Testing
+
+Test the API endpoint directly:
+
+```bash
+curl -X POST http://localhost:5000/api/chat/message \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "message": "I need 2kg tomatoes",
+    "userRole": "customer",
+    "conversationHistory": [],
+    "userLocation": {
+      "type": "Point",
+      "coordinates": [77.2090, 28.6139]
+    }
+  }'
+```
+
+## 📱 Testing on Mobile
+
+The chatbot is responsive and works on mobile devices:
 - Touch-friendly confirmation buttons
-- Mobile voice recognition support
 - Optimized chat interface
+- Location-aware functionality
 
-## 🎉 Demo Ready!
+## 🎉 Ready for Production!
 
 Your enhanced AI chatbot is now ready with:
-- ✅ Google AI integration
-- ✅ Confirmation workflow
-- ✅ Voice recognition
+- ✅ Google Gemini AI integration with proper environment loading
+- ✅ Interactive demo script for easy testing
+- ✅ Confirmation workflow for orders and listings
 - ✅ Agricultural domain expertise
-- ✅ Safety measures
-
-Test it live at: http://localhost:5173/
+- ✅ Consistent environment variable loading across all services

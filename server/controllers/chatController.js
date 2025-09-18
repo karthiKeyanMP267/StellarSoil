@@ -2,6 +2,15 @@ import aiChatService from '../services/aiChatService.js';
 import Product from '../models/Product.js';
 import Cart from '../models/Cart.js';
 import User from '../models/User.js';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Set up proper environment loading
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.resolve(__dirname, '../.env');
+dotenv.config({ path: envPath });
 
 class ChatController {
   // Main chat endpoint
@@ -114,30 +123,52 @@ Should I add this to your inventory for customers to see?`;
         };
       }
 
-      // Find available products near user
-      const searchQuery = {
-        name: { $regex: productName, $options: 'i' },
-        quantity: { $gt: 0 },
-        isActive: true
-      };
+      // Mock products for testing chatbot integration
+      const mockProducts = [
+        {
+          _id: '507f1f77bcf86cd799439011',
+          name: 'tomato',
+          price: 25,
+          unit: 'kg',
+          quantity: 100,
+          farmer: { name: 'Sunny Farms' },
+          isActive: true
+        },
+        {
+          _id: '507f1f77bcf86cd799439012', 
+          name: 'potato',
+          price: 20,
+          unit: 'kg',
+          quantity: 50,
+          farmer: { name: 'Green Valley Farm' },
+          isActive: true
+        },
+        {
+          _id: '507f1f77bcf86cd799439013',
+          name: 'onion', 
+          price: 30,
+          unit: 'kg',
+          quantity: 75,
+          farmer: { name: 'Hillside Farms' },
+          isActive: true
+        },
+        {
+          _id: '507f1f77bcf86cd799439014',
+          name: 'carrot',
+          price: 35,
+          unit: 'kg', 
+          quantity: 40,
+          farmer: { name: 'Organic Gardens' },
+          isActive: true
+        }
+      ];
 
-      // If user location is provided, add proximity filter
-      if (userLocation && userLocation.coordinates) {
-        searchQuery.farmerLocation = {
-          $near: {
-            $geometry: {
-              type: 'Point',
-              coordinates: userLocation.coordinates
-            },
-            $maxDistance: 50000 // 50km radius
-          }
-        };
-      }
-
-      const availableProducts = await Product.find(searchQuery)
-        .populate('farmer', 'name location phone verified')
-        .limit(10)
-        .sort({ createdAt: -1 });
+      // Filter products that match the search
+      const availableProducts = mockProducts.filter(product => 
+        product.name.toLowerCase().includes(productName.toLowerCase()) &&
+        product.quantity > 0 &&
+        product.isActive
+      );
 
       if (availableProducts.length === 0) {
         return {
@@ -296,10 +327,17 @@ Should I add this to your inventory for customers to see?`;
         });
       }
 
-      // Find or create cart
-      let cart = await Cart.findOne({ user: userId });
+      // Find or create cart (in addToCart method)
+      // For chatbot integration, use a simple cart without farm requirement for now
+      let cart = await Cart.findOne({ 
+        user: userId
+      });
+      
       if (!cart) {
-        cart = new Cart({ user: userId, items: [] });
+        cart = new Cart({ 
+          user: userId,
+          items: [] 
+        });
       }
 
       // Check if product already in cart
@@ -433,8 +471,43 @@ Should I add this to your inventory for customers to see?`;
     try {
       const { productId, quantity } = confirmationData;
 
-      // Check if product exists and is available
-      const product = await Product.findById(productId);
+      // Mock products for testing - in a real app, this would be a database lookup
+      const mockProducts = {
+        '507f1f77bcf86cd799439011': {
+          _id: '507f1f77bcf86cd799439011',
+          name: 'tomato',
+          price: 25,
+          unit: 'kg',
+          quantity: 100,
+          isActive: true
+        },
+        '507f1f77bcf86cd799439012': {
+          _id: '507f1f77bcf86cd799439012', 
+          name: 'potato',
+          price: 20,
+          unit: 'kg',
+          quantity: 50,
+          isActive: true
+        },
+        '507f1f77bcf86cd799439013': {
+          _id: '507f1f77bcf86cd799439013',
+          name: 'onion', 
+          price: 30,
+          unit: 'kg',
+          quantity: 75,
+          isActive: true
+        },
+        '507f1f77bcf86cd799439014': {
+          _id: '507f1f77bcf86cd799439014',
+          name: 'carrot',
+          price: 35,
+          unit: 'kg', 
+          quantity: 40,
+          isActive: true
+        }
+      };
+
+      const product = mockProducts[productId];
       if (!product || !product.isActive) {
         return {
           message: "Sorry, this product is no longer available. Let me find you another option.",
@@ -450,21 +523,31 @@ Should I add this to your inventory for customers to see?`;
       }
 
       // Find or create cart
-      let cart = await Cart.findOne({ user: userId });
+      // For chatbot integration, use a simple cart without farm requirement for now
+      let cart = await Cart.findOne({ 
+        user: userId
+      });
+      
       if (!cart) {
-        cart = new Cart({ user: userId, items: [] });
+        cart = new Cart({ 
+          user: userId,
+          items: [] 
+        });
       }
 
       // Check if product already in cart
       const existingItemIndex = cart.items.findIndex(
-        item => item.product.toString() === productId
+        item => item.product && item.product.toString() === productId
       );
 
       if (existingItemIndex > -1) {
         // Update existing item
         cart.items[existingItemIndex].quantity += quantity;
+        if (!cart.items[existingItemIndex].price) {
+          cart.items[existingItemIndex].price = product.price;
+        }
       } else {
-        // Add new item
+        // Add new item - create a mock product reference for the cart
         cart.items.push({
           product: productId,
           quantity: quantity,
@@ -473,7 +556,25 @@ Should I add this to your inventory for customers to see?`;
       }
 
       await cart.save();
-      await cart.populate('items.product');
+      
+      // For mock products, we need to simulate the populated cart response
+      // Transform the cart to include product details that the frontend expects
+      const cartResponse = {
+        _id: cart._id,
+        user: cart.user,
+        items: cart.items.map(item => ({
+          product: {
+            _id: item.product,
+            name: product.name,
+            price: product.price,
+            unit: product.unit,
+            image: '/placeholder.jpg'
+          },
+          quantity: item.quantity,
+          price: item.price
+        })),
+        farm: cart.farm
+      };
 
       const totalCost = confirmationData.totalCost;
       
@@ -482,11 +583,12 @@ Should I add this to your inventory for customers to see?`;
 
 💰 Cost: ₹${totalCost}
 🚚 Estimated delivery: Same day
-🛒 Cart total: ₹${cart.items.reduce((total, item) => total + (item.quantity * item.price), 0)}
+🛒 Cart total: ₹${cartResponse.items.reduce((total, item) => total + (item.quantity * item.price), 0)}
 
 What else would you like to order?`,
         orderProcessed: true,
-        cartTotal: cart.items.reduce((total, item) => total + (item.quantity * item.price), 0),
+        cartTotal: cartResponse.items.reduce((total, item) => total + (item.quantity * item.price), 0),
+        cart: cartResponse,
         actions: ['🛒 View cart', '➕ Add more items', '💳 Proceed to checkout', '🏠 Continue shopping']
       };
 

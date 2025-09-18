@@ -118,7 +118,7 @@ export default function FarmProfile({ onComplete }) {
       
       // Navigate to farm dashboard after short delay
       setTimeout(() => {
-        navigate('/farm-dashboard');
+        navigate('/farmer');  // Changed from '/farm-dashboard' to '/farmer' to match route in App.jsx
       }, 1500);
     } catch (err) {
       console.error('Profile update error:', err);

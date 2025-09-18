@@ -31,7 +31,8 @@ const Favorites = () => {
   const handleRemoveFavorite = async (productId) => {
     try {
       await API.post('/favorites/remove', { productId });
-      setFavorites(favorites.filter(fav => fav.product._id !== productId));
+      // Filter out the removed product based on its ID
+      setFavorites(favorites.filter(fav => fav._id !== productId));
     } catch (err) {
       console.error('Error removing favorite:', err);
       setError('Error removing from favorites');
@@ -95,12 +96,12 @@ const Favorites = () => {
                 <div key={favorite._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 group">
                   <div className="relative">
                     <img
-                      src={favorite.product?.image || '/placeholder.jpg'}
-                      alt={favorite.product?.name || 'Product'}
+                      src={favorite.image || '/placeholder.jpg'}
+                      alt={favorite.name || 'Product'}
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <button
-                      onClick={() => handleRemoveFavorite(favorite.product._id)}
+                      onClick={() => handleRemoveFavorite(favorite._id)}
                       className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-red-50 transition-colors"
                     >
                       <HeartIcon className="h-5 w-5 text-red-500 fill-current" />
@@ -108,14 +109,14 @@ const Favorites = () => {
                   </div>
                   
                   <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1">{favorite.product?.name}</h3>
-                    <p className="text-sm text-gray-500 mb-2">{favorite.product?.farm?.name}</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">{favorite.name}</h3>
+                    <p className="text-sm text-gray-500 mb-2">{favorite.farm?.name}</p>
                     <div className="flex items-center justify-between">
                       <div className="text-lg font-bold text-amber-600">
-                        ₹{favorite.product?.price}/{favorite.product?.unit}
+                        ₹{favorite.price}/{favorite.unit}
                       </div>
                       <Link
-                        to={`/purchase/${favorite.product?.farm?._id}/${favorite.product?._id}`}
+                        to={`/purchase/${favorite.farm?._id}/${favorite._id}`}
                         className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-sm font-medium rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all duration-200"
                       >
                         Buy Now

@@ -184,18 +184,37 @@ const IoTFarmMonitoringHub = () => {
   };
 
   const startRealTimeUpdates = () => {
-    const interval = setInterval(() => {
-      setSensors(prevSensors => 
-        prevSensors.map(sensor => ({
-          ...sensor,
-          value: generateRealisticValue(sensor),
-          lastUpdate: new Date(),
-          status: Math.random() < 0.95 ? 'online' : 'warning'
-        }))
-      );
-    }, 3000);
-
-    return () => clearInterval(interval);
+    // Use requestAnimationFrame for better performance
+    let animationFrameId;
+    let lastUpdate = 0;
+    const updateInterval = 3000; // 3 seconds
+    
+    const updateSensors = (timestamp) => {
+      // Only update if enough time has passed
+      if (timestamp - lastUpdate >= updateInterval) {
+        // Use a callback with requestAnimationFrame for better performance
+        window.requestAnimationFrame(() => {
+          setSensors(prevSensors => 
+            prevSensors.map(sensor => ({
+              ...sensor,
+              value: generateRealisticValue(sensor),
+              lastUpdate: new Date(),
+              status: Math.random() < 0.95 ? 'online' : 'warning'
+            }))
+          );
+        });
+        lastUpdate = timestamp;
+      }
+      
+      animationFrameId = requestAnimationFrame(updateSensors);
+    };
+    
+    animationFrameId = requestAnimationFrame(updateSensors);
+    
+    // Return cleanup function
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
   };
 
   const generateRealisticValue = (sensor) => {

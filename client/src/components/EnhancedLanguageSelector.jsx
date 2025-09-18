@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LanguageIcon, ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline';
 
 const EnhancedLanguageSelector = ({ variant = 'default', className = '' }) => {
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const languages = [
@@ -18,6 +19,13 @@ const EnhancedLanguageSelector = ({ variant = 'default', className = '' }) => {
       code: 'hi',
       name: 'Hindi',
       nativeName: 'हिन्दी',
+      flag: '🇮🇳',
+      rtl: false
+    },
+    {
+      code: 'ta',
+      name: 'Tamil',
+      nativeName: 'தமிழ்',
       flag: '🇮🇳',
       rtl: false
     },
@@ -79,27 +87,19 @@ const EnhancedLanguageSelector = ({ variant = 'default', className = '' }) => {
     }
   ];
 
-  const currentLanguage = languages.find(lang => lang.code === selectedLanguage);
+  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 
-  useEffect(() => {
-    // Load saved language preference
-    const savedLanguage = localStorage.getItem('preferred-language');
-    if (savedLanguage && languages.find(lang => lang.code === savedLanguage)) {
-      setSelectedLanguage(savedLanguage);
+  const handleLanguageChange = async (languageCode) => {
+    try {
+      await i18n.changeLanguage(languageCode);
+      setIsOpen(false);
+      
+      // Update document direction for RTL languages
+      const newLanguage = languages.find(lang => lang.code === languageCode);
+      document.documentElement.dir = newLanguage.rtl ? 'rtl' : 'ltr';
+    } catch (error) {
+      console.error('Language change failed:', error);
     }
-  }, []);
-
-  const handleLanguageChange = (languageCode) => {
-    setSelectedLanguage(languageCode);
-    localStorage.setItem('preferred-language', languageCode);
-    setIsOpen(false);
-    
-    // Here you would typically trigger i18n language change
-    // i18n.changeLanguage(languageCode);
-    
-    // Update document direction for RTL languages
-    const newLanguage = languages.find(lang => lang.code === languageCode);
-    document.documentElement.dir = newLanguage.rtl ? 'rtl' : 'ltr';
   };
 
   if (variant === 'compact') {
@@ -151,7 +151,7 @@ const EnhancedLanguageSelector = ({ variant = 'default', className = '' }) => {
                     className={`
                       flex items-center space-x-2 w-full px-3 py-2 text-sm
                       hover:bg-gray-50 transition-colors duration-200
-                      ${selectedLanguage === language.code ? 'text-sage-600 bg-sage-50' : 'text-gray-700'}
+                      ${i18n.language === language.code ? 'text-sage-600 bg-sage-50' : 'text-gray-700'}
                     `}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -164,7 +164,7 @@ const EnhancedLanguageSelector = ({ variant = 'default', className = '' }) => {
                   >
                     <span>{language.flag}</span>
                     <span className="flex-1 text-left">{language.name}</span>
-                    {selectedLanguage === language.code && (
+                    {i18n.language === language.code && (
                       <CheckIcon className="h-4 w-4 text-sage-600" />
                     )}
                   </motion.button>
@@ -210,7 +210,7 @@ const EnhancedLanguageSelector = ({ variant = 'default', className = '' }) => {
                   className={`
                     flex items-center space-x-2 w-full px-3 py-2 text-sm whitespace-nowrap
                     hover:bg-gray-50 transition-colors duration-200
-                    ${selectedLanguage === language.code ? 'text-sage-600 bg-sage-50' : 'text-gray-700'}
+                    ${i18n.language === language.code ? 'text-sage-600 bg-sage-50' : 'text-gray-700'}
                   `}
                   style={{ 
                     outline: 'none !important', 
@@ -248,7 +248,7 @@ const EnhancedLanguageSelector = ({ variant = 'default', className = '' }) => {
         }}
       >
         <motion.div
-          key={selectedLanguage}
+          key={i18n.language}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.2 }}
@@ -301,7 +301,7 @@ const EnhancedLanguageSelector = ({ variant = 'default', className = '' }) => {
                     className={`
                       flex items-center space-x-3 w-full px-3 py-3 
                       hover:bg-gray-50 transition-all duration-200
-                      ${selectedLanguage === language.code ? 'bg-sage-50 border-r-2 border-sage-600' : ''}
+                      ${i18n.language === language.code ? 'bg-sage-50 border-r-2 border-sage-600' : ''}
                     `}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -321,14 +321,14 @@ const EnhancedLanguageSelector = ({ variant = 'default', className = '' }) => {
                       {language.flag}
                     </motion.span>
                     <div className="flex-1 text-left">
-                      <div className={`text-sm font-medium ${selectedLanguage === language.code ? 'text-sage-700' : 'text-gray-700'}`}>
+                      <div className={`text-sm font-medium ${i18n.language === language.code ? 'text-sage-700' : 'text-gray-700'}`}>
                         {language.name}
                       </div>
                       <div className="text-xs text-gray-500">
                         {language.nativeName}
                       </div>
                     </div>
-                    {selectedLanguage === language.code && (
+                    {i18n.language === language.code && (
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import API from '../api/api';
 import { 
   MagnifyingGlassIcon, 
@@ -33,6 +34,7 @@ function Marketplace() {
   const [showQuickView, setShowQuickView] = useState(null);
   const [cartItems, setCartItems] = useState(new Set());
   const [quickAddAnimation, setQuickAddAnimation] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchAllProducts();
@@ -46,7 +48,7 @@ function Marketplace() {
       const res = await API.get('/products/search');
       setProducts(res.data);
     } catch (err) {
-      setError('Error loading products');
+      setError(t('products.errorLoading'));
     } finally {
       setLoading(false);
     }
@@ -71,7 +73,7 @@ function Marketplace() {
       });
       setProducts(res.data);
     } catch (err) {
-      setError('Error searching products');
+      setError(t('products.errorSearching'));
     } finally {
       setLoading(false);
     }
@@ -140,13 +142,13 @@ function Marketplace() {
   };
 
   const categories = [
-    { value: '', label: '🌱 All Categories', icon: '🌿' },
-    { value: 'vegetables', label: '🥬 Vegetables', icon: '🥕' },
-    { value: 'fruits', label: '🍎 Fruits', icon: '🍓' },
-    { value: 'grains', label: '🌾 Grains', icon: '🌾' },
-    { value: 'herbs', label: '🌿 Herbs', icon: '🌿' },
-    { value: 'dairy', label: '🥛 Dairy', icon: '🧀' },
-    { value: 'meat', label: '🥩 Meat', icon: '🐄' }
+    { value: '', label: t('products.allCategories'), icon: '🌿' },
+    { value: 'vegetables', label: t('products.vegetables'), icon: '🥕' },
+    { value: 'fruits', label: t('products.fruits'), icon: '🍓' },
+    { value: 'grains', label: t('products.grains'), icon: '🌾' },
+    { value: 'herbs', label: t('products.herbs'), icon: '🌿' },
+    { value: 'dairy', label: t('products.dairy'), icon: '🧀' },
+    { value: 'meat', label: t('products.meat'), icon: '🐄' }
   ];
 
   return (
@@ -233,7 +235,7 @@ function Marketplace() {
                   color: 'transparent'
                 }}
               >
-                🌾 Farm Fresh Marketplace
+                🌾 {t('products.title')}
               </motion.h1>
               
               <motion.p 
@@ -242,7 +244,7 @@ function Marketplace() {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
               >
-                Discover premium organic produce directly from sustainable farms
+                {t('products.subtitle')}
               </motion.p>
             </motion.div>
           </div>
@@ -255,10 +257,10 @@ function Marketplace() {
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             {[
-              { icon: '🌱', count: '500+', label: 'Fresh Products' },
-              { icon: '🚚', count: '24h', label: 'Fast Delivery' },
-              { icon: '🌿', count: '100%', label: 'Organic' },
-              { icon: '⭐', count: '4.9', label: 'Rating' }
+              { icon: '🌱', count: '500+', label: t('products.freshProducts') },
+              { icon: '🚚', count: '24h', label: t('products.fastDelivery') },
+              { icon: '🌿', count: '100%', label: t('products.organic') },
+              { icon: '⭐', count: '4.9', label: t('products.rating') }
             ].map((stat, index) => (
               <motion.div
                 key={index}
@@ -320,7 +322,7 @@ function Marketplace() {
                 <MagnifyingGlassIcon className="h-6 w-6 absolute left-4 top-1/2 transform -translate-y-1/2 text-beige-600 group-focus-within:text-beige-800 transition-colors" />
                 <input
                   type="text"
-                  placeholder="🔍 Search for organic vegetables, fresh fruits..."
+                  placeholder={t('products.searchProducts')}
                   value={filters.query}
                   onChange={(e) => setFilters({ ...filters, query: e.target.value })}
                   className="w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm border border-beige-200/50 rounded-2xl text-earth-800 placeholder-earth-500 focus:outline-none focus:ring-2 focus:ring-beige-400 focus:border-transparent transition-all duration-300 shadow-lg"
@@ -347,11 +349,11 @@ function Marketplace() {
                   onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
                   className="w-full px-4 py-4 bg-white/80 backdrop-blur-sm border border-beige-200/50 rounded-2xl text-earth-800 focus:outline-none focus:ring-2 focus:ring-beige-400 focus:border-transparent transition-all duration-300 shadow-lg"
                 >
-                  <option value="featured">✨ Featured</option>
-                  <option value="price-low">💰 Price: Low to High</option>
-                  <option value="price-high">💎 Price: High to Low</option>
-                  <option value="name">📝 Name A-Z</option>
-                  <option value="rating">⭐ Highest Rated</option>
+                  <option value="featured">✨ {t('products.featured')}</option>
+                  <option value="price-low">💰 {t('products.priceLowToHigh')}</option>
+                  <option value="price-high">💎 {t('products.priceHighToLow')}</option>
+                  <option value="name">📝 {t('products.nameAZ')}</option>
+                  <option value="rating">⭐ {t('products.highestRated')}</option>
                 </select>
               </div>
             </div>
@@ -361,7 +363,7 @@ function Marketplace() {
               <div>
                 <input
                   type="number"
-                  placeholder="💰 Min Price"
+                  placeholder={t('products.minPrice')}
                   value={filters.minPrice}
                   onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
                   className="w-full px-4 py-3 bg-white/80 backdrop-blur-sm border border-beige-200/50 rounded-xl text-earth-800 placeholder-earth-500 focus:outline-none focus:ring-2 focus:ring-beige-400 focus:border-transparent transition-all duration-300 shadow-md"
@@ -370,7 +372,7 @@ function Marketplace() {
               <div>
                 <input
                   type="number"
-                  placeholder="💎 Max Price"
+                  placeholder={t('products.maxPrice')}
                   value={filters.maxPrice}
                   onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
                   className="w-full px-4 py-3 bg-white/80 backdrop-blur-sm border border-beige-200/50 rounded-xl text-earth-800 placeholder-earth-500 focus:outline-none focus:ring-2 focus:ring-beige-400 focus:border-transparent transition-all duration-300 shadow-md"
@@ -382,7 +384,7 @@ function Marketplace() {
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
               >
-                🔍 Search Products
+                🔍 {t('products.searchProducts')}
               </motion.button>
             </div>
           </motion.form>
@@ -403,7 +405,7 @@ function Marketplace() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               />
-              <p className="text-earth-600 font-medium">🌱 Loading fresh products...</p>
+              <p className="text-earth-600 font-medium">{t('products.loading')}</p>
             </div>
           </motion.div>
         ) : error ? (
@@ -427,7 +429,7 @@ function Marketplace() {
               transition={{ delay: 0.2 }}
             >
               <p className="text-earth-600 font-medium">
-                Found <span className="text-beige-600 font-bold">{filteredAndSortedProducts().length}</span> premium products
+                {t('products.found')} <span className="text-beige-600 font-bold">{filteredAndSortedProducts().length}</span> {t('products.premiumProducts')}
               </p>
             </motion.div>
 
@@ -530,7 +532,7 @@ function Marketplace() {
                             animate={quickAddAnimation === product._id ? { scale: [1, 1.2, 1] } : {}}
                           >
                             <ShoppingCartIcon className="h-5 w-5 inline mr-2" />
-                            Quick Add
+                            {t('products.quickAdd')}
                           </motion.button>
                         </motion.div>
                       </div>
@@ -565,11 +567,11 @@ function Marketplace() {
                           
                           {product.stock > 0 ? (
                             <div className="text-green-600 text-sm font-medium">
-                              ✅ In Stock ({product.stock})
+                              ✅ {t('products.inStock')} ({product.stock})
                             </div>
                           ) : (
                             <div className="text-red-600 text-sm font-medium">
-                              ❌ Out of Stock
+                              ❌ {t('products.outOfStock')}
                             </div>
                           )}
                         </div>
@@ -577,8 +579,8 @@ function Marketplace() {
                         {/* Farm Info */}
                         <div className="flex items-center space-x-2 mb-4 p-3 bg-gradient-to-r from-beige-50/50 to-sage-50/50 rounded-xl border border-beige-200/30">
                           <div className="text-sm">
-                            <span className="font-medium text-earth-700">🚜 {product.farmer?.name || 'Fresh Farm'}</span>
-                            <div className="text-xs text-earth-600">{product.farmer?.location || 'Local Farm'}</div>
+                            <span className="font-medium text-earth-700">🚜 {product.farmer?.name || t('products.freshFarm')}</span>
+                            <div className="text-xs text-earth-600">{product.farmer?.location || t('products.localFarm')}</div>
                           </div>
                         </div>
 
@@ -596,7 +598,7 @@ function Marketplace() {
                             whileTap={product.stock > 0 ? { scale: 0.98 } : {}}
                           >
                             <ShoppingCartIcon className="h-5 w-5 inline mr-2" />
-                            {cartItems.has(product._id) ? 'In Cart' : 'Add to Cart'}
+                            {cartItems.has(product._id) ? t('products.inCart') : t('products.addToCart')}
                           </motion.button>
                           
                           <motion.button
@@ -629,15 +631,15 @@ function Marketplace() {
               >
                 <div className="bg-beige-50/80 backdrop-blur-sm border border-beige-200 rounded-3xl p-12 inline-block shadow-lg">
                   <div className="text-8xl mb-6">🌾</div>
-                  <h3 className="text-2xl font-bold text-earth-800 mb-4">No products found</h3>
-                  <p className="text-earth-600 mb-6">Try adjusting your search filters</p>
+                  <h3 className="text-2xl font-bold text-earth-800 mb-4">{t('products.noProductsFound')}</h3>
+                  <p className="text-earth-600 mb-6">{t('products.tryAdjustingFilters')}</p>
                   <motion.button
                     onClick={() => setFilters({ query: '', category: '', minPrice: '', maxPrice: '', sortBy: 'featured' })}
                     className="bg-gradient-to-r from-beige-500 to-sage-500 text-white font-bold py-3 px-8 rounded-xl hover:from-beige-600 hover:to-sage-600 transition-all duration-300 shadow-lg"
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    🔄 Reset Filters
+                    🔄 {t('products.resetFilters')}
                   </motion.button>
                 </div>
               </motion.div>
@@ -732,7 +734,7 @@ function Marketplace() {
                       whileTap={showQuickView.stock > 0 ? { scale: 0.98 } : {}}
                     >
                       <ShoppingCartIcon className="h-5 w-5 inline mr-2" />
-                      {showQuickView.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                      {showQuickView.stock > 0 ? t('products.addToCart') : t('products.outOfStock')}
                     </motion.button>
                   </div>
                 </div>

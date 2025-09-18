@@ -23,14 +23,34 @@ const SmartNotificationSystem = ({ userId }) => {
 
   useEffect(() => {
     loadNotifications();
-    // Simulate real-time notifications
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) { // 30% chance every 10 seconds
-        addNewNotification();
-      }
-    }, 10000);
+    
+    // Use setTimeout instead of setInterval for better performance
+    // This creates a self-adjusting timer that waits for the previous operation to complete
+    let timeoutId;
+    
+    const scheduleNextUpdate = () => {
+      timeoutId = setTimeout(() => {
+        // Only add notification in idle periods using requestIdleCallback if available
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(() => {
+            if (Math.random() > 0.7) { // 30% chance every 10 seconds
+              addNewNotification();
+            }
+            scheduleNextUpdate();
+          }, { timeout: 2000 });
+        } else {
+          // Fallback for browsers that don't support requestIdleCallback
+          if (Math.random() > 0.7) { // 30% chance every 10 seconds
+            addNewNotification();
+          }
+          scheduleNextUpdate();
+        }
+      }, 10000);
+    };
+    
+    scheduleNextUpdate();
 
-    return () => clearInterval(interval);
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const loadNotifications = () => {
@@ -91,7 +111,7 @@ const SmartNotificationSystem = ({ userId }) => {
         timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
         read: true,
         priority: 'low',
-        actionUrl: '/farmer-dashboard?tab=health',
+        actionUrl: '/farmer?tab=health',
         icon: InformationCircleIcon,
         color: 'blue'
       }

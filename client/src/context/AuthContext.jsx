@@ -56,7 +56,7 @@ function AuthProvider({ children }) {
     if (userData.role === 'admin') {
       navigate('/admin/verifications');
     } else if (userData.role === 'farmer') {
-      navigate('/farm-dashboard');
+      navigate('/farmer');  // Changed from '/farm-dashboard' to '/farmer' to match route in App.jsx
     } else {
       navigate('/marketplace');
     }

@@ -1,4 +1,13 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Set up proper environment loading
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.resolve(__dirname, '../.env');
+dotenv.config({ path: envPath });
 
 class WeatherService {
   constructor() {
@@ -8,6 +17,10 @@ class WeatherService {
       openWeather: 'https://api.openweathermap.org/data/2.5',
       weatherApi: 'http://api.weatherapi.com/v1'
     };
+    
+    // Log which API keys are available
+    console.log('Weather API Key available:', !!this.weatherApiKey);
+    console.log('OpenWeather API Key available:', !!this.openWeatherApiKey);
   }
 
   async getCurrentWeather(lat, lon) {

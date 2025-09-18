@@ -1,4 +1,15 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// Use absolute path for .env
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const envPath = path.resolve(__dirname, '../.env');
+
+// Load environment variables from the correct path
+dotenv.config({ path: envPath });
 
 class AIChatService {
   constructor() {
@@ -8,8 +19,14 @@ class AIChatService {
       return;
     }
     
-    this.genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+    try {
+      this.genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY);
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+      console.log('Google Gemini API initialized successfully with model: gemini-1.5-flash-latest');
+    } catch (error) {
+      console.error('Failed to initialize Google Gemini API:', error);
+      this.genAI = null;
+    }
   }
 
   getSystemPrompt(userRole, userLocation = null) {
@@ -127,11 +144,16 @@ Response: Extract as order_confirmation, process the order`;
 
 USER MESSAGE: "${userMessage}"
 
-Remember to respond ONLY in the specified JSON format. Be helpful, friendly, and focused on agricultural commerce.`;
+IMPORTANT: Respond ONLY with a plain JSON object. Do NOT use markdown formatting, code blocks, or any non-JSON content. The response should be valid JSON that can be directly parsed without removing any characters.`;
 
+      console.log('Sending prompt to Gemini API...');
       const result = await this.model.generateContent(fullPrompt);
       const response = await result.response;
-      const text = response.text();
+      let text = response.text();
+      console.log('Received response from Gemini API');
+      
+      // Clean up the response if it contains markdown code blocks
+      text = text.replace(/```json\n?|\n?```/g, '').trim();
 
       // Try to parse JSON response
       try {
@@ -139,6 +161,7 @@ Remember to respond ONLY in the specified JSON format. Be helpful, friendly, and
         return this.validateAndCleanResponse(jsonResponse, userRole);
       } catch (parseError) {
         console.error('Failed to parse AI response as JSON:', parseError);
+        console.error('Raw response:', text);
         // Extract message from non-JSON response
         return {
           message: text.replace(/```json|```/g, '').trim(),

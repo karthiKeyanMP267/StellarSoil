@@ -14,7 +14,7 @@ const PrivateRoute = ({ children, allowedRoles = [] }) => {
     if (user.role === 'admin') {
       return <Navigate to="/admin-dashboard" />;
     } else if (user.role === 'farmer') {
-      return <Navigate to="/farmer-dashboard" />;
+      return <Navigate to="/farmer" />;
     } else {
       return <Navigate to="/user-dashboard" />;
     }

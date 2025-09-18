@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useCart } from '../context/CartContext';
 
 const AISmartChatbot = ({ userRole = 'customer' }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,6 +29,7 @@ const AISmartChatbot = ({ userRole = 'customer' }) => {
   const recognition = useRef(null);
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { setCartItems, addToCart } = useCart();
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
@@ -162,6 +164,37 @@ const AISmartChatbot = ({ userRole = 'customer' }) => {
         setMessages(prev => [...prev, botMessage]);
         setConnectionStatus('connected');
 
+        // If chatbot response includes cart, update cart context
+        if (data.data.cart && Array.isArray(data.data.cart.items)) {
+          try {
+            // Convert backend cart items to frontend format
+            const newCartItems = data.data.cart.items.map(item => ({
+              id: item.product._id,
+              name: item.product.name,
+              price: item.product?.price || item.price,
+              quantity: item.quantity,
+              unit: item.product.unit,
+              image: item.product.image || '/placeholder.jpg',
+              farmerId: item.product.farmer || '',
+              category: item.product.category || ''
+            }));
+            
+            console.log('Updating cart with new items:', newCartItems);
+            // Update cart context with the new items
+            setCartItems(newCartItems);
+            
+            // Also store in localStorage for persistence
+            localStorage.setItem('cart', JSON.stringify(newCartItems));
+            
+            // Force a refresh of the cart page if needed
+            window.dispatchEvent(new CustomEvent('cart-updated', { 
+              detail: { items: newCartItems }
+            }));
+          } catch (error) {
+            console.error('Error updating cart items:', error);
+          }
+        }
+
         // Handle confirmation workflow
         if (data.data.requiresConfirmation && data.data.pendingConfirmation) {
           setPendingConfirmation(data.data.pendingConfirmation);
@@ -203,6 +236,21 @@ const AISmartChatbot = ({ userRole = 'customer' }) => {
       const data = await response.json();
 
       if (data.success) {
+        // Add to local cart as well to ensure consistency
+        if (data.data.cart && data.data.cart.items) {
+          const newItem = data.data.cart.items.find(item => item.product._id === productId);
+          if (newItem) {
+            addToCart({
+              id: productId,
+              name: newItem.product.name,
+              price: newItem.product.price || newItem.price,
+              quantity: quantity,
+              unit: newItem.product.unit || 'kg',
+              image: newItem.product.image || '/placeholder.jpg'
+            });
+          }
+        }
+
         const confirmMessage = {
           id: Date.now(),
           text: data.data.message,
@@ -215,14 +263,41 @@ const AISmartChatbot = ({ userRole = 'customer' }) => {
         throw new Error(data.error);
       }
     } catch (error) {
-      const errorMessage = {
-        id: Date.now(),
-        text: `Sorry, I couldn't add that to your cart: ${error.message}`,
-        sender: 'bot',
-        timestamp: new Date(),
-        type: 'error'
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      console.error('Add to cart error:', error);
+      
+      // If server error, still try to add to local cart
+      if (error.message.includes('Network Error') || error.message.includes('Connection refused')) {
+        // Attempt to create a minimal item for the cart
+        const localCartItem = {
+          id: productId,
+          name: 'Product', // Basic fallback name
+          price: 0, // We don't know the price
+          quantity: quantity,
+          unit: 'kg',
+          image: '/placeholder.jpg'
+        };
+        
+        // Add to local cart context
+        addToCart(localCartItem);
+        
+        const warningMessage = {
+          id: Date.now(),
+          text: `Added to cart locally. Server connection unavailable, so the cart will be synchronized when connection is restored.`,
+          sender: 'bot',
+          timestamp: new Date(),
+          type: 'warning'
+        };
+        setMessages(prev => [...prev, warningMessage]);
+      } else {
+        const errorMessage = {
+          id: Date.now(),
+          text: `Sorry, I couldn't add that to your cart: ${error.message}`,
+          sender: 'bot',
+          timestamp: new Date(),
+          type: 'error'
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
     }
   };
 

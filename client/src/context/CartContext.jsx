@@ -61,8 +61,15 @@ export const CartProvider = ({ children }) => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
 
+  // Function to directly set cart items (useful for external sources like chatbot)
+  const setCartItemsDirect = (items) => {
+    console.log('Setting cart items directly:', items);
+    setCartItems(items);
+  };
+
   const value = {
     cartItems,
+    setCartItems: setCartItemsDirect,
     addToCart,
     removeFromCart,
     updateQuantity,

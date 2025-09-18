@@ -7,6 +7,7 @@ import { useNotification } from '../components/ui/Notification';
 import LocationMap from '../components/LocationMap';
 import { Card, ProductCard } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import API from '../api/api';
 import { 
   MapPinIcon,
   StarIcon,
@@ -104,6 +105,8 @@ const Farms = () => {
       setFarms(sampleFarms);
       setLoading(false);
     }, 1000);
+    
+    fetchUserFavorites();
 
     // Get user location
     if (navigator.geolocation) {
@@ -127,18 +130,43 @@ const Farms = () => {
     setSelectedFarm(farm);
   };
 
-  const toggleFavorite = (productId) => {
-    setFavoriteProducts(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(productId)) {
-        newFavorites.delete(productId);
+  const fetchUserFavorites = async () => {
+    try {
+      if (user?.token) {
+        const response = await API.get('/favorites');
+        const favorites = new Set(response.data.map(product => product._id));
+        setFavoriteProducts(favorites);
+      }
+    } catch (err) {
+      console.error('Error fetching favorites:', err);
+    }
+  };
+  
+  const toggleFavorite = async (productId) => {
+    try {
+      if (favoriteProducts.has(productId)) {
+        // Remove from favorites
+        await API.post('/favorites/remove', { productId });
+        setFavoriteProducts(prev => {
+          const newFavorites = new Set(prev);
+          newFavorites.delete(productId);
+          return newFavorites;
+        });
         success('Removed from favorites', 'Product removed from your favorites list');
       } else {
-        newFavorites.add(productId);
+        // Add to favorites
+        await API.post('/favorites/add', { productId });
+        setFavoriteProducts(prev => {
+          const newFavorites = new Set(prev);
+          newFavorites.add(productId);
+          return newFavorites;
+        });
         success('Added to favorites', 'Product added to your favorites list');
       }
-      return newFavorites;
-    });
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+      error('Error', 'Could not update favorites. Please try again.');
+    }
   };
 
   const addToCart = (product, farmId) => {

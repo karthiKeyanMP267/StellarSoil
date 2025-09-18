@@ -9,8 +9,10 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     unit: { type: String, required: true }, // kg, piece, bundle, etc.
     stock: { type: Number, required: true },
+    quantity: { type: Number, required: true }, // Available quantity for sale
     images: [String],
     isOrganic: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true }, // Whether product is available for sale
     seasonality: {
       start: { type: Date },
       end: { type: Date }

@@ -40,7 +40,11 @@ export const addToCart = async (req, res) => {
         cart.items[itemIndex].quantity += quantity;
       } else {
         // Add new item
-        cart.items.push({ product: productId, quantity });
+        cart.items.push({ 
+          product: productId, 
+          quantity, 
+          price: product.price 
+        });
       }
       await cart.save();
     }

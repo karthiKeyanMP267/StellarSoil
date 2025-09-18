@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Cog6ToothIcon,
   BellIcon,
@@ -24,6 +25,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const Settings = () => {
+  const { i18n } = useTranslation();
   const [activeSection, setActiveSection] = useState('general');
   const [settings, setSettings] = useState({
     notifications: {
@@ -86,6 +88,11 @@ const Settings = () => {
         [key]: value
       }
     }));
+    
+    // If language is being changed, update i18n
+    if (section === 'appearance' && key === 'language') {
+      i18n.changeLanguage(value);
+    }
   };
 
   const handleSave = () => {
@@ -198,6 +205,7 @@ const Settings = () => {
                             >
                               <option value="en">🇺🇸 English</option>
                               <option value="hi">🇮🇳 हिंदी (Hindi)</option>
+                              <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
                               <option value="es">🇪🇸 Español</option>
                               <option value="fr">🇫🇷 Français</option>
                             </select>

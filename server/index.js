@@ -31,7 +31,15 @@ import chatRoutes from './routes/chatRoutes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-dotenv.config();
+// Load environment variables from the correct path
+const envPath = path.resolve(__dirname, '.env');
+dotenv.config({ path: envPath });
+
+// Log that env was loaded
+console.log(`Environment loaded from: ${envPath}`);
+console.log(`Node environment: ${process.env.NODE_ENV}`);
+console.log(`Server port: ${process.env.PORT}`);
+
 connectDB();
 
 const app = express();

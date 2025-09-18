@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/api';
 import {
@@ -20,6 +21,7 @@ import {
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
 const Cart = () => {
+  const { t } = useTranslation();
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -27,6 +29,18 @@ const Cart = () => {
 
   useEffect(() => {
     fetchCart();
+    
+    // Listen for cart update events from the chatbot
+    const handleCartUpdate = () => {
+      console.log('Cart updated event received, fetching cart...');
+      fetchCart();
+    };
+    
+    window.addEventListener('cart-updated', handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener('cart-updated', handleCartUpdate);
+    };
   }, []);
 
   const fetchCart = async () => {
@@ -40,16 +54,47 @@ const Cart = () => {
           productId: item.product._id,
           name: item.product.name,
           image: item.product.image,
-          price: item.product.price,
+          price: item.product.price || item.price,
           unit: item.product.unit,
           quantity: item.quantity,
           farmName: cart.farm?.name || '',
         }))
       );
       setCart(allItems);
+      setError('');
     } catch (err) {
       console.error('Cart fetch error:', err);
-      setError('Error loading cart');
+      if (err.message.includes('Network Error') || err.message.includes('Connection refused')) {
+        // Use local storage as fallback if API is not available
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) {
+          try {
+            const parsedCart = JSON.parse(savedCart);
+            // Transform the saved cart format to match the expected format
+            const localCartItems = parsedCart.map(item => ({
+              cartId: 'local',
+              productId: item.id,
+              name: item.name,
+              image: item.image || '/placeholder.jpg',
+              price: item.price || 0,
+              unit: item.unit || 'kg',
+              quantity: item.quantity || 1,
+              farmName: item.farmerName || 'Local Farm',
+            }));
+            setCart(localCartItems);
+            setError('Using cached cart data. Server connection unavailable.');
+          } catch (parseError) {
+            console.error('Error parsing local cart:', parseError);
+            setError('Error loading cart. Server unavailable and no cached data found.');
+            setCart([]);
+          }
+        } else {
+          setError('Server connection unavailable. No cached cart data found.');
+          setCart([]);
+        }
+      } else {
+        setError('Error loading cart: ' + (err.response?.data?.message || err.message));
+      }
     } finally {
       setLoading(false);
     }
@@ -62,9 +107,49 @@ const Cart = () => {
     }
 
     try {
-      await API.put(`/cart/${cartId}/items/${productId}`, {
-        quantity: newQuantity
-      });
+      // If cartId is 'local', we're working with localStorage data
+      if (cartId === 'local') {
+        // Update the cart items in state
+        setCart(prevCart =>
+          prevCart.map(item =>
+            item.cartId === cartId && item.productId === productId
+              ? { ...item, quantity: newQuantity }
+              : item
+          )
+        );
+        
+        // Also update localStorage
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) {
+          try {
+            const parsedCart = JSON.parse(savedCart);
+            const updatedCart = parsedCart.map(item => 
+              item.id === productId
+                ? { ...item, quantity: newQuantity }
+                : item
+            );
+            localStorage.setItem('cart', JSON.stringify(updatedCart));
+          } catch (error) {
+            console.error('Error updating localStorage cart:', error);
+          }
+        }
+      } else {
+        // Try to update on the server
+        await API.put(`/cart/${cartId}/items/${productId}`, {
+          quantity: newQuantity
+        });
+        setCart(prevCart =>
+          prevCart.map(item =>
+            item.cartId === cartId && item.productId === productId
+              ? { ...item, quantity: newQuantity }
+              : item
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Error updating quantity:', err);
+      
+      // Even if API fails, update the local state
       setCart(prevCart =>
         prevCart.map(item =>
           item.cartId === cartId && item.productId === productId
@@ -72,21 +157,47 @@ const Cart = () => {
             : item
         )
       );
-    } catch (err) {
-      console.error('Error updating quantity:', err);
-      setError('Error updating quantity');
+      
+      setError('Server connection error. Changes saved locally.');
     }
   };
 
   const removeFromCart = async (cartId, productId) => {
     try {
-      await API.delete(`/cart/${cartId}/items/${productId}`);
+      // If cartId is 'local', we're working with localStorage data
+      if (cartId === 'local') {
+        // Remove from state
+        setCart(prevCart =>
+          prevCart.filter(item => !(item.cartId === cartId && item.productId === productId))
+        );
+        
+        // Also update localStorage
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) {
+          try {
+            const parsedCart = JSON.parse(savedCart);
+            const updatedCart = parsedCart.filter(item => item.id !== productId);
+            localStorage.setItem('cart', JSON.stringify(updatedCart));
+          } catch (error) {
+            console.error('Error updating localStorage cart:', error);
+          }
+        }
+      } else {
+        // Try to remove on the server
+        await API.delete(`/cart/${cartId}/items/${productId}`);
+        setCart(prevCart =>
+          prevCart.filter(item => !(item.cartId === cartId && item.productId === productId))
+        );
+      }
+    } catch (err) {
+      console.error('Error removing from cart:', err);
+      
+      // Even if API fails, update the local state
       setCart(prevCart =>
         prevCart.filter(item => !(item.cartId === cartId && item.productId === productId))
       );
-    } catch (err) {
-      console.error('Error removing from cart:', err);
-      setError('Error removing item');
+      
+      setError('Server connection error. Changes saved locally.');
     }
   };
 
@@ -121,8 +232,8 @@ const Cart = () => {
               <ShoppingBagIcon className="w-6 h-6 text-beige-600" />
             </motion.div>
           </motion.div>
-          <h3 className="text-lg font-semibold text-beige-700 mb-2">Loading Your Cart</h3>
-          <p className="text-beige-600">Gathering your fresh selections...</p>
+          <h3 className="text-lg font-semibold text-beige-700 mb-2">{t('cart.loadingCart')}</h3>
+          <p className="text-beige-600">{t('cart.gatheringSelections')}</p>
         </motion.div>
       </motion.div>
     );
@@ -196,7 +307,7 @@ const Cart = () => {
                 transition={{ duration: 0.8, delay: 0.6 }}
                 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-earth-700 via-sage-600 to-earth-700 bg-clip-text text-transparent tracking-tight drop-shadow-2xl"
               >
-                🛒 Shopping Cart
+                🛒 {t('cart.title')}
               </motion.h1>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -204,7 +315,7 @@ const Cart = () => {
                 transition={{ duration: 0.8, delay: 0.8 }}
                 className="text-earth-600 text-2xl font-semibold tracking-wide drop-shadow-sm"
               >
-                Review your handpicked fresh produce
+                {t('cart.reviewProduce')}
               </motion.p>
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -214,11 +325,11 @@ const Cart = () => {
               >
                 <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-beige-400/20 to-cream-400/20 text-earth-700 rounded-full border border-beige-300/50 font-semibold">
                   <CheckBadgeIcon className="h-5 w-5 mr-2" />
-                  ✅ Farm Verified
+                  ✅ {t('cart.farmVerified')}
                 </span>
                 <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-sage-400/20 to-earth-400/20 text-earth-700 rounded-full border border-sage-300/50 font-semibold">
                   <TruckIcon className="h-5 w-5 mr-2" />
-                  🚚 Free Delivery
+                  🚚 {t('cart.freeDelivery')}
                 </span>
               </motion.div>
             </div>
@@ -245,16 +356,16 @@ const Cart = () => {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 to-orange-600/30 rounded-full blur-2xl animate-pulse"></div>
               </div>
-              <h3 className="text-5xl font-black text-amber-800 mb-6 animate-pulse">🛒 Your cart is empty</h3>
+              <h3 className="text-5xl font-black text-amber-800 mb-6 animate-pulse">🛒 {t('cart.empty')}</h3>
               <p className="text-amber-700 mb-12 max-w-2xl mx-auto text-2xl font-medium leading-relaxed">
-                🌱 Discover amazing fresh produce from local farms and start your healthy journey!
+                🌱 {t('cart.emptyCartMessage')}
               </p>
               <Link
                 to="/marketplace"
                 className="inline-flex items-center px-12 py-6 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white font-black rounded-2xl shadow-2xl hover:from-amber-600 hover:via-orange-600 hover:to-red-600 transition-all duration-500 hover:shadow-xl transform hover:-translate-y-2 hover:scale-110 text-xl tracking-wide group"
               >
                 <ShoppingBagIcon className="h-8 w-8 mr-4 group-hover:animate-bounce" />
-                🌟 Explore Fresh Products
+                🌟 {t('cart.exploreProducts')}
               </Link>
             </div>
           ) : (
@@ -262,10 +373,10 @@ const Cart = () => {
               {/* Cart Items Section */}
               <div className="space-y-8 mb-12">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-3xl font-black text-amber-900">🛍️ Your Items ({cart.length})</h2>
+                  <h2 className="text-3xl font-black text-amber-900">🛍️ {t('cart.yourItems')} ({cart.length})</h2>
                   <div className="flex items-center space-x-3">
                     <GiftIcon className="h-6 w-6 text-purple-600 animate-pulse" />
-                    <span className="text-lg font-bold text-purple-600">Free gift wrapping available!</span>
+                    <span className="text-lg font-bold text-purple-600">{t('cart.freeGift')}</span>
                   </div>
                 </div>
 
@@ -273,7 +384,7 @@ const Cart = () => {
                   <div key={`${item.cartId}-${item.productId}`} className="group bg-gradient-to-br from-white/98 to-white/90 rounded-3xl shadow-xl border border-amber-200/40 p-8 hover:shadow-2xl transition-all duration-500 hover:scale-102 relative overflow-hidden">
                     {/* Premium Badge */}
                     <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-3 py-1 rounded-full text-xs font-black shadow-lg">
-                      ✅ ORGANIC
+                      ✅ {t('cart.organic')}
                     </div>
                     
                     <div className="flex items-center space-x-8">
@@ -323,10 +434,10 @@ const Cart = () => {
                               20% OFF
                             </span>
                           </div>
-                          <p className="text-amber-700 font-medium">per {item.unit}</p>
+                          <p className="text-amber-700 font-medium">{t('cart.perUnit')} {item.unit}</p>
                           <div className="flex items-center space-x-2 text-sm">
                             <TruckIcon className="h-4 w-4 text-orange-600" />
-                            <span className="text-orange-600 font-medium">Free delivery • Arrives tomorrow</span>
+                            <span className="text-orange-600 font-medium">{t('cart.freeDeliveryArrives')}</span>
                           </div>
                         </div>
                       </div>
@@ -366,7 +477,7 @@ const Cart = () => {
 
                         {/* Item Total */}
                         <div className="text-center bg-gradient-to-r from-amber-500/10 to-orange-500/10 p-3 rounded-xl border border-amber-400/30">
-                          <div className="text-sm text-amber-700 font-medium">Item Total</div>
+                          <div className="text-sm text-amber-700 font-medium">{t('cart.itemTotal')}</div>
                           <div className="text-xl font-black text-amber-800">₹{(item.price * item.quantity).toFixed(2)}</div>
                         </div>
                       </div>
@@ -385,28 +496,28 @@ const Cart = () => {
                     <CreditCardIcon className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-3xl font-black text-amber-900">💰 Order Summary</h3>
-                    <p className="text-amber-700 font-medium">Review your total and savings</p>
+                    <h3 className="text-3xl font-black text-amber-900">💰 {t('cart.orderSummary')}</h3>
+                    <p className="text-amber-700 font-medium">{t('cart.reviewTotal')}</p>
                   </div>
                 </div>
 
                 {/* Price Breakdown */}
                 <div className="space-y-4 mb-8">
                   <div className="flex justify-between items-center text-lg">
-                    <span className="text-amber-800 font-medium">Subtotal ({cart.length} items)</span>
+                    <span className="text-amber-800 font-medium">{t('cart.subtotal')} ({cart.length} {t('cart.items')})</span>
                     <span className="font-bold text-amber-900">₹{(getTotalPrice() * 1.2).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center text-lg">
-                    <span className="text-amber-700 font-medium">Savings (Organic Discount)</span>
+                    <span className="text-amber-700 font-medium">{t('cart.savings')}</span>
                     <span className="font-bold text-amber-700">-₹{(getTotalPrice() * 0.2).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center text-lg">
-                    <span className="text-orange-700 font-medium">Delivery</span>
-                    <span className="font-bold text-orange-700">FREE 🚚</span>
+                    <span className="text-orange-700 font-medium">{t('cart.delivery')}</span>
+                    <span className="font-bold text-orange-700">{t('cart.shipping')} 🚚</span>
                   </div>
                   <div className="border-t-2 border-amber-300/50 pt-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-3xl font-black text-amber-800">Total Amount:</span>
+                      <span className="text-3xl font-black text-amber-800">{t('cart.totalAmount')}</span>
                       <span className="text-4xl font-black bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent drop-shadow-lg">
                         ₹{getTotalPrice().toFixed(2)}
                       </span>
@@ -420,14 +531,14 @@ const Cart = () => {
                     to="/marketplace"
                     className="flex items-center justify-center py-5 px-8 bg-gradient-to-r from-amber-400/80 to-orange-500/80 backdrop-blur-lg border border-amber-300/50 text-amber-900 font-black rounded-2xl hover:from-amber-500/80 hover:to-orange-600/80 transition-all duration-300 text-xl tracking-wide hover:scale-105 shadow-xl"
                   >
-                    🛍️ Continue Shopping
+                    🛍️ {t('cart.continueShopping')}
                   </Link>
                   <Link
                     to="/checkout"
                     className="flex items-center justify-center py-5 px-8 bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 text-white font-black rounded-2xl shadow-2xl hover:from-amber-700 hover:via-orange-700 hover:to-red-700 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 text-xl tracking-wide group"
                   >
                     <CreditCardIcon className="h-6 w-6 mr-3 group-hover:animate-bounce" />
-                    🚀 Proceed to Checkout
+                    🚀 {t('cart.checkout')}
                   </Link>
                 </div>
 
@@ -435,15 +546,15 @@ const Cart = () => {
                 <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-amber-300/50">
                   <div className="text-center">
                     <CheckBadgeIcon className="h-8 w-8 text-amber-600 mx-auto mb-2" />
-                    <div className="text-sm font-bold text-amber-800">100% Organic</div>
+                    <div className="text-sm font-bold text-amber-800">{t('cart.trustOrganic')}</div>
                   </div>
                   <div className="text-center">
                     <TruckIcon className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                    <div className="text-sm font-bold text-orange-800">Fast Delivery</div>
+                    <div className="text-sm font-bold text-orange-800">{t('cart.trustDelivery')}</div>
                   </div>
                   <div className="text-center">
                     <GiftIcon className="h-8 w-8 text-amber-600 mx-auto mb-2" />
-                    <div className="text-sm font-bold text-amber-800">Money Back Guarantee</div>
+                    <div className="text-sm font-bold text-amber-800">{t('cart.trustGuarantee')}</div>
                   </div>
                 </div>
               </div>

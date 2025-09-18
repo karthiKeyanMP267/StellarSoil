@@ -17,12 +17,16 @@ const cartSchema = new mongoose.Schema(
         type: Number,
         required: true,
         min: 1
+      },
+      price: {
+        type: Number,
+        default: 0
       }
     }],
     farm: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Farm',
-      required: true
+      required: false // Make optional for now to allow chatbot integration
     }
   },
   { timestamps: true }

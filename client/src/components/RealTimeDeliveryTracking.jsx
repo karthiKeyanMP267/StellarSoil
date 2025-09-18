@@ -24,14 +24,17 @@ const RealTimeDeliveryTracking = ({ orderId }) => {
   useEffect(() => {
     loadDeliveryData();
     
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      updateDeliveryStatus();
-      updateDriverLocation();
-      updateEstimatedTime();
-    }, 30000); // Update every 30 seconds
+    // Simulate real-time updates - using separate intervals with staggered timing
+    // to prevent simultaneous heavy operations
+    const statusInterval = setInterval(updateDeliveryStatus, 30000); // 30 seconds
+    const locationInterval = setInterval(updateDriverLocation, 31000); // 31 seconds
+    const timeInterval = setInterval(updateEstimatedTime, 32000); // 32 seconds
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(statusInterval);
+      clearInterval(locationInterval);
+      clearInterval(timeInterval);
+    };
   }, [orderId]);
 
   const loadDeliveryData = () => {

@@ -1,222 +1,240 @@
-# 🎬 AI Chatbot Demo Script
+# 🎬 StellarSoil AI Chatbot Demo Script
 
-## Demo Scenario 1: Customer Ordering Experience
+## Preparation
 
-### Setup:
-- User: Customer looking for fresh vegetables
-- Location: Mumbai, Maharashtra
-- Time: Evening (dinner planning)
+Before starting the demo, ensure you have:
 
-### Conversation Flow:
+1. The server running with all environment variables properly set:
+   ```bash
+   cd server
+   npm start
+   ```
+
+2. For interactive terminal demo (optional):
+   ```bash
+   cd server
+   node demo-chatbot.js
+   ```
+
+3. For web interface demo (main):
+   ```bash
+   cd client
+   npm run dev
+   ```
+
+## Demo Introduction (1 minute)
+
+"Today I'll demonstrate StellarSoil's AI chatbot powered by Google Gemini. This intelligent assistant helps both farmers and customers with agricultural commerce, providing real-time assistance for orders, listings, and farming advice."
+
+**Key Points:**
+- Powered by Google Gemini 1.5 Flash model
+- Context-aware conversations
+- Intent recognition for orders and listings 
+- Confirmation workflow for safety
+
+## Demo Method 1: Interactive Terminal (2 minutes)
+
+"First, let's see the core AI functionality in our terminal demo:"
+
+```bash
+cd server
+node demo-chatbot.js
 ```
-Customer: "Hi, I need some fresh vegetables for dinner"
 
-AI (Sage): "Good evening! 🌙 I'm Sage, your AI shopping assistant! I'd be happy to help you find fresh produce for dinner. What specific vegetables are you thinking about? I can check what's available from local farmers near you."
+**Show Terminal Features:**
+- Switch between customer/farmer roles with `/switch`
+- Show example queries with `/examples`
+- Highlight color-coded messages
+- Demonstrate intent detection and data extraction
+
+**Terminal Demo Queries:**
+1. Customer: "I need 2kg tomatoes"
+2. Farmer: "I want to sell 50kg potatoes at 30 rupees per kg"
+3. Switch to farmer mode and ask: "What is the current market price for onions?"
+
+## Demo Method 2: Web Interface (5 minutes)
+
+### Customer Demo
+
+**Login as Customer:**
+"Now, let's see the complete integration in our web application."
+
+**Customer Query 1: Basic Order**
+```
+Customer: "I need some fresh vegetables for dinner"
+
+AI: "Good evening! I'd be happy to help you find fresh produce for dinner. What specific vegetables are you thinking about? I can check what's available from local farmers near you."
 
 Customer: "I need 2kg tomatoes and 1kg onions"
 
-AI (Sage): "Perfect! Let me find the best tomatoes and onions near Mumbai for you. 
+AI: [Shows available products with confirmation buttons]
 
-🌱 Available Products Near You:
+Customer: [Click "Yes, add to cart"]
 
-**Tomatoes:**
-- Farmer: Raj Patel (5.2km away)
-- Price: ₹25/kg | Available: 50kg
-- Quality: Organic, Premium Grade
-- Estimated Delivery: Same day
-
-**Onions:**  
-- Farmer: Sunita Sharma (3.8km away)
-- Price: ₹20/kg | Available: 100kg
-- Quality: Standard Grade
-- Estimated Delivery: Same day
-
-Total Cost: ₹70 (2kg tomatoes + 1kg onions)
-Would you like me to add these to your cart?"
-
-Customer: "Yes, add them to cart"
-
-AI (Sage): "Excellent! ✅ Added to your cart:
-- 2kg Organic Tomatoes from Raj Patel - ₹50
-- 1kg Onions from Sunita Sharma - ₹20
-
-Cart Total: ₹70
-
-Would you like me to suggest a recipe for tonight's dinner using these fresh ingredients? I have some amazing tomato-onion curry recipes! 👨‍🍳"
+AI: [Shows success message with cart information]
 ```
 
-## Demo Scenario 2: Farmer Product Listing
+**Highlight Features:**
+- Intent recognition (order request)
+- Product extraction (tomatoes, onions)
+- Quantity extraction (2kg, 1kg)
+- Confirmation workflow
+- Cart integration
 
-### Setup:
-- User: Farmer with fresh harvest
-- Location: Rural Maharashtra
-- Scenario: Morning harvest ready for listing
+### Farmer Demo
 
-### Conversation Flow:
+**Login as Farmer:**
+"Let's switch to a farmer's perspective."
+
+**Farmer Query 1: Product Listing**
 ```
-Farmer: "Good morning, I have fresh harvest ready"
+Farmer: "I have fresh harvest ready"
 
-AI (Alex): "Good morning! ☀️ I'm Alex, your farming assistant! 🌱 That's wonderful news about your fresh harvest! I'm excited to help you get it listed for customers. What did you harvest today?"
+AI: "Good morning! That's wonderful news about your fresh harvest! I'm excited to help you get it listed for customers. What did you harvest today?"
 
 Farmer: "I have 50kg tomatoes for 30 rupees per kg"
 
-AI (Alex): "Excellent! 🍅 I've processed your tomato listing:
+AI: [Shows listing confirmation]
 
-✅ Product Listed Successfully!
-- Product: Tomatoes
-- Quantity: 50kg  
-- Price: ₹30 per kg
-- Quality: Standard Grade
-- Location: Your farm (verified)
+Farmer: [Click "Yes, list it"]
 
-Your tomatoes are now live and customers in your area can see them! Based on current market trends, ₹30/kg is competitive pricing. 
-
-Would you like to:
-📱 Set up instant notifications when customers order
-🌱 Add more products from today's harvest  
-📊 Check market demand for other crops
-💡 Get tips for extending shelf life"
-
-Farmer: "Also have 30kg onions, 25 rupees each kg"
-
-AI (Alex): "Perfect! 🧅 Adding your onions:
-
-✅ Onions Listed Successfully!
-- Product: Onions  
-- Quantity: 30kg
-- Price: ₹25 per kg
-- Quality: Standard Grade
-
-You now have 2 products active:
-🍅 Tomatoes: 50kg at ₹30/kg
-🧅 Onions: 30kg at ₹25/kg
-
-Great pricing strategy! Your onions are slightly below market average - this should attract more customers. Both products are now visible to customers within 50km of your location.
-
-💰 Potential Revenue: ₹2,250 if all sold
-📍 Customers nearby: 47 active users looking for fresh vegetables"
+AI: [Shows success message with listing details]
 ```
 
-## Demo Scenario 3: Voice Interaction
+**Highlight Features:**
+- Intent recognition (product listing)
+- Product/quantity/price extraction
+- Listing confirmation workflow
+- Integration with product database
 
-### Setup:
-- Feature: Voice recognition for hands-free operation
-- User: Farmer with dirty hands from fieldwork
-
-### Voice Interaction:
+**Farmer Query 2: Market Information**
 ```
-[Farmer clicks microphone button]
+Farmer: "What is the current market price for onions?"
 
-Farmer: *speaks* "I need to list carrots, twenty kilograms, forty rupees per kilogram"
-
-AI (Alex): "I heard you perfectly! 🥕 Let me process that:
-
-📝 Voice Input Processed:
-- Product: Carrots
-- Quantity: 20kg  
-- Price: ₹40/kg
-
-✅ Carrots Listed Successfully!
-Your carrots are now available for customers. ₹40/kg is excellent pricing for carrots - that's 15% above market average, perfect for premium quality!
-
-Would you like to add more products using voice commands? Just click the microphone and speak naturally!"
+AI: [Provides current market information and price trends]
 ```
 
-## Demo Scenario 4: Error Handling & Guidance
+## Technical Highlights (2 minutes)
 
-### Setup:
-- Scenario: Incomplete information provided
-- Show how AI guides users to complete transactions
+"Let me highlight some technical aspects of our implementation:"
 
-### Conversation Flow:
+1. **Google Gemini Integration**: Show how we connect to the Gemini API
+   ```javascript
+   // Using the latest model
+   this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+   ```
+
+2. **Environment Variable Loading**: Demonstrate our robust environment loading
+   ```javascript
+   // Proper environment loading with absolute paths
+   const __dirname = path.dirname(fileURLToPath(import.meta.url));
+   const envPath = path.resolve(__dirname, '../.env');
+   dotenv.config({ path: envPath });
+   ```
+
+3. **Intent Recognition**: Show how we detect user intents
+   ```javascript
+   // Example extracted from chat
+   {
+     "intent": "order_request",
+     "extractedData": {
+       "productName": "tomatoes",
+       "quantity": 2,
+       "unit": "kg"
+     }
+   }
+   ```
+
+4. **Confirmation Workflow**: Show the two-step process for safety
+   ```javascript
+   // Confirmation data structure
+   additionalData.pendingConfirmation = {
+     type: 'order',
+     productId: bestMatch.id,
+     productName: bestMatch.name,
+     quantity: aiResponse.extractedData.quantity || 1,
+     unit: aiResponse.extractedData.unit || 'kg',
+     price: bestMatch.price,
+     totalCost: bestMatch.price * (aiResponse.extractedData.quantity || 1)
+   };
+   ```
+
+## Demo Scenario: Advanced Features (2 minutes)
+
+**Customer Query: Agricultural Advice**
 ```
-Customer: "I want vegetables"
+Customer: "How do I grow tomatoes in my balcony garden?"
 
-AI (Sage): "I'd love to help you find vegetables! 🥬 To give you the best recommendations, could you tell me:
-
-🤔 What specific vegetables are you looking for?
-📏 How much do you need?
-🍽️ What are you planning to cook?
-
-Or if you're not sure, I can suggest what's fresh and seasonal right now! What sounds good to you?"
-
-Customer: "Something for curry"
-
-AI (Sage): "Perfect! Curry ingredients! 🍛 For a delicious curry, I recommend:
-
-🌟 **Popular Curry Vegetables Available Near You:**
-🍅 Tomatoes (₹25/kg) - Perfect base for curry
-🧅 Onions (₹20/kg) - Essential flavor foundation  
-🌶️ Green Chilies (₹40/kg) - Add the perfect heat
-🥕 Carrots (₹35/kg) - Natural sweetness
-🥔 Potatoes (₹18/kg) - Hearty and filling
-
-How much are you cooking for? Family of 4? I can suggest the perfect quantities! 👨‍👩‍👧‍👦"
-```
-
-## Demo Scenario 5: Integration Features
-
-### Setup:
-- Show how chatbot integrates with existing platform features
-- Location detection, cart, user profiles
-
-### Advanced Features Demo:
-```
-AI (Sage): "I notice this is your first order with us! 🎉 Welcome to StellarSoil! 
-
-Based on your location in Pune, I found 12 verified farmers within 15km. I've also noticed you're interested in organic products - would you like me to filter for certified organic farms only?
-
-🌱 **Organic Options Available:**
-- Certified organic tomatoes: ₹35/kg (vs ₹25/kg regular)
-- Organic onions: ₹28/kg (vs ₹20/kg regular)
-- Pesticide-free carrots: ₹45/kg
-
-🚚 **Delivery Options:**
-- Same-day delivery: Available for orders before 2 PM
-- Scheduled delivery: Choose your preferred time slot
-- Farm pickup: Visit the farm and get 10% discount
-
-💳 **Payment Options:**
-- UPI/Digital payments: Get 2% cashback
-- Cash on delivery: Available in your area
-- StellarSoil Wallet: Earn reward points
-
-Would you like me to set up your profile preferences for faster future orders?"
+AI: [Provides detailed gardening advice specific to balcony conditions]
 ```
 
-## Key Demo Points to Highlight:
+**Farmer Query: Crop Planning**
+```
+Farmer: "When is the best time to plant wheat in northern India?"
 
-### 🎯 **Natural Language Processing:**
-- Understands conversational requests
-- Extracts product, quantity, price automatically
-- Handles variations in speech patterns
+AI: [Provides region-specific agricultural advice with seasonal recommendations]
+```
 
-### 🌍 **Location Intelligence:**
-- Finds farmers within radius
-- Calculates delivery distances
-- Shows realistic delivery times
+## Fallback Handling (1 minute)
 
-### 🛒 **E-commerce Integration:**
-- Direct cart operations
-- Real-time inventory checks
-- Price comparisons
+"Our system gracefully handles situations when the AI service is unavailable:"
 
-### 🎙️ **Voice Recognition:**
-- Hands-free operation
-- Perfect for farmers in field
-- Accurate speech-to-text conversion
+```javascript
+// Fallback system ensures responses even without API
+try {
+  // Attempt to get AI response
+  const aiResponse = await this.generateGeminiResponse(message, context);
+  return aiResponse;
+} catch (error) {
+  console.error('AI response generation error:', error);
+  // Use fallback responses if AI fails
+  return this.generateFallbackResponse(message, userRole);
+}
+```
 
-### 🤖 **Smart Assistance:**
-- Context-aware responses
-- Proactive suggestions
-- Learning from conversations
+## Closing (1 minute)
 
-### 🔄 **Real-time Processing:**
-- Instant product listings
-- Immediate order processing
-- Live inventory updates
+"This AI chatbot significantly improves the user experience for both farmers and customers by:
+
+1. Reducing friction in the buying/selling process
+2. Providing agricultural expertise on demand
+3. Making complex interactions conversational
+4. Ensuring safety with confirmation workflows
+5. Creating a consistent experience across devices
+
+With our enhanced environment variable loading system, the chatbot now works reliably across all services, with proper integration of the Google Gemini API."
+
+## Q&A (2 minutes)
+
+"I'd be happy to answer any questions about the implementation or demonstrate additional features."
 
 ---
 
-**Demo Duration:** 8-10 minutes total
-**Key Message:** "AI that understands agriculture and makes buying/selling as easy as having a conversation!"
+## Appendix: Additional Demo Scenarios
+
+### Error Handling Demo
+```
+Customer: "I want vegetables"
+
+AI: [Asks for clarification about specific vegetables]
+
+Customer: "Something for curry"
+
+AI: [Provides suggestions for curry ingredients]
+```
+
+### Voice Recognition Demo (If Available)
+```
+[User clicks microphone button]
+
+User: *speaks* "I need 2kg tomatoes"
+
+AI: [Processes voice input and responds accordingly]
+```
+
+### Location-Aware Demo
+```
+Customer: "Find farmers near me"
+
+AI: [Uses location data to recommend nearby farmers]
+```
