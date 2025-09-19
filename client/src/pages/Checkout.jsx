@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import API from '../api/api';
 import PaymentForm from '../components/PaymentForm';
+import OrderSummary from '../components/OrderSummary';
 import { 
   ShoppingBagIcon, 
   CreditCardIcon, 
@@ -19,6 +20,7 @@ const Checkout = () => {
   const [error, setError] = useState(null);
   const [orderCreated, setOrderCreated] = useState(false);
   const [order, setOrder] = useState(null);
+  const [showSummary, setShowSummary] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,15 +58,13 @@ const Checkout = () => {
   const handlePaymentSuccess = (orderData) => {
     setOrder(orderData);
     setOrderCreated(true);
+    setShowSummary(true); // Show the order summary modal
     
-    // If COD, show the verification code modal
-    if (orderData.paymentMethod === 'cod' && orderData.verificationCode) {
-      // We'll use orderCreated state to show the success modal with verification code
-    } else {
-      // For other payment methods, navigate to order detail
-      setTimeout(() => {
-        navigate(`/orders/${orderData._id}`);
-      }, 3000);
+    // For COD, the modal will show the verification code
+    // For other payment methods, we'll still show the summary but set a timeout to navigate after closing
+    if (orderData.paymentMethod !== 'cod') {
+      // We'll let the user manually close the summary now, instead of auto-navigating
+      // They can view order details later from the order history page
     }
   };
 
@@ -75,6 +75,14 @@ const Checkout = () => {
 
   const handleViewOrder = () => {
     navigate(`/orders/${order._id}`);
+  };
+
+  const handleCloseSummary = () => {
+    setShowSummary(false);
+    // Optional: navigate to order details after closing summary
+    if (order && order._id) {
+      navigate(`/orders/${order._id}`);
+    }
   };
 
   if (loading) {
@@ -187,79 +195,76 @@ const Checkout = () => {
     );
   }
 
-  // Order success modal
+  // Order Success Modal with Order Summary
   if (orderCreated && order) {
     return (
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-h-screen bg-gradient-to-br from-beige-50 via-cream-50 to-sage-50 pt-20 flex items-center justify-center p-4"
-      >
+      <>
         <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-green-200 p-8 max-w-lg w-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="min-h-screen bg-gradient-to-br from-beige-50 via-cream-50 to-sage-50 pt-20 flex items-center justify-center p-4"
         >
-          <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mb-6">
-              <motion.svg 
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1 }}
-                className="w-10 h-10 text-white" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <motion.path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M5 13l4 4L19 7" 
-                />
-              </motion.svg>
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-green-200 p-8 max-w-lg w-full"
+          >
+            <div className="flex flex-col items-center text-center mb-8">
+              <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mb-6">
+                <motion.svg 
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 1 }}
+                  className="w-10 h-10 text-white" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <motion.path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M5 13l4 4L19 7" 
+                  />
+                </motion.svg>
+              </div>
+              
+              <h2 className="text-3xl font-bold text-green-800 mb-2">Order Successful!</h2>
+              <p className="text-green-700 mb-4">Your order has been placed successfully.</p>
             </div>
             
-            <h2 className="text-3xl font-bold text-green-800 mb-2">Order Successful!</h2>
-            <p className="text-green-700 mb-4">Your order has been placed successfully.</p>
-            
-            {order.paymentMethod === 'cod' && (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-amber-50 border border-amber-200 p-4 rounded-xl w-full"
+            <div className="space-y-4">
+              <button
+                onClick={() => setShowSummary(true)}
+                className="w-full px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg"
               >
-                <h3 className="text-amber-800 font-bold text-lg mb-2">Verification Code</h3>
-                <p className="text-amber-700 mb-2">Show this code to the delivery person:</p>
-                <div className="bg-white p-4 rounded-lg border-2 border-amber-300 flex items-center justify-center">
-                  <span className="text-3xl font-mono font-bold tracking-widest text-amber-900">
-                    {order.verificationCode?.code || "N/A"}
-                  </span>
-                </div>
-                <p className="mt-4 text-sm text-amber-700">
-                  This code will also be sent to your phone for verification at delivery.
-                </p>
-              </motion.div>
-            )}
-          </div>
-          
-          <div className="space-y-4">
-            <button
-              onClick={handleViewOrder}
-              className="w-full px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg"
-            >
-              View Order Details
-            </button>
-            
-            <Link
-              to="/"
-              className="w-full px-6 py-3 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center"
-            >
-              Return to Home
-            </Link>
-          </div>
+                View Order Summary
+              </button>
+              
+              <button
+                onClick={handleViewOrder}
+                className="w-full px-6 py-3 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center"
+              >
+                Go to Order Details
+              </button>
+              
+              <Link
+                to="/"
+                className="w-full px-6 py-3 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center"
+              >
+                Return to Home
+              </Link>
+            </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
+        
+        {/* Order Summary Modal */}
+        <AnimatePresence>
+          {showSummary && (
+            <OrderSummary order={order} onClose={handleCloseSummary} />
+          )}
+        </AnimatePresence>
+      </>
     );
   }
 

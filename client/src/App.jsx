@@ -6,7 +6,7 @@ import Marketplace from './pages/Marketplace';
 import EnhancedFarms from './pages/EnhancedFarms';
 import FarmDashboard from './pages/FarmDashboard';
 import FarmProfile from './pages/FarmProfile';
-import FarmerOrders from './pages/FarmerOrders';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import AdminPanel from './components/AdminPanel';
 
@@ -67,69 +67,70 @@ const App = () => {
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-cream-300 to-beige-300 rounded-full blur-3xl"></div>
           </div>
         
-        <div className="relative z-10">
-          <Navbar />
-          <SmartNotificationSystem />
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
-              <Routes location={location}>
-                {/* Public Routes */}
-                <Route path="/" element={<EnhancedLandingPage />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/privacy" element={<PrivacyPolicyPage />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/features" element={<AdvancedFeaturesShowcase />} />
-                <Route path="/features-new" element={<FeaturesPage />} />
-              
-                {/* Legacy Routes for compatibility */}
-                <Route path="/about-old" element={<AboutPage />} />
-                <Route path="/contact-old" element={<ContactPage />} />
-                
-                {/* User Dashboard (authenticated users only) */}
-                <Route path="/dashboard" element={<UserRoute><Home /></UserRoute>} />
-                <Route path="/profile" element={<UserRoute><UserProfile /></UserRoute>} />
-                <Route path="/settings" element={<UserRoute><Settings /></UserRoute>} />
-                
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
-                <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
-                <Route path="/admin/farms" element={<AdminRoute><AdminFarms /></AdminRoute>} />
-                <Route path="/admin/verifications" element={<AdminRoute><AdminPanel /></AdminRoute>} />
-                
-                {/* Farmer Routes */}
-                <Route path="/farmer" element={<FarmerRoute><FarmDashboard /></FarmerRoute>} />
-                <Route path="/farmer/profile" element={<FarmerRoute><FarmProfile /></FarmerRoute>} />
-                <Route path="/farmer/orders" element={<FarmerRoute><FarmerOrders /></FarmerRoute>} />
-                
-                {/* User Shopping Routes */}
-                <Route path="/farms" element={<EnhancedFarms />} />
-                <Route path="/purchase/:farmId/:productId" element={<UserRoute><PurchaseProduce /></UserRoute>} />
-                <Route path="/cart" element={<UserRoute><Cart /></UserRoute>} />
-                <Route path="/favorites" element={<UserRoute><Favorites /></UserRoute>} />
-                <Route path="/orders" element={<UserRoute><OrderHistory /></UserRoute>} />
-                <Route path="/checkout" element={<UserRoute><Checkout /></UserRoute>} />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </motion.div>
-          </AnimatePresence>
-          
-          {/* AI Chatbot Assistant - Global */}
-          <AIChatbotAssistant />
-          
-          {/* Focus Test Component - Testing Only */}
-          {/* <FocusTestComponent /> */}
+          <div className="relative z-10">
+            <Navbar />
+            <SmartNotificationSystem />
+            <ErrorBoundary>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={location.pathname}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                >
+                  <Routes location={location}>
+                    {/* Public Routes */}
+                    <Route path="/" element={<EnhancedLandingPage />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/faq" element={<FAQ />} />
+                    <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                    <Route path="/marketplace" element={<Marketplace />} />
+                    <Route path="/features" element={<AdvancedFeaturesShowcase />} />
+                    <Route path="/features" element={<FeaturesPage />} />
+                  
+                    {/* Legacy Routes for compatibility */}
+                    <Route path="/about-old" element={<AboutPage />} />
+                    <Route path="/contact-old" element={<ContactPage />} />
+                    
+                    {/* User Dashboard (authenticated users only) */}
+                    <Route path="/dashboard" element={<UserRoute><Home /></UserRoute>} />
+                    <Route path="/profile" element={<UserRoute><UserProfile /></UserRoute>} />
+                    <Route path="/settings" element={<UserRoute><Settings /></UserRoute>} />
+                    
+                    {/* Admin Routes */}
+                    <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+                    <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+                    <Route path="/admin/farms" element={<AdminRoute><AdminFarms /></AdminRoute>} />
+                    <Route path="/admin/verifications" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+                    
+                    {/* Farmer Routes */}
+                    <Route path="/farmer" element={<FarmerRoute><FarmDashboard /></FarmerRoute>} />
+                    <Route path="/farmer/profile" element={<FarmerRoute><FarmProfile /></FarmerRoute>} />
+                    
+                    {/* User Shopping Routes */}
+                    <Route path="/farms" element={<EnhancedFarms />} />
+                    <Route path="/purchase/:farmId/:productId" element={<UserRoute><PurchaseProduce /></UserRoute>} />
+                    <Route path="/cart" element={<UserRoute><Cart /></UserRoute>} />
+                    <Route path="/favorites" element={<UserRoute><Favorites /></UserRoute>} />
+                    <Route path="/orders" element={<UserRoute><OrderHistory /></UserRoute>} />
+                    <Route path="/checkout" element={<UserRoute><Checkout /></UserRoute>} />
+                    
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </motion.div>
+              </AnimatePresence>
+            </ErrorBoundary>
+            
+            {/* AI Chatbot Assistant - Global */}
+            <AIChatbotAssistant />
+            
+            {/* Focus Test Component - Testing Only */}
+            {/* <FocusTestComponent /> */}
+          </div>
         </div>
-      </div>
-    </NotificationProvider>
+      </NotificationProvider>
     </ThemeProvider>
   );
 };
