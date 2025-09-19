@@ -1,0 +1,113 @@
+/* Compact floating translate button (arrow only) */
+#google_translate_element {
+    position: fixed !important;
+    top: 12px !important;
+    right: 12px !important;
+    z-index: 9999 !important;
+    width: 36px !important;
+    height: 10px !important;
+    background: transparent !important; /* remove black panel */
+    border-radius: 8px !important;
+    padding: 0 !important;
+    box-shadow: none !important; /* no shadow panel */
+    transition: transform 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: visible !important;
+}
+
+#google_translate_element::before { content: none !important; }
+
+#google_translate_element::after {
+    content: "\25BE" !important; /* ▼ */
+    color: #000000 !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+}
+
+#google_translate_element:hover { transform: translateY(-1px) !important; }
+
+/* Keep notification button above navbar */
+.floating-notification-btn { position: fixed !important; top: 16px !important; left: 16px !important; z-index: 10000 !important; }
+
+/* Hide attribution */
+.goog-logo-link { display: none !important; }
+
+/* Make gadget cover the button area so clicks reach the select */
+.goog-te-gadget {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    font-size: 0 !important;
+    color: transparent !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.goog-te-gadget > span, .goog-te-gadget > span > a { display: none !important; }
+
+/* Make the select invisible but clickable */
+.skiptranslate select.goog-te-combo,
+.goog-te-combo {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    color: transparent !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    cursor: pointer !important;
+}
+
+/* Hide Google's top banner */
+.goog-te-banner-frame { display: none !important; }
+.skiptranslate iframe { display: none !important; }
+
+/* Style the Google Translate menu when it opens */
+
+.goog-te-menu-frame {
+    background: #fff !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12) !important;
+    width: 140px !important;
+    min-width: 120px !important;
+    max-width: 160px !important;
+    height: auto !important;
+    top: 48px !important;
+    right: 0 !important;
+    left: auto !important;
+    backdrop-filter: none !important;
+}
+.goog-te-menu2 {
+    background: #fff !important;
+    border: none !important;
+    min-width: 120px !important;
+    max-width: 160px !important;
+}
+.goog-te-menu2-item {
+    color: #222 !important;
+    background: #fff !important;
+    border: none !important;
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+    font-family: inherit !important;
+    transition: background 0.2s ease !important;
+    min-width: 100px !important;
+}
+.goog-te-menu2-item:hover {
+    background: #f0f0f0 !important;
+}
+.goog-te-menu2-item-selected {
+    background: #e3f2fd !important;
+}
+
+/* Remove the black arrow from the dropdown */
+.goog-te-menu2-arrow {
+    display: none !important;
+}

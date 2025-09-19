@@ -37,7 +37,7 @@ const seedProducts = async () => {
         name: 'tomato',
         price: 25,
         unit: 'kg',
-        quantity: 100,
+        quantity: 1000,
         farmer: 'Sunny Farms',
         description: 'Fresh organic tomatoes',
         image: '/placeholder.jpg'
@@ -46,7 +46,7 @@ const seedProducts = async () => {
         name: 'potato',
         price: 20,
         unit: 'kg',
-        quantity: 50,
+        quantity: 800,
         farmer: 'Green Valley Farm',
         description: 'Fresh potatoes',
         image: '/placeholder.jpg'
@@ -55,7 +55,7 @@ const seedProducts = async () => {
         name: 'onion',
         price: 30,
         unit: 'kg',
-        quantity: 75,
+        quantity: 900,
         farmer: 'Hillside Farms',
         description: 'Fresh red onions',
         image: '/placeholder.jpg'
@@ -64,7 +64,7 @@ const seedProducts = async () => {
         name: 'carrot',
         price: 35,
         unit: 'kg',
-        quantity: 40,
+        quantity: 700,
         farmer: 'Organic Gardens',
         description: 'Fresh organic carrots',
         image: '/placeholder.jpg'

@@ -1,3 +1,21 @@
+                    {/* Google Translate Selector Button (compact, does not affect navbar size) */}
+                    <motion.button
+                      className="px-2 py-2 rounded-lg text-gray-600 hover:text-sage-700 hover:bg-sage-50/70 transition-all duration-300 flex items-center space-x-1 h-10 min-w-0"
+                      style={{ outline: 'none', boxShadow: 'none', border: 'none', height: '40px', minWidth: 0 }}
+                      tabIndex="-1"
+                      onClick={() => {
+                        // Try to open Google Translate widget dropdown
+                        const combo = document.querySelector('.goog-te-combo');
+                        if (combo) {
+                          combo.focus();
+                          combo.click();
+                        }
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </motion.button>
 import { Fragment, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -30,6 +48,8 @@ import {
 import AuthModal from './AuthModal';
 import EnhancedLanguageSelector from './EnhancedLanguageSelector';
 import EnhancedThemeToggle from './EnhancedThemeToggle';
+import GoogleTranslateWidget from './GoogleTranslateWidget';
+import useGoogleTranslate from '../hooks/useGoogleTranslate';
 import FocusKiller from './FocusKiller';
 import ThemeToggle from './ThemeToggle';
 
@@ -42,6 +62,7 @@ const EnhancedNavbar = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+  const isTranslateActive = useGoogleTranslate();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [notifications, setNotifications] = useState(2);
@@ -325,7 +346,11 @@ const EnhancedNavbar = () => {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 w-full z-50"
+      className="fixed left-0 right-0 w-full z-50"
+      style={{ 
+        top: isTranslateActive ? '40px' : '0px',
+        transition: 'top 0.3s ease-in-out'
+      }}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
@@ -589,6 +614,11 @@ const EnhancedNavbar = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, delay: 0.4 }}
                   >
+                    {/* Google Translate Widget */}
+                    <div className="mr-2">
+                      <GoogleTranslateWidget />
+                    </div>
+                    
                     {user && (
                       <>
                         {/* Quick Actions Dropdown */}
@@ -727,13 +757,6 @@ const EnhancedNavbar = () => {
                       </>
                     )}
 
-                    {/* Enhanced Language Selector */}
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <EnhancedLanguageSelector variant="compact" />
-                    </motion.div>
                     
                     {/* Enhanced Theme Toggle */}
                     <motion.div
@@ -1087,6 +1110,21 @@ const EnhancedNavbar = () => {
                             </motion.div>
                           ))}
                         </div>
+
+                        {/* Mobile Google Translate Widget */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: 0.4 }}
+                          className="border-t border-gray-100 pt-4 pb-4"
+                        >
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                            Language
+                          </p>
+                          <div className="px-2">
+                            <GoogleTranslateWidget />
+                          </div>
+                        </motion.div>
 
                         {user && (
                           <>

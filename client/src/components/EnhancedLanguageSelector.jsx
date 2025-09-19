@@ -93,7 +93,6 @@ const EnhancedLanguageSelector = ({ variant = 'default', className = '' }) => {
     try {
       await i18n.changeLanguage(languageCode);
       setIsOpen(false);
-      
       // Update document direction for RTL languages
       const newLanguage = languages.find(lang => lang.code === languageCode);
       document.documentElement.dir = newLanguage.rtl ? 'rtl' : 'ltr';

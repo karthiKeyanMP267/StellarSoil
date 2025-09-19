@@ -165,7 +165,7 @@ const AISmartChatbot = ({ userRole = 'customer' }) => {
         setConnectionStatus('connected');
 
         // If chatbot response includes cart, update cart context
-        if (data.data.cart && Array.isArray(data.data.cart.items)) {
+        if (data.data.orderProcessed && data.data.cart && Array.isArray(data.data.cart.items)) {
           try {
             // Convert backend cart items to frontend format
             const newCartItems = data.data.cart.items.map(item => ({

@@ -38,9 +38,23 @@ class ChatController {
       let additionalData = {};
 
       // Handle confirmation intents first
-      if (aiResponse.intent === 'order_confirmation' && userId && pendingConfirmation) {
+      if (
+        aiResponse.intent === 'order_confirmation' &&
+        userId &&
+        pendingConfirmation &&
+        req.body.message &&
+        typeof req.body.message === 'string' &&
+        ["yes", "confirm", "add to cart", "proceed", "approve"].some(keyword => req.body.message.toLowerCase().includes(keyword))
+      ) {
         additionalData = await this.processOrderConfirmation(pendingConfirmation, userId);
-      } else if (aiResponse.intent === 'listing_confirmation' && userId && pendingConfirmation) {
+      } else if (
+        aiResponse.intent === 'listing_confirmation' &&
+        userId &&
+        pendingConfirmation &&
+        req.body.message &&
+        typeof req.body.message === 'string' &&
+        ["yes", "confirm", "list it", "proceed", "approve"].some(keyword => req.body.message.toLowerCase().includes(keyword))
+      ) {
         additionalData = await this.processListingConfirmation(pendingConfirmation, userId, userLocation);
       }
       // Handle initial requests that need confirmation

@@ -204,21 +204,22 @@ IMPORTANT: Respond ONLY with a plain JSON object. Do NOT use markdown formatting
 
   getFallbackResponse(userMessage, userRole) {
     const message = userMessage.toLowerCase();
-    
-    // Simple intent detection for fallback
     let intent = 'general_query';
     let extractedData = {};
     let needsLocation = false;
     let requiresConfirmation = false;
     let confirmationData = {};
+    let reply = '';
 
     // Check for confirmation responses
     if (message.includes('yes') || message.includes('confirm') || message.includes('add to cart') || 
         message.includes('list it') || message.includes('proceed') || message.includes('approve')) {
       if (userRole === 'farmer') {
         intent = 'listing_confirmation';
+        reply = "Perfect! I'll process your product listing now.";
       } else {
         intent = 'order_confirmation';
+        reply = "Excellent! I'll add that to your cart right now.";
       }
     }
     // Check for order/listing intents
@@ -228,6 +229,14 @@ IMPORTANT: Respond ONLY with a plain JSON object. Do NOT use markdown formatting
         extractedData = this.extractProductListing(userMessage);
         requiresConfirmation = true;
         confirmationData = extractedData;
+        // Build context-aware reply
+        if (extractedData.productName && extractedData.quantity && extractedData.pricePerUnit) {
+          reply = `I understand you want to list ${extractedData.quantity}${extractedData.unit ? ' ' + extractedData.unit : ''} ${extractedData.productName} at ₹${extractedData.pricePerUnit} per ${extractedData.unit || 'unit'}. Should I add this to your inventory?`;
+        } else if (extractedData.productName) {
+          reply = `You want to list ${extractedData.productName}. Please provide quantity and price details.`;
+        } else {
+          reply = "I understand you want to list a product. Please provide product name, quantity, and price.";
+        }
       }
     } else {
       if (message.includes('need') || message.includes('want') || message.includes('order')) {
@@ -236,24 +245,28 @@ IMPORTANT: Respond ONLY with a plain JSON object. Do NOT use markdown formatting
         needsLocation = true;
         requiresConfirmation = true;
         confirmationData = extractedData;
+        // Build context-aware reply
+        if (extractedData.productName && extractedData.quantity) {
+          reply = `Would you like me to add ${extractedData.quantity}${extractedData.unit ? ' ' + extractedData.unit : ''} ${extractedData.productName} to your cart?`;
+        } else if (extractedData.productName) {
+          reply = `You want to order ${extractedData.productName}. Please specify the quantity you need.`;
+        } else {
+          reply = "I can help you place an order. Please specify the product and quantity you need.";
+        }
       }
     }
 
-    const responses = {
-      farmer: {
-        product_listing: "I understand you want to list that product. Let me confirm the details before adding it to your inventory.",
-        listing_confirmation: "Perfect! I'll process your product listing now.",
-        general_query: "Hello! I'm here to help you manage your farm products and connect with customers. What would you like to do today?"
-      },
-      customer: {
-        order_request: "I'd be happy to help you find that product! Let me show you what's available and confirm your order.",
-        order_confirmation: "Excellent! I'll add that to your cart right now.",
-        general_query: "Welcome! I can help you find fresh produce, place orders, and discover amazing recipes. What are you looking for today?"
+    // General query fallback
+    if (!reply) {
+      if (userRole === 'farmer') {
+        reply = "Hello! I'm here to help you manage your farm products and connect with customers. What would you like to do today?";
+      } else {
+        reply = "Welcome! I can help you find fresh produce, place orders, and discover amazing recipes. What are you looking for today?";
       }
-    };
+    }
 
     return {
-      message: responses[userRole][intent] || responses[userRole].general_query,
+      message: reply,
       intent,
       extractedData,
       actions: userRole === 'farmer' 
