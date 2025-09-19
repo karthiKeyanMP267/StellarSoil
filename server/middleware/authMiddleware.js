@@ -58,6 +58,12 @@ export const protect = async (req, res, next) => {
 
       // Add user info to request
       req.user = user;
+      console.log('Auth Middleware - User authenticated:', { 
+        userId: user._id, 
+        userIdAsString: user._id.toString(),
+        role: user.role,
+        hasId: !!user.id
+      });
       next();
     } catch (tokenError) {
       if (tokenError.name === 'TokenExpiredError') {

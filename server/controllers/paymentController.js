@@ -10,7 +10,7 @@ export const initializePayment = async (req, res) => {
     // Get cart and validate
     const cart = await Cart.findOne({
       _id: cartId,
-      user: req.user.id
+      user: req.user._id
     }).populate('items.product');
 
     if (!cart) {
@@ -65,7 +65,7 @@ export const verifyPayment = async (req, res) => {
     // Get cart
     const cart = await Cart.findOne({
       _id: cartId,
-      user: req.user.id
+      user: req.user._id
     }).populate('items.product');
 
     if (!cart) {
@@ -74,7 +74,7 @@ export const verifyPayment = async (req, res) => {
 
     // Create order
     const order = await Order.create({
-      buyer: req.user.id,
+      buyer: req.user._id,
       farm: cart.farm,
       items: cart.items.map(item => ({
         product: item.product._id,

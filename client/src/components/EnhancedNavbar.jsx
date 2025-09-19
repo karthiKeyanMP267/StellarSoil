@@ -110,7 +110,7 @@ const EnhancedNavbar = () => {
         actions.push(
           { name: 'Add Product', icon: SparklesIcon, path: '/farmer/products/add' },
           { name: 'View Analytics', icon: InformationCircleIcon, path: '/farmer/analytics' },
-          { name: 'Manage Orders', icon: CurrencyDollarIcon, path: '/farmer/orders' }
+          { name: 'Manage Orders', icon: CurrencyDollarIcon, path: '/farmer/orders', showBadge: true }
         );
       } else if (user.role === 'user') {
         actions.push(
@@ -129,110 +129,20 @@ const EnhancedNavbar = () => {
     setQuickActions(actions);
   }, [user]);
 
-  // Nuclear focus prevention
-  const preventFocus = (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-    if (e.target && e.target.blur) {
-      e.target.blur();
-    }
-    return false;
-  };
-
-  const preventAllFocus = (e) => {
+  // Custom focus style instead of prevention
+  const handleFocus = (e) => {
+    // Add a custom focus style if needed
     if (e.target) {
-      e.target.style.outline = 'none';
-      e.target.style.outlineWidth = '0';
-      e.target.style.outlineStyle = 'none';
-      e.target.style.outlineColor = 'transparent';
-      e.target.style.boxShadow = 'none';
-      e.target.style.border = 'none';
-      e.target.style.webkitTapHighlightColor = 'transparent';
-      e.target.style.webkitFocusRingColor = 'transparent';
-      e.target.blur();
+      e.target.classList.add('custom-focus');
     }
   };
 
-  // Enhanced global focus prevention
-  const ultraFocusPrevention = (e) => {
-    if (e.target.closest('nav') || e.target.closest('.navbar')) {
-  e.preventDefault();
-  e.stopPropagation();
-      
-      // Remove all focus attributes
-      e.target.removeAttribute('tabindex');
-      e.target.setAttribute('tabindex', '-1');
-      
-      // Force blur
-      if (e.target.blur) {
-        try {
-          e.target.blur();
-        } catch (err) {
-          // Ignore
-        }
-      }
-      
-      // Remove focus from document.activeElement
-      if (document.activeElement && document.activeElement.blur) {
-        try {
-          document.activeElement.blur();
-        } catch (err) {
-          // Ignore
-        }
-      }
-      
-      return false;
+  const handleBlur = (e) => {
+    // Remove custom focus style
+    if (e.target) {
+      e.target.classList.remove('custom-focus');
     }
   };
-
-  // Add global event listeners to prevent focus
-  useEffect(() => {
-    const handleFocus = (e) => {
-      if (e.target.closest('nav') || e.target.closest('.navbar')) {
-        ultraFocusPrevention(e);
-      }
-    };
-
-    const handleKeyDown = (e) => {
-      if ((e.key === 'Tab' || e.key === 'Enter' || e.key === ' ') && 
-          (e.target.closest('nav') || e.target.closest('.navbar'))) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        return false;
-      }
-    };
-
-    const handleMouseDown = (e) => {
-      if (e.target.closest('nav') || e.target.closest('.navbar')) {
-        // Allow click but prevent focus
-        setTimeout(() => {
-          if (e.target.blur) {
-            try {
-              e.target.blur();
-            } catch (err) {
-              // Ignore
-            }
-          }
-        }, 0);
-      }
-    };
-
-    // Add listeners with high priority
-    document.addEventListener('focus', handleFocus, { capture: true, passive: false });
-    document.addEventListener('focusin', handleFocus, { capture: true, passive: false });
-    document.addEventListener('focusout', handleFocus, { capture: true, passive: false });
-    document.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
-    document.addEventListener('mousedown', handleMouseDown, { capture: true, passive: false });
-
-    return () => {
-      document.removeEventListener('focus', handleFocus, { capture: true });
-      document.removeEventListener('focusin', handleFocus, { capture: true });
-      document.removeEventListener('focusout', handleFocus, { capture: true });
-      document.removeEventListener('keydown', handleKeyDown, { capture: true });
-      document.removeEventListener('mousedown', handleMouseDown, { capture: true });
-    };
-  }, [ultraFocusPrevention]);
 
   const handleLogout = () => {
     logout();
@@ -368,20 +278,9 @@ const EnhancedNavbar = () => {
                   >
                     <Link 
                       to={user ? "/dashboard" : "/"} 
-                      className="flex items-center space-x-3 group no-focus-outline"
-                      style={{ 
-                        outline: 'none !important', 
-                        boxShadow: 'none !important',
-                        border: 'none !important'
-                      }}
-                      tabIndex="-1"
-                      onFocus={preventFocus}
-                      onMouseDown={preventFocus}
-                      onKeyDown={preventFocus}
-                      onClick={(e) => {
-                        preventAllFocus(e);
-                        // Let the navigation happen normally
-                      }}
+                      className="flex items-center space-x-3 group"
+                      onFocus={handleFocus}
+                      onBlur={handleBlur}
                     >
                       <motion.div 
                         className="relative"
@@ -462,20 +361,10 @@ const EnhancedNavbar = () => {
                               item.current
                                 ? 'text-sage-700 font-semibold bg-gradient-to-r from-sage-50/90 to-beige-50/90 shadow-sm'
                                 : 'text-gray-700 hover:text-sage-700 hover:bg-gradient-to-r hover:from-sage-50/60 hover:to-beige-50/60',
-                              'relative px-4 py-2.5 text-sm font-medium tracking-wide transition-all duration-300 group rounded-lg backdrop-blur-sm border-0 no-focus-outline'
+                              'relative px-4 py-2.5 text-sm font-medium tracking-wide transition-all duration-300 group rounded-lg backdrop-blur-sm'
                             )}
-                            style={{ 
-                              outline: 'none !important', 
-                              boxShadow: 'none !important',
-                              border: 'none !important'
-                            }}
-                            tabIndex="-1"
-                            onFocus={preventFocus}
-                            onMouseDown={preventFocus}
-                            onKeyDown={preventFocus}
-                            onClick={(e) => {
-                              preventAllFocus(e);
-                            }}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
                           >
                             <motion.div 
                               className="flex items-center space-x-2"
@@ -775,22 +664,9 @@ const EnhancedNavbar = () => {
                       >
                         <motion.button
                           onClick={() => openModal('login')}
-                          className="relative px-5 py-2 text-gray-700 hover:text-sage-700 font-medium rounded-lg hover:bg-sage-50/70 transition-all duration-300 no-focus-outline overflow-hidden"
-                          style={{ 
-                            outline: 'none !important', 
-                            boxShadow: 'none !important',
-                            border: 'none !important'
-                          }}
-                          tabIndex="-1"
-                          onFocus={(e) => {
-                            e.target.style.outline = 'none';
-                            e.target.style.boxShadow = 'none';
-                            e.target.style.border = 'none';
-                            e.target.blur();
-                          }}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                          }}
+                          className="relative px-5 py-2 text-gray-700 hover:text-sage-700 font-medium rounded-lg hover:bg-sage-50/70 transition-all duration-300 overflow-hidden"
+                          onFocus={handleFocus}
+                          onBlur={handleBlur}
                           whileHover={{ 
                             scale: 1.05, 
                             y: -2,
@@ -809,22 +685,9 @@ const EnhancedNavbar = () => {
                         
                         <motion.button
                           onClick={() => openModal('register')}
-                          className="relative px-5 py-2 bg-gradient-to-r from-sage-600 to-sage-700 text-white font-medium rounded-lg hover:from-sage-700 hover:to-sage-800 transition-all duration-300 shadow-md hover:shadow-lg no-focus-outline overflow-hidden"
-                          style={{ 
-                            outline: 'none !important', 
-                            boxShadow: 'none !important',
-                            border: 'none !important'
-                          }}
-                          tabIndex="-1"
-                          onFocus={(e) => {
-                            e.target.style.outline = 'none';
-                            e.target.style.boxShadow = 'none';
-                            e.target.style.border = 'none';
-                            e.target.blur();
-                          }}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                          }}
+                          className="relative px-5 py-2 bg-gradient-to-r from-sage-600 to-sage-700 text-white font-medium rounded-lg hover:from-sage-700 hover:to-sage-800 transition-all duration-300 shadow-md hover:shadow-lg overflow-hidden"
+                          onFocus={handleFocus}
+                          onBlur={handleBlur}
                           whileHover={{ 
                             scale: 1.05, 
                             y: -2,

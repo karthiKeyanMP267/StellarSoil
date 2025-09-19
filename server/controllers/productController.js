@@ -4,7 +4,7 @@ import Farm from '../models/Farm.js';
 // Create a new product
 export const createProduct = async (req, res) => {
   try {
-    const farm = await Farm.findOne({ owner: req.user.id });
+    const farm = await Farm.findOne({ owner: req.user._id });
     if (!farm) {
       return res.status(404).json({ msg: 'Farm not found' });
     }
@@ -16,7 +16,11 @@ export const createProduct = async (req, res) => {
 
     res.status(201).json(product);
   } catch (err) {
-    res.status(500).json({ msg: 'Error creating product' });
+    console.error('Create product error:', err);
+    res.status(500).json({ 
+      msg: 'Error creating product', 
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    });
   }
 };
 
@@ -42,7 +46,11 @@ export const getNearbyProducts = async (req, res) => {
 
     res.json(products);
   } catch (err) {
-    res.status(500).json({ msg: 'Error fetching nearby products' });
+    console.error('Get nearby products error:', err);
+    res.status(500).json({ 
+      msg: 'Error fetching nearby products', 
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    });
   }
 };
 
@@ -76,14 +84,18 @@ export const searchProducts = async (req, res) => {
 
     res.json(products);
   } catch (err) {
-    res.status(500).json({ msg: 'Error searching products' });
+    console.error('Search products error:', err);
+    res.status(500).json({ 
+      msg: 'Error searching products', 
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    });
   }
 };
 
 // Update product
 export const updateProduct = async (req, res) => {
   try {
-    const farm = await Farm.findOne({ owner: req.user.id });
+    const farm = await Farm.findOne({ owner: req.user._id });
     if (!farm) {
       return res.status(404).json({ msg: 'Farm not found' });
     }
@@ -100,14 +112,18 @@ export const updateProduct = async (req, res) => {
 
     res.json(product);
   } catch (err) {
-    res.status(500).json({ msg: 'Error updating product' });
+    console.error('Update product error:', err);
+    res.status(500).json({ 
+      msg: 'Error updating product', 
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    });
   }
 };
 
 // Delete product
 export const deleteProduct = async (req, res) => {
   try {
-    const farm = await Farm.findOne({ owner: req.user.id });
+    const farm = await Farm.findOne({ owner: req.user._id });
     if (!farm) {
       return res.status(404).json({ msg: 'Farm not found' });
     }
@@ -123,7 +139,11 @@ export const deleteProduct = async (req, res) => {
 
     res.json({ msg: 'Product removed' });
   } catch (err) {
-    res.status(500).json({ msg: 'Error deleting product' });
+    console.error('Delete product error:', err);
+    res.status(500).json({ 
+      msg: 'Error deleting product', 
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    });
   }
 };
 
@@ -140,7 +160,7 @@ export const uploadProductImages = async (req, res) => {
     }
 
     // Verify farm ownership
-    const farm = await Farm.findOne({ owner: req.user.id });
+    const farm = await Farm.findOne({ owner: req.user._id });
     if (!farm || farm._id.toString() !== product.farm.toString()) {
       return res.status(403).json({ msg: 'Not authorized' });
     }
@@ -168,7 +188,7 @@ export const deleteProductImage = async (req, res) => {
     }
 
     // Verify farm ownership
-    const farm = await Farm.findOne({ owner: req.user.id });
+    const farm = await Farm.findOne({ owner: req.user._id });
     if (!farm || farm._id.toString() !== product.farm.toString()) {
       return res.status(403).json({ msg: 'Not authorized' });
     }

@@ -6,6 +6,7 @@ import Marketplace from './pages/Marketplace';
 import EnhancedFarms from './pages/EnhancedFarms';
 import FarmDashboard from './pages/FarmDashboard';
 import FarmProfile from './pages/FarmProfile';
+import FarmerOrders from './pages/FarmerOrders';
 
 import AdminPanel from './components/AdminPanel';
 
@@ -86,7 +87,7 @@ const App = () => {
                 <Route path="/privacy" element={<PrivacyPolicyPage />} />
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/features" element={<AdvancedFeaturesShowcase />} />
-                <Route path="/features" element={<FeaturesPage />} />
+                <Route path="/features-new" element={<FeaturesPage />} />
               
                 {/* Legacy Routes for compatibility */}
                 <Route path="/about-old" element={<AboutPage />} />
@@ -106,6 +107,7 @@ const App = () => {
                 {/* Farmer Routes */}
                 <Route path="/farmer" element={<FarmerRoute><FarmDashboard /></FarmerRoute>} />
                 <Route path="/farmer/profile" element={<FarmerRoute><FarmProfile /></FarmerRoute>} />
+                <Route path="/farmer/orders" element={<FarmerRoute><FarmerOrders /></FarmerRoute>} />
                 
                 {/* User Shopping Routes */}
                 <Route path="/farms" element={<EnhancedFarms />} />

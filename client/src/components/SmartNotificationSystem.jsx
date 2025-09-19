@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 import {
   BellIcon,
   XMarkIcon,
@@ -21,6 +22,9 @@ const SmartNotificationSystem = ({ userId }) => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [filter, setFilter] = useState('all');
 
+  // Get user information from AuthContext
+  const { user } = useAuth();
+  
   useEffect(() => {
     loadNotifications();
     
@@ -54,19 +58,8 @@ const SmartNotificationSystem = ({ userId }) => {
   }, []);
 
   const loadNotifications = () => {
-    const mockNotifications = [
-      {
-        id: 1,
-        type: 'order',
-        title: 'Order Shipped',
-        message: 'Your order #12345 has been shipped and will arrive tomorrow!',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-        read: false,
-        priority: 'high',
-        actionUrl: '/orders/12345',
-        icon: TruckIcon,
-        color: 'blue'
-      },
+    // Base notifications that all users can receive
+    let mockNotifications = [
       {
         id: 2,
         type: 'promotion',
@@ -77,19 +70,8 @@ const SmartNotificationSystem = ({ userId }) => {
         priority: 'medium',
         actionUrl: '/marketplace?category=vegetables',
         icon: CurrencyDollarIcon,
-        color: 'green'
-      },
-      {
-        id: 3,
-        type: 'health',
-        title: 'Weekly Nutrition Goal Achieved',
-        message: 'Congratulations! You\'ve met your vitamin C intake goal this week.',
-        timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
-        read: true,
-        priority: 'low',
-        actionUrl: '/dashboard?tab=nutrition',
-        icon: HeartIcon,
-        color: 'purple'
+        color: 'green',
+        forRoles: ['user', 'farmer', 'admin'] // Everyone can see promotions
       },
       {
         id: 4,
@@ -101,8 +83,43 @@ const SmartNotificationSystem = ({ userId }) => {
         priority: 'medium',
         actionUrl: '/marketplace/product/rainbow-carrots',
         icon: ShoppingBagIcon,
-        color: 'orange'
+        color: 'orange',
+        forRoles: ['user', 'admin'] // Only users and admins care about stock updates
+      }
+    ];
+    
+    // User-specific notifications
+    const userNotifications = [
+      {
+        id: 1,
+        type: 'order',
+        title: 'Order Shipped',
+        message: 'Your order #12345 has been shipped and will arrive tomorrow!',
+        timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+        read: false,
+        priority: 'high',
+        actionUrl: '/orders/12345',
+        icon: TruckIcon,
+        color: 'blue',
+        forRoles: ['user'] // Only buyers see this
       },
+      {
+        id: 3,
+        type: 'health',
+        title: 'Weekly Nutrition Goal Achieved',
+        message: 'Congratulations! You\'ve met your vitamin C intake goal this week.',
+        timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+        read: true,
+        priority: 'low',
+        actionUrl: '/dashboard?tab=nutrition',
+        icon: HeartIcon,
+        color: 'purple',
+        forRoles: ['user'] // Only users see health tracking
+      }
+    ];
+    
+    // Farmer-specific notifications
+    const farmerNotifications = [
       {
         id: 5,
         type: 'system',
@@ -113,31 +130,55 @@ const SmartNotificationSystem = ({ userId }) => {
         priority: 'low',
         actionUrl: '/farmer?tab=health',
         icon: InformationCircleIcon,
-        color: 'blue'
+        color: 'blue',
+        forRoles: ['farmer'] // Only farmers see farm management features
+      },
+      {
+        id: 6,
+        type: 'order',
+        title: 'New Order Received',
+        message: 'You have received a new order for organic carrots',
+        timestamp: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
+        read: false,
+        priority: 'high',
+        actionUrl: '/farmer/orders',
+        icon: ShoppingBagIcon,
+        color: 'green',
+        forRoles: ['farmer'] // Only farmers see incoming orders
       }
     ];
+    
+    // Filter notifications based on user role
+    if (user && user.role) {
+      if (user.role === 'farmer') {
+        mockNotifications = [...mockNotifications, ...farmerNotifications];
+      } else if (user.role === 'user') {
+        mockNotifications = [...mockNotifications, ...userNotifications];
+      } else if (user.role === 'admin') {
+        // Admin can see everything for monitoring
+        mockNotifications = [...mockNotifications, ...userNotifications, ...farmerNotifications];
+      }
+    } else {
+      // If no user or role, show only general notifications
+      mockNotifications = mockNotifications.filter(n => !n.forRoles || n.forRoles.includes('guest'));
+    }
 
     setNotifications(mockNotifications);
     setUnreadCount(mockNotifications.filter(n => !n.read).length);
   };
 
   const addNewNotification = () => {
-    const newNotifications = [
-      {
-        type: 'order',
-        title: 'New Order Received',
-        message: 'You have a new order from a local customer!',
-        icon: ShoppingBagIcon,
-        color: 'green',
-        priority: 'high'
-      },
+    // Define role-specific notifications
+    const userNotifications = [
       {
         type: 'promotion',
         title: 'Price Alert',
         message: 'Tomato prices have dropped by 15% - Great time to buy!',
         icon: CurrencyDollarIcon,
         color: 'green',
-        priority: 'medium'
+        priority: 'medium',
+        actionUrl: '/marketplace?product=tomatoes',
+        forRoles: ['user']
       },
       {
         type: 'inventory',
@@ -145,17 +186,61 @@ const SmartNotificationSystem = ({ userId }) => {
         message: 'Only 3 items left of your favorite organic apples.',
         icon: ExclamationTriangleIcon,
         color: 'yellow',
-        priority: 'medium'
+        priority: 'medium',
+        actionUrl: '/marketplace/product/organic-apples',
+        forRoles: ['user']
       }
     ];
+    
+    const farmerNotifications = [
+      {
+        type: 'order',
+        title: 'New Order Received',
+        message: 'You have a new order from a local customer!',
+        icon: ShoppingBagIcon,
+        color: 'green',
+        priority: 'high',
+        actionUrl: '/farmer/orders',
+        forRoles: ['farmer']
+      },
+      {
+        type: 'inventory',
+        title: 'Low Stock Alert',
+        message: 'You have only 5 units of organic potatoes left. Consider restocking.',
+        icon: ExclamationTriangleIcon,
+        color: 'yellow',
+        priority: 'medium',
+        actionUrl: '/farmer/inventory',
+        forRoles: ['farmer']
+      }
+    ];
+    
+    // Select notifications based on user role
+    let availableNotifications = [];
+    
+    if (user && user.role) {
+      if (user.role === 'farmer') {
+        availableNotifications = farmerNotifications;
+      } else if (user.role === 'user') {
+        availableNotifications = userNotifications;
+      } else if (user.role === 'admin') {
+        // Admins can see all notification types
+        availableNotifications = [...userNotifications, ...farmerNotifications];
+      }
+    } else {
+      // Default to user notifications if no role defined
+      availableNotifications = userNotifications.filter(n => !n.forRoles || n.forRoles.includes('guest'));
+    }
+    
+    // Only continue if we have notifications appropriate for this user
+    if (availableNotifications.length === 0) return;
 
-    const randomNotification = newNotifications[Math.floor(Math.random() * newNotifications.length)];
+    const randomNotification = availableNotifications[Math.floor(Math.random() * availableNotifications.length)];
     const newNotification = {
       id: Date.now(),
       ...randomNotification,
       timestamp: new Date(),
-      read: false,
-      actionUrl: '/marketplace'
+      read: false
     };
 
     setNotifications(prev => [newNotification, ...prev]);

@@ -70,7 +70,7 @@ export const deleteDoctor = async (req, res) => {
 export const updateDoctorProfile = async (req, res) => {
   try {
     const doctor = await Doctor.findOneAndUpdate(
-      { _id: req.user.id },
+      { _id: req.user._id },
       {
         experience: req.body.experience,
         availability: req.body.availability,

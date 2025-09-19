@@ -145,7 +145,7 @@ export const login = async (req, res) => {
 };
 export const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
     res.json({ id: user._id, name: user.name, email: user.email, role: user.role });
@@ -225,7 +225,7 @@ export const refreshToken = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { name, email, phone, address } = req.body;
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     // Check if email is already taken by another user
     if (email) {
