@@ -17,7 +17,7 @@ import User from '../models/User.js';
 // Get farm profile
 export const getFarmProfile = async (req, res) => {
   try {
-    const farm = await Farm.findOne({ owner: req.user.id })
+    const farm = await Farm.findOne({ owner: req.user._id })
       .populate('owner', 'name email phone');
     
     if (!farm) {
@@ -34,7 +34,7 @@ export const getFarmProfile = async (req, res) => {
 // Update farm profile
 export const updateFarmProfile = async (req, res) => {
   try {
-    if (!req.user || !req.user.id) {
+    if (!req.user || !req.user._id) {
       return res.status(401).json({ msg: 'User not authenticated' });
     }
 
@@ -50,10 +50,10 @@ export const updateFarmProfile = async (req, res) => {
       images
     } = req.body;
 
-    let farm = await Farm.findOne({ owner: req.user.id });
+    let farm = await Farm.findOne({ owner: req.user._id });
     
     const farmData = {
-      owner: req.user.id, // Explicitly set the owner
+      owner: req.user._id, // Explicitly set the owner
       name: farmName,
       type: farmType,
       description,
@@ -78,7 +78,7 @@ export const updateFarmProfile = async (req, res) => {
       farm.contactPhone = contactPhone;
       farm.specialties = specialties;
       farm.certifications = certifications;
-      farm.owner = req.user.id; // Ensure owner is set
+      farm.owner = req.user._id; // Ensure owner is set
       if (images) {
         farm.images = images;
       }
@@ -88,7 +88,7 @@ export const updateFarmProfile = async (req, res) => {
     
     // Update user's farmName if it's different
     if (req.user.farmName !== farmName) {
-      await User.findByIdAndUpdate(req.user.id, { farmName });
+      await User.findByIdAndUpdate(req.user._id, { farmName });
     }
 
     res.json({
@@ -108,7 +108,7 @@ export const uploadFarmImages = async (req, res) => {
       return res.status(400).json({ msg: 'No files uploaded' });
     }
 
-    const farm = await Farm.findOne({ owner: req.user.id });
+    const farm = await Farm.findOne({ owner: req.user._id });
     if (!farm) {
       return res.status(404).json({ msg: 'Farm profile not found' });
     }
@@ -138,7 +138,7 @@ export const deleteFarmImage = async (req, res) => {
       return res.status(400).json({ msg: 'Image path is required' });
     }
 
-    const farm = await Farm.findOne({ owner: req.user.id });
+    const farm = await Farm.findOne({ owner: req.user._id });
     if (!farm) {
       return res.status(404).json({ msg: 'Farm profile not found' });
     }
@@ -213,7 +213,7 @@ export const addFarmReview = async (req, res) => {
 
     // Check if user has already reviewed
     const reviewIndex = farm.reviews.findIndex(
-      review => review.user.toString() === req.user.id
+      review => review.user.toString() === req.user._id.toString()
     );
 
     if (reviewIndex > -1) {
@@ -223,7 +223,7 @@ export const addFarmReview = async (req, res) => {
     } else {
       // Add new review
       farm.reviews.push({
-        user: req.user.id,
+        user: req.user._id,
         rating,
         comment
       });

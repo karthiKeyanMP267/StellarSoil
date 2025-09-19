@@ -11,6 +11,13 @@ const farmSchema = new mongoose.Schema(
     },
     address: { type: String, required: true },
     contactPhone: { type: String, required: true },
+    email: { type: String },
+    farmType: { 
+      type: String, 
+      enum: ['organic', 'conventional', 'hydroponic', 'mixed'], 
+      default: 'organic' 
+    },
+    farmSize: { type: String },
     businessHours: {
       monday: { open: String, close: String },
       tuesday: { open: String, close: String },
@@ -20,8 +27,15 @@ const farmSchema = new mongoose.Schema(
       saturday: { open: String, close: String },
       sunday: { open: String, close: String }
     },
+    specialCrops: { type: String },
     certifications: [String],
     images: [String],
+    website: { type: String },
+    socialMedia: {
+      facebook: { type: String },
+      instagram: { type: String },
+      twitter: { type: String }
+    },
     rating: { type: Number, default: 0 },
     reviews: [{
       user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

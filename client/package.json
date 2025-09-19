@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5174 --strictPort false",
     "build": "vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -30,6 +30,7 @@
     "aos": "^2.3.4",
     "axios": "^1.6.2",
     "chart.js": "^4.5.0",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.12",
     "i18next": "^25.4.2",
     "i18next-browser-languagedetector": "^8.2.0",

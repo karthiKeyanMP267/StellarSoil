@@ -98,14 +98,33 @@ class NotificationService {
   }
 
   // Order notifications
-  async sendOrderNotification(userId, orderId, status, message) {
+  async sendOrderNotification(userId, orderId, status, message, orderData = {}) {
     await this.createNotification({
       userId,
       type: 'order',
       title: `Order ${status}`,
       message,
       actionUrl: `/orders/${orderId}`,
-      data: { orderId, status }
+      data: { orderId, status, ...orderData }
+    });
+  }
+  
+  // Farmer order notification - notify farmer about new orders
+  async sendFarmerOrderNotification(farmerId, orderId, buyerName, totalAmount, deliveryAddress) {
+    await this.createNotification({
+      userId: farmerId,
+      type: 'order',
+      title: 'New Order Received',
+      message: `You have received a new order of ₹${totalAmount} from ${buyerName}`,
+      priority: 'high',
+      actionUrl: `/farmer/orders/${orderId}`,
+      data: { 
+        orderId, 
+        buyerName, 
+        totalAmount,
+        deliveryAddress,
+        status: 'new'
+      }
     });
   }
 
@@ -124,6 +143,19 @@ class NotificationService {
       priority: status === 'failed' ? 'high' : 'medium',
       actionUrl: `/orders/${orderId}`,
       data: { orderId, status, amount }
+    });
+  }
+  
+  // Order verification code notifications
+  async sendVerificationCodeNotification(userId, orderId, code) {
+    await this.createNotification({
+      userId,
+      type: 'order',
+      title: 'Order Verification Code',
+      message: `Your verification code for order #${orderId.toString().slice(-6)} is: ${code}. Show this to the delivery person when receiving your order.`,
+      priority: 'high',
+      actionUrl: `/orders/${orderId}`,
+      data: { orderId, code, isVerification: true }
     });
   }
 

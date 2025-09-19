@@ -1,0 +1,78 @@
+/* Farm Profile Modal Styles */
+.farm-profile-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  padding: 20px;
+}
+
+.farm-profile-content {
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.farm-profile-header {
+  padding: 20px;
+  background: linear-gradient(to right, #f6efe4, #f3f0e8);
+  border-bottom: 1px solid #e4dfd3;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.farm-profile-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.farm-profile-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.farm-profile-actions {
+  padding: 16px 20px;
+  background: #f9f7f3;
+  border-top: 1px solid #e4dfd3;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  position: sticky;
+  bottom: 0;
+}
+
+/* Form responsive layout */
+@media (min-width: 640px) {
+  .farm-profile-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .farm-profile-full {
+    grid-column: span 2;
+  }
+}
+
+/* Override for mobile devices to ensure the modal fits properly */
+@media (max-width: 640px) {
+  .farm-profile-content {
+    max-height: 85vh;
+    width: 95%;
+  }
+}

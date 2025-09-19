@@ -302,7 +302,7 @@ Should I add this to your inventory for customers to see?`;
   async addToCart(req, res) {
     try {
       const { productId, quantity } = req.body;
-      const userId = req.user.id;
+      const userId = req.user._id;
 
       if (!productId || !quantity) {
         return res.status(400).json({

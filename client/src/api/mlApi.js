@@ -1,13 +1,14 @@
+import API from './api';
 import cache from '../services/cache';
 
-// ML API endpoints
+// ML API endpoints - using relative paths since API already has baseURL
 const ML_API = {
-    PRICE_PREDICTION: '/api/ml/price-prediction',
-    PRICE_FACTORS: '/api/ml/price-factors',
-    AVAILABLE_CROPS: '/api/ml/available-crops',
-    HEALTH: '/api/ml/health',
-    CROP_RECOMMENDATION: '/api/ml/crop-recommendation',
-    CROP_CALENDAR: '/api/ml/crop-calendar'
+    PRICE_PREDICTION: '/ml/price-prediction',
+    PRICE_FACTORS: '/ml/price-factors',
+    AVAILABLE_CROPS: '/ml/available-crops',
+    HEALTH: '/ml/health',
+    CROP_RECOMMENDATION: '/ml/crop-recommendation',
+    CROP_CALENDAR: '/ml/crop-calendar'
 };
 
 // Cache TTLs (in milliseconds)
@@ -18,16 +19,7 @@ const CACHE_TTL = {
     CALENDAR: 24 * 60 * 60 * 1000    // 24 hours
 };
 
-// Helper to handle response
-const handleResponse = async (response) => {
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'API request failed');
-    }
-    return response.json();
-};
-
-// Helper to make authenticated requests with caching
+// Helper to make authenticated requests with caching using our API instance
 const makeAuthenticatedRequest = async (endpoint, options = {}, cacheKey = null, ttl = null) => {
     // Check cache if cacheKey is provided
     if (cacheKey) {
@@ -35,31 +27,31 @@ const makeAuthenticatedRequest = async (endpoint, options = {}, cacheKey = null,
         if (cachedData) return cachedData;
     }
 
-    const token = localStorage.getItem('token');
-    const defaultOptions = {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+    try {
+        // Use API instance with interceptors that already handle auth headers
+        let response;
+        
+        if (options.method === 'POST') {
+            response = await API.post(endpoint, options.body ? JSON.parse(options.body) : {});
+        } else if (options.method === 'PUT') {
+            response = await API.put(endpoint, options.body ? JSON.parse(options.body) : {});
+        } else {
+            // Default to GET
+            response = await API.get(endpoint);
         }
-    };
 
-    const response = await fetch(endpoint, {
-        ...defaultOptions,
-        ...options,
-        headers: {
-            ...defaultOptions.headers,
-            ...options.headers
+        const data = response.data;
+
+        // Cache the response if cacheKey is provided
+        if (cacheKey && ttl && data.success) {
+            cache.set(cacheKey, data, ttl);
         }
-    });
 
-    const data = await handleResponse(response);
-
-    // Cache the response if cacheKey is provided
-    if (cacheKey && ttl && data.success) {
-        cache.set(cacheKey, data, ttl);
+        return data;
+    } catch (error) {
+        console.error('ML API request failed:', error);
+        throw error;
     }
-
-    return data;
 };
 
 export const mlApi = {

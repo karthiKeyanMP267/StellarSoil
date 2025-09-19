@@ -28,7 +28,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function FarmDashboard() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const { success, error, info } = useNotification();
   
   const [stats, setStats] = useState({
@@ -129,7 +129,11 @@ export default function FarmDashboard() {
 
   // Check if farm profile needs completion
   useEffect(() => {
-    if (user?.role === 'farmer' && (!user.farmDescription || !user.location || !farmLocation)) {
+    // Only show registration modal if not on the profile page and profile is incomplete
+    const isOnProfilePage = window.location.pathname.includes('/farmer/profile');
+    if (user?.role === 'farmer' && 
+        (!user.farmDescription || !user.location || !farmLocation) && 
+        !isOnProfilePage) {
       setShowFarmRegistration(true);
     }
   }, [user, farmLocation]);
@@ -140,6 +144,25 @@ export default function FarmDashboard() {
       const response = await API.put('/farms/profile', farmData);
       success('Farm Registered', 'Your farm profile has been updated successfully');
       setShowFarmRegistration(false);
+      
+      // Update the user context data to prevent the modal from reappearing
+      if (response.data?.farm || response.data) {
+        setUser(prev => ({
+          ...prev,
+          farmName: farmData.farmName,
+          farmDescription: farmData.description,
+          location: farmData.location
+        }));
+        
+        // Also update localStorage to persist the changes
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        localStorage.setItem('user', JSON.stringify({
+          ...storedUser,
+          farmName: farmData.farmName,
+          farmDescription: farmData.description,
+          location: farmData.location
+        }));
+      }
     } catch (error) {
       error('Registration Failed', error.response?.data?.message || 'Failed to update farm profile');
     }

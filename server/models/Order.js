@@ -11,11 +11,14 @@ const orderSchema = new mongoose.Schema(
       unit: { type: String, required: true }
     }],
     totalAmount: { type: Number, required: true },
+    discount: { type: Number, default: 0 }, // Discount amount applied
+    discountCode: { type: String }, // Discount code if used
     deliveryAddress: {
       street: String,
       city: String,
       state: String,
       zipCode: String,
+      phoneNumber: String, // Added for delivery contact
       coordinates: {
         type: { type: String, enum: ['Point'], default: 'Point' },
         coordinates: [Number]
@@ -32,6 +35,18 @@ const orderSchema = new mongoose.Schema(
       type: String, 
       enum: ['placed', 'confirmed', 'processing', 'ready', 'out_for_delivery', 'delivered', 'cancelled'],
       default: 'placed'
+    },
+    verificationCode: { 
+      code: { type: String },
+      generatedAt: { type: Date },
+      verifiedAt: { type: Date },
+      verified: { type: Boolean, default: false }
+    },
+    deliveryVerification: {
+      required: { type: Boolean, default: true },
+      verified: { type: Boolean, default: false },
+      verifiedBy: { type: String },
+      verifiedAt: { type: Date }
     },
     statusHistory: [{
       status: String,
