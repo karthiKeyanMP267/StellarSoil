@@ -4,6 +4,8 @@ const orderSchema = new mongoose.Schema(
   {
     buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     farm: { type: mongoose.Schema.Types.ObjectId, ref: 'Farm', required: true },
+    // Denormalized owner reference for faster farmer order lookups
+    farmer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     items: [{
       product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
       quantity: { type: Number, required: true },
@@ -59,6 +61,7 @@ const orderSchema = new mongoose.Schema(
 // Create indexes
 orderSchema.index({ buyer: 1, createdAt: -1 });
 orderSchema.index({ farm: 1, createdAt: -1 });
+orderSchema.index({ farmer: 1, createdAt: -1 });
 orderSchema.index({ "deliverySlot.date": 1 });
 
 const Order = mongoose.model('Order', orderSchema);

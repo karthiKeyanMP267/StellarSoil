@@ -12,7 +12,7 @@ import {
   CalendarIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import API from './api/api';
+import API from '../api/api';
 
 const OrdersPage = () => {
   const [orders, setOrders] = useState([]);

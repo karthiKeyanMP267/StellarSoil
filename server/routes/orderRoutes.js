@@ -5,6 +5,7 @@ import {
   getBuyerOrders,
   getFarmOrders,
   getFarmerOrders,
+  getOrderById,
   updateOrderStatus,
   cancelOrder,
   verifyOrderDelivery,
@@ -16,6 +17,7 @@ import {
   createOrderValidator,
   updateOrderStatusValidator,
   orderIdValidator,
+  orderIdParamValidator,
   farmIdValidator,
   verifyOrderDeliveryValidator,
   regenerateCodeValidator,
@@ -29,6 +31,7 @@ router.post('/', protect, createOrderValidator, validateRequest, createOrder);
 router.get('/my-orders', protect, getBuyerOrders);
 router.get('/farm/:farmId', protect, farmIdValidator, validateRequest, getFarmOrders);
 router.get('/farmer-orders', protect, getFarmerOrders);
+router.get('/:id', protect, orderIdParamValidator, validateRequest, getOrderById);
 router.put('/:id/status', protect, updateOrderStatusValidator, validateRequest, updateOrderStatus);
 router.put('/:id/cancel', protect, orderIdValidator, validateRequest, cancelOrder);
 router.post('/verify-delivery', protect, verifyOrderDeliveryValidator, validateRequest, verifyOrderDelivery);

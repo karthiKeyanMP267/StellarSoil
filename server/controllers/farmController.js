@@ -42,24 +42,61 @@ export const updateFarmProfile = async (req, res) => {
       farmName,
       farmType,
       description,
-      location,
+      location, // might be address string from client
       address,
       contactPhone,
       specialties,
       certifications,
-      images
+      images,
+      latitude,
+      longitude,
+      phone,
+      email,
+      website
     } = req.body;
 
     let farm = await Farm.findOne({ owner: req.user._id });
     
+    // Build GeoJSON location if coordinates provided, else keep existing later
+    let geoLocation;
+    if (latitude && longitude) {
+      geoLocation = {
+        type: 'Point',
+        coordinates: [parseFloat(longitude), parseFloat(latitude)]
+      };
+    }
+
+    const resolvedAddress = address || location; // client may send 'location' as address string
+    const resolvedPhone = contactPhone || phone;
+
+    // Basic validation for required fields on create
+    if (!farm && (!farmName || !resolvedAddress || !resolvedPhone)) {
+      return res.status(400).json({ msg: 'farmName, address and contactPhone are required' });
+    }
+
+    const allowedTypes = ['organic','conventional','hydroponic','mixed'];
+    const normalizedType = farmType && typeof farmType === 'string'
+      ? (allowedTypes.includes(farmType) ? farmType : 'mixed')
+      : undefined;
+
+    // Combine farm size if provided as separate parts
+    let farmSizeStr;
+    if (req.body.farmSize) {
+      const unit = req.body.unit || req.body.farmSizeUnit || 'acres';
+      farmSizeStr = `${req.body.farmSize} ${unit}`;
+    }
+
     const farmData = {
       owner: req.user._id, // Explicitly set the owner
       name: farmName,
-      type: farmType,
+      farmType: normalizedType,
       description,
-      location,
-      address,
-      contactPhone,
+      location: geoLocation, // may be undefined; handle on update
+      address: resolvedAddress,
+      contactPhone: resolvedPhone,
+      email,
+      website,
+      farmSize: farmSizeStr,
       specialties,
       certifications,
       images: images || []
@@ -70,12 +107,15 @@ export const updateFarmProfile = async (req, res) => {
       farm = new Farm(farmData);
     } else {
       // Update existing farm
-      farm.name = farmName;
-      farm.type = farmType;
-      farm.description = description;
-      farm.location = location;
-      farm.address = address;
-      farm.contactPhone = contactPhone;
+      if (farmName !== undefined) farm.name = farmName;
+  if (normalizedType !== undefined) farm.farmType = normalizedType;
+      if (description !== undefined) farm.description = description;
+      if (geoLocation) farm.location = geoLocation;
+      if (resolvedAddress !== undefined) farm.address = resolvedAddress;
+      if (resolvedPhone !== undefined) farm.contactPhone = resolvedPhone;
+      if (email !== undefined) farm.email = email;
+      if (website !== undefined) farm.website = website;
+  if (farmSizeStr !== undefined) farm.farmSize = farmSizeStr;
       farm.specialties = specialties;
       farm.certifications = certifications;
       farm.owner = req.user._id; // Ensure owner is set
@@ -86,10 +126,12 @@ export const updateFarmProfile = async (req, res) => {
 
     const updatedFarm = await farm.save();
     
-    // Update user's farmName if it's different
-    if (req.user.farmName !== farmName) {
-      await User.findByIdAndUpdate(req.user._id, { farmName });
+    // Update user's farm info
+    const updates = { farmName };
+    if (!req.user.farmId || req.user.farmId.toString() !== updatedFarm._id.toString()) {
+      updates.farmId = updatedFarm._id;
     }
+    await User.findByIdAndUpdate(req.user._id, updates);
 
     res.json({
       msg: 'Farm profile updated successfully',

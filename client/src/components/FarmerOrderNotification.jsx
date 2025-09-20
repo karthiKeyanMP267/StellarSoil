@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
-import API from './api/api';
+import API from '../api/api';
 
 const FarmerOrderNotification = () => {
   const [pendingOrders, setPendingOrders] = useState(0);

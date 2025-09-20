@@ -11,7 +11,7 @@ import {
   CreditCardIcon,
   MapPinIcon
 } from '@heroicons/react/24/outline';
-import API from './api/api';
+import API from '../api/api';
 
 const OrderTracker = ({ orderId, refreshInterval = 60000 }) => {
   const [order, setOrder] = useState(null);

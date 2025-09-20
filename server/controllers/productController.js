@@ -1,6 +1,21 @@
 import Product from '../models/Product.js';
 import Farm from '../models/Farm.js';
 
+// Get products for the authenticated farmer
+export const getMyProducts = async (req, res) => {
+  try {
+    const farm = await Farm.findOne({ owner: req.user._id }).select('_id');
+    if (!farm) {
+      return res.json([]);
+    }
+    const products = await Product.find({ farm: farm._id }).sort({ createdAt: -1 });
+    res.json(products);
+  } catch (err) {
+    console.error('Get my products error:', err);
+    res.status(500).json({ msg: 'Error fetching products' });
+  }
+};
+
 // Create a new product
 export const createProduct = async (req, res) => {
   try {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { loadGoogleMaps } from '../utils/loadGoogleMaps';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPinIcon, 
@@ -41,59 +42,48 @@ const LocationMap = ({
   const [isLoading, setIsLoading] = useState(true);
   const [userLocationError, setUserLocationError] = useState(null);
 
-  // Initialize Google Maps
+  // Initialize Google Maps with singleton loader
   useEffect(() => {
-    const initMap = () => {
-      if (!window.google || !mapRef.current) return;
-
-      const mapOptions = {
-        zoom: 10,
-        center: userLocation || { lat: 28.6139, lng: 77.2090 }, // Default to Delhi
-        styles: [
-          {
-            featureType: 'all',
-            elementType: 'geometry.fill',
-            stylers: [{ color: '#f5f1eb' }]
-          },
-          {
-            featureType: 'water',
-            elementType: 'geometry.fill',
-            stylers: [{ color: '#c8e6c9' }]
-          },
-          {
-            featureType: 'road',
-            elementType: 'geometry.stroke',
-            stylers: [{ color: '#d4b896' }]
-          }
-        ],
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: true,
-        zoomControl: true
-      };
-
-      const newMap = new window.google.maps.Map(mapRef.current, mapOptions);
-      setMap(newMap);
-      setIsLoading(false);
+    let cancelled = false;
+    const init = async () => {
+      try {
+        await loadGoogleMaps();
+        if (cancelled || !mapRef.current || !window.google) return;
+        const mapOptions = {
+          zoom: 10,
+          center: userLocation || { lat: 28.6139, lng: 77.2090 }, // Default to Delhi
+          styles: [
+            { featureType: 'all', elementType: 'geometry.fill', stylers: [{ color: '#f5f1eb' }] },
+            { featureType: 'water', elementType: 'geometry.fill', stylers: [{ color: '#c8e6c9' }] },
+            { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#d4b896' }] }
+          ],
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: true,
+          zoomControl: true
+        };
+        const newMap = new window.google.maps.Map(mapRef.current, {
+          ...mapOptions,
+          // Optional vector mapId for Advanced Markers (set VITE_GOOGLE_MAPS_MAP_ID in .env)
+          ...(import.meta.env.VITE_GOOGLE_MAPS_MAP_ID ? { mapId: import.meta.env.VITE_GOOGLE_MAPS_MAP_ID } : {})
+        });
+        if (!cancelled) {
+          setMap(newMap);
+          setIsLoading(false);
+        }
+      } catch (e) {
+        console.error('Google Maps load/init failed', e);
+      }
     };
-
-    if (window.google && window.google.maps) {
-      initMap();
-    } else {
-      // Load Google Maps API
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&callback=initMap`;
-      script.async = true;
-      window.initMap = initMap;
-      document.head.appendChild(script);
-    }
+    init();
+    return () => { cancelled = true; };
   }, [userLocation]);
 
   // Get user's current location
   useEffect(() => {
     if (showUserLocation && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const newUserLocation = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
@@ -102,22 +92,22 @@ const LocationMap = ({
           if (map) {
             map.setCenter(newUserLocation);
             
-            // Create user location marker
-            const marker = new window.google.maps.Marker({
-              position: newUserLocation,
-              map: map,
-              title: 'Your Location',
-              icon: {
-                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3B82F6" width="24" height="24">
-                    <circle cx="12" cy="12" r="8" fill="#3B82F6"/>
-                    <circle cx="12" cy="12" r="3" fill="white"/>
-                  </svg>
-                `),
-                scaledSize: new window.google.maps.Size(24, 24)
-              }
-            });
-            setUserMarker(marker);
+            // Create user location marker using AdvancedMarkerElement when available
+            try {
+              const { AdvancedMarkerElement } = await window.google.maps.importLibrary('marker');
+              const el = document.createElement('div');
+              el.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3B82F6" width="24" height="24">
+                  <circle cx="12" cy="12" r="8" fill="#3B82F6"/>
+                  <circle cx="12" cy="12" r="3" fill="white"/>
+                </svg>`;
+              const advMarker = new AdvancedMarkerElement({ map, position: newUserLocation, content: el, title: 'Your Location' });
+              setUserMarker(advMarker);
+            } catch (e) {
+              // Fallback to classic Marker if AdvancedMarker not available
+              const marker = new window.google.maps.Marker({ position: newUserLocation, map, title: 'Your Location' });
+              setUserMarker(marker);
+            }
           }
         },
         (error) => {
@@ -133,33 +123,38 @@ const LocationMap = ({
     if (!map || !filteredFarms.length) return;
 
     // Clear existing markers
-    markers.forEach(marker => marker.setMap(null));
+    markers.forEach(marker => marker.setMap && marker.setMap(null));
 
-    const newMarkers = filteredFarms.map(farm => {
-      const marker = new window.google.maps.Marker({
-        position: { lat: farm.latitude, lng: farm.longitude },
-        map: map,
-        title: farm.name,
-        icon: {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+    (async () => {
+      try {
+        const { AdvancedMarkerElement } = await window.google.maps.importLibrary('marker');
+        const created = filteredFarms.map((farm) => {
+          const el = document.createElement('div');
+          el.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EFCB73" width="32" height="32">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-            </svg>
-          `),
-          scaledSize: new window.google.maps.Size(32, 32)
-        }
-      });
-
-      // Add click listener
-      marker.addListener('click', () => {
-        setSelectedFarm(farm);
-        if (onFarmSelect) onFarmSelect(farm);
-      });
-
-      return marker;
-    });
-
-    setMarkers(newMarkers);
+            </svg>`;
+          const adv = new AdvancedMarkerElement({ map, position: { lat: farm.latitude, lng: farm.longitude }, content: el, title: farm.name });
+          adv.addListener('gmp-click', () => {
+            setSelectedFarm(farm);
+            if (onFarmSelect) onFarmSelect(farm);
+          });
+          return adv;
+        });
+        setMarkers(created);
+      } catch (e) {
+        // Fallback to classic markers
+        const created = filteredFarms.map((farm) => {
+          const marker = new window.google.maps.Marker({ position: { lat: farm.latitude, lng: farm.longitude }, map, title: farm.name });
+          marker.addListener('click', () => {
+            setSelectedFarm(farm);
+            if (onFarmSelect) onFarmSelect(farm);
+          });
+          return marker;
+        });
+        setMarkers(created);
+      }
+    })();
   }, [map, filteredFarms, onFarmSelect]);
 
   // Filter farms based on search and filters

@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// Use VITE_API_URL if provided, otherwise default to relative '/api' to leverage Vite proxy in dev
+const baseURL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL + '/api',
+  baseURL,
 });
 
 // Add auth token to requests if available

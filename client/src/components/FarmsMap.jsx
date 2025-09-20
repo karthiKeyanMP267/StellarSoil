@@ -1,27 +1,26 @@
 import { useEffect, useRef } from 'react';
-
-// Add your Google Maps API key below
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY';
+import { loadGoogleMaps } from '../utils/loadGoogleMaps';
 
 const FarmsMap = ({ farms, userLocation }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
 
   useEffect(() => {
-    if (!window.google && !document.getElementById('google-maps-script')) {
-      const script = document.createElement('script');
-      script.id = 'google-maps-script';
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}`;
-      script.async = true;
-      script.onload = () => initMap();
-      document.body.appendChild(script);
-    } else if (window.google) {
-      initMap();
-    }
+    let cancelled = false;
+    const run = async () => {
+      try {
+        await loadGoogleMaps();
+        if (!cancelled) initMap();
+      } catch (e) {
+        console.error('Maps load failed', e);
+      }
+    };
+    run();
+    return () => { cancelled = true; };
     // eslint-disable-next-line
   }, [farms, userLocation]);
 
-  function initMap() {
+  async function initMap() {
     if (!mapRef.current) return;
     if (!window.google) return;
     if (mapInstance.current) return;
@@ -44,18 +43,17 @@ const FarmsMap = ({ farms, userLocation }) => {
     });
     // User marker
     if (userLocation && userLocation.lat && userLocation.lon) {
-      new window.google.maps.Marker({
-        position: { lat: userLocation.lat, lng: userLocation.lon },
-        map: mapInstance.current,
-        title: 'Your Location',
-        icon: {
-          url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-        },
-        animation: window.google.maps.Animation.DROP,
-      });
+      try {
+        const { AdvancedMarkerElement } = await window.google.maps.importLibrary('marker');
+        const el = document.createElement('div');
+        el.innerHTML = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='#3B82F6' width='24' height='24'><circle cx='12' cy='12' r='8' fill='#3B82F6'/><circle cx='12' cy='12' r='3' fill='white'/></svg>`;
+        new AdvancedMarkerElement({ map: mapInstance.current, position: { lat: userLocation.lat, lng: userLocation.lon }, content: el, title: 'Your Location' });
+      } catch (e) {
+        new window.google.maps.Marker({ position: { lat: userLocation.lat, lng: userLocation.lon }, map: mapInstance.current, title: 'Your Location' });
+      }
     }
     // Farm markers
-    farms.forEach(farm => {
+  for (const farm of farms) {
       // Add null check and type validation for coordinates
       if (farm.location && Array.isArray(farm.location.coordinates) && farm.location.coordinates.length === 2) {
         try {
@@ -63,20 +61,22 @@ const FarmsMap = ({ farms, userLocation }) => {
           // Validate coordinates are numbers and within valid ranges
           if (typeof lat === 'number' && typeof lng === 'number' &&
               lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-            const marker = new window.google.maps.Marker({
-              position: { lat, lng },
-              map: mapInstance.current,
-              title: farm.name,
-              icon: {
-                url: 'https://cdn-icons-png.flaticon.com/512/616/616408.png',
-                scaledSize: new window.google.maps.Size(36, 36),
-              },
-              animation: window.google.maps.Animation.DROP,
-            });
-            const info = new window.google.maps.InfoWindow({
-              content: `<div style='font-family:sans-serif'><strong>${farm.name}</strong><br/>${farm.address || ''}</div>`
-            });
-            marker.addListener('click', () => info.open(mapInstance.current, marker));
+            try {
+              const { AdvancedMarkerElement } = await window.google.maps.importLibrary('marker');
+              const el = document.createElement('div');
+              el.innerHTML = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='#EFCB73' width='32' height='32'><path d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/></svg>`;
+              const adv = new AdvancedMarkerElement({ map: mapInstance.current, position: { lat, lng }, content: el, title: farm.name });
+              adv.addListener('gmp-click', () => {
+                const info = new window.google.maps.InfoWindow({
+                  content: `<div style='font-family:sans-serif'><strong>${farm.name}</strong><br/>${farm.address || ''}</div>`
+                });
+                info.open(mapInstance.current, adv);
+              });
+            } catch (e) {
+              const marker = new window.google.maps.Marker({ position: { lat, lng }, map: mapInstance.current, title: farm.name });
+              const info = new window.google.maps.InfoWindow({ content: `<div style='font-family:sans-serif'><strong>${farm.name}</strong><br/>${farm.address || ''}</div>` });
+              marker.addListener('click', () => info.open(mapInstance.current, marker));
+            }
           } else {
             console.warn('Invalid coordinates for farm:', farm.name, { lat, lng });
           }
@@ -86,7 +86,7 @@ const FarmsMap = ({ farms, userLocation }) => {
       } else {
         console.warn('Missing or invalid location data for farm:', farm.name);
       }
-    });
+    }
   }
 
   return (

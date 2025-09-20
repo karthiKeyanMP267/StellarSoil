@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import API from './api/api';
+import API from '../api/api';
 import { MapPinIcon } from '@heroicons/react/24/outline';
 import AddressForm from './AddressForm';
 

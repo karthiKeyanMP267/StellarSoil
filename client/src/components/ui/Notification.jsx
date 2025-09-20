@@ -210,7 +210,8 @@ const Notification = ({
                       onClick={() => {
                         action.onClick();
                         if (action.closeOnClick !== false) {
-                          onRemove(id);
+                          // Defer removal to next tick to avoid setState during render warnings
+                          setTimeout(() => onRemove(id), 0);
                         }
                       }}
                       className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
@@ -230,7 +231,7 @@ const Notification = ({
             <motion.button
               whileHover={{ scale: 1.1, rotate: 90 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => onRemove(id)}
+              onClick={() => setTimeout(() => onRemove(id), 0)}
               className="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <XMarkIcon className="h-5 w-5" />

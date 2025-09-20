@@ -16,6 +16,7 @@ const FarmProfileModal = ({ isOpen, onClose, onComplete, userData }) => {
     specialties: [],
     certifications: [],
     farmSize: '',
+    unit: 'Acres',
     established: new Date().getFullYear().toString(),
     organicCertified: false,
     website: ''
@@ -62,20 +63,35 @@ const FarmProfileModal = ({ isOpen, onClose, onComplete, userData }) => {
     try {
       const response = await API.get('/farms/profile/me');
       const farmData = response.data;
-      
+      // Parse farmSize like "10 acres" -> { farmSize: "10", unit: "acres" }
+      let parsedSize = '';
+      let parsedUnit = 'Acres';
+      if (typeof farmData.farmSize === 'string' && farmData.farmSize.trim()) {
+        const parts = farmData.farmSize.trim().split(/\s+/);
+        if (parts.length >= 2) {
+          parsedSize = parts[0];
+          // Normalize unit capitalization for UI
+          const unitRaw = parts.slice(1).join(' ');
+          parsedUnit = unitRaw.charAt(0).toUpperCase() + unitRaw.slice(1);
+        } else {
+          parsedSize = farmData.farmSize;
+        }
+      }
+
       setForm(prev => ({
         ...prev,
         farmName: farmData.name || userData?.farmName || '',
-        farmType: farmData.type || '',
+        farmType: farmData.farmType || '',
         description: farmData.description || '',
-        location: farmData.location || '',
+        // Use address as a human-friendly location string fallback
+        location: farmData.address || prev.location || '',
         address: farmData.address || '',
         contactPhone: farmData.contactPhone || '',
         email: farmData.email || userData?.email || '',
         specialties: farmData.specialties || [],
         certifications: farmData.certifications || [],
-        farmSize: farmData.size || '',
-        unit: farmData.unit || 'Acres',
+        farmSize: parsedSize,
+        unit: parsedUnit,
         established: farmData.established || new Date().getFullYear().toString(),
         organicCertified: farmData.organicCertified || false,
         website: farmData.website || ''
@@ -114,7 +130,24 @@ const FarmProfileModal = ({ isOpen, onClose, onComplete, userData }) => {
     setLoading(true);
     
     try {
-      const response = await API.put('/farms/profile/me', form);
+      // Normalize payload to server schema
+      const allowedTypes = ['organic','conventional','hydroponic','mixed'];
+      const normalizedType = form.farmType?.toLowerCase();
+      const payload = {
+        farmName: form.farmName,
+        farmType: allowedTypes.includes(normalizedType) ? normalizedType : 'mixed',
+        description: form.description,
+        address: form.address || form.location,
+        location: form.address || form.location, // server resolves this alias
+        contactPhone: form.contactPhone,
+        email: form.email,
+        website: form.website,
+        farmSize: form.farmSize,
+        unit: form.unit,
+        specialties: form.specialties,
+        certifications: form.certifications
+      };
+      const response = await API.put('/farms/profile/me', payload);
       setSuccess('Farm profile updated successfully!');
       
       if (onComplete) {
@@ -127,7 +160,7 @@ const FarmProfileModal = ({ isOpen, onClose, onComplete, userData }) => {
       }, 1500);
     } catch (err) {
       console.error('Profile update error:', err);
-      setError(err.response?.data?.msg || 'Failed to update farm profile');
+      setError(err.response?.data?.msg || err.message || 'Failed to update farm profile');
     } finally {
       setLoading(false);
     }

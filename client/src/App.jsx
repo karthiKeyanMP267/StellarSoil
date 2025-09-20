@@ -6,6 +6,9 @@ import Marketplace from './pages/Marketplace';
 import EnhancedFarms from './pages/EnhancedFarms';
 import FarmDashboard from './pages/FarmDashboard';
 import FarmProfile from './pages/FarmProfile';
+import FarmerAnalytics from './pages/FarmerAnalytics';
+import FarmerCustomers from './pages/FarmerCustomers';
+import FarmerDeliveries from './pages/FarmerDeliveries';
 import ErrorBoundary from './components/ErrorBoundary';
 
 import AdminPanel from './components/AdminPanel';
@@ -19,6 +22,7 @@ import Cart from './pages/Cart';
 import Favorites from './pages/Favorites';
 import OrderHistory from './pages/OrderHistory';
 import Checkout from './pages/Checkout';
+import OrderDetails from './pages/OrderDetails';
 import AdminUsers from './pages/AdminUsers';
 
 // Import focus prevention hooks
@@ -108,6 +112,9 @@ const App = () => {
                     {/* Farmer Routes */}
                     <Route path="/farmer" element={<FarmerRoute><FarmDashboard /></FarmerRoute>} />
                     <Route path="/farmer/profile" element={<FarmerRoute><FarmProfile /></FarmerRoute>} />
+                    <Route path="/farmer/analytics" element={<FarmerRoute><FarmerAnalytics /></FarmerRoute>} />
+                    <Route path="/farmer/customers" element={<FarmerRoute><FarmerCustomers /></FarmerRoute>} />
+                    <Route path="/farmer/deliveries" element={<FarmerRoute><FarmerDeliveries /></FarmerRoute>} />
                     
                     {/* User Shopping Routes */}
                     <Route path="/farms" element={<EnhancedFarms />} />
@@ -115,6 +122,7 @@ const App = () => {
                     <Route path="/cart" element={<UserRoute><Cart /></UserRoute>} />
                     <Route path="/favorites" element={<UserRoute><Favorites /></UserRoute>} />
                     <Route path="/orders" element={<UserRoute><OrderHistory /></UserRoute>} />
+                    <Route path="/orders/:id" element={<UserRoute><OrderDetails /></UserRoute>} />
                     <Route path="/checkout" element={<UserRoute><Checkout /></UserRoute>} />
                     
                     <Route path="*" element={<NotFound />} />

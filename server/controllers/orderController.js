@@ -22,7 +22,8 @@ export const createOrder = async (req, res) => {
     let totalAmount = 0;
     let discount = 0;
     const orderItems = [];
-    let farmId = null;
+  let farmId = null;
+  let farmerId = null;
 
     for (let item of items) {
       const product = await Product.findById(item.productId);
@@ -42,8 +43,8 @@ export const createOrder = async (req, res) => {
 
       totalAmount += product.price * item.quantity;
       
-      // Store farmId for notification later
-      farmId = product.farm;
+  // Store farmId (assumes single-farm cart)
+  farmId = product.farm;
 
       // Update stock
       await Product.findByIdAndUpdate(product._id, {
@@ -83,9 +84,20 @@ export const createOrder = async (req, res) => {
       authHeader: req.headers.authorization ? 'Present' : 'Missing'
     });
     
+    // Resolve farmer (owner) for denormalized storage
+    if (farmId) {
+      try {
+        const farmDoc = await Farm.findById(farmId).select('owner');
+        farmerId = farmDoc?.owner || null;
+      } catch (e) {
+        console.warn('Failed to resolve farm owner for order:', e?.message);
+      }
+    }
+
     const order = await Order.create({
       buyer: req.user._id, // Use _id instead of id
       farm: farmId, // Assuming all items are from same farm
+      farmer: farmerId || undefined,
       items: orderItems,
       totalAmount,
       discount,
@@ -200,26 +212,65 @@ export const getFarmOrders = async (req, res) => {
   }
 };
 
+// Get single order by ID (buyer, farmer owner, or admin only)
+export const getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id)
+      .populate('farm', 'name address contactPhone')
+      .populate('items.product', 'name price unit image');
+
+    if (!order) {
+      return res.status(404).json({ msg: 'Order not found' });
+    }
+
+    const isBuyer = order.buyer?.toString() === req.user._id?.toString();
+    let isFarmer = false;
+    if (req.user.role === 'farmer') {
+      if (order.farmer) {
+        isFarmer = order.farmer.toString() === req.user._id.toString();
+      } else {
+        const farm = await Farm.findById(order.farm).select('owner');
+        isFarmer = !!farm && farm.owner?.toString() === req.user._id.toString();
+      }
+    }
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isBuyer && !isFarmer && !isAdmin) {
+      return res.status(403).json({ msg: 'Not authorized' });
+    }
+
+    res.json(order);
+  } catch (err) {
+    console.error('Error fetching order by id:', err);
+    res.status(500).json({ msg: 'Error fetching order' });
+  }
+};
+
 // Get farmer's orders with detailed information
 export const getFarmerOrders = async (req, res) => {
   try {
-    // First find all farms owned by the farmer
-    const farms = await Farm.find({ owner: req.user._id });
-    
-    if (!farms || farms.length === 0) {
-      return res.json([]);
-    }
-    
-    // Get the farm IDs
-    const farmIds = farms.map(farm => farm._id);
-    
-    // Find all orders for these farms
-    const orders = await Order.find({ farm: { $in: farmIds } })
+    // Prefer denormalized query by farmer for performance & robustness
+    const directOrders = await Order.find({ farmer: req.user._id })
       .populate('buyer', 'name phone email')
       .populate('items.product', 'name price unit image')
       .sort({ createdAt: -1 }); // Sort by newest first
-      
-    res.json(orders);
+
+    if (directOrders.length > 0) {
+      return res.json(directOrders);
+    }
+
+    // Fallback for legacy orders without the farmer field
+    const farms = await Farm.find({ owner: req.user._id }).select('_id');
+    const farmIds = farms.map(f => f._id);
+    const fallbackOrders = farmIds.length
+      ? await Order.find({ farm: { $in: farmIds } })
+          .populate('buyer', 'name phone email')
+          .populate('items.product', 'name price unit image')
+          .sort({ createdAt: -1 })
+      : [];
+
+    res.json(fallbackOrders);
   } catch (err) {
     console.error('Error fetching farmer orders:', err);
     res.status(500).json({ msg: 'Error fetching farmer orders' });
@@ -236,8 +287,19 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ msg: 'Order not found' });
     }
 
-    // Verify farmer owns the farm
-    if (order.farm.toString() !== req.user.farmId.toString()) {
+    // Authorization: allow admin, the denormalized farmer owner, or any user whose farmId matches
+    const isAdmin = req.user.role === 'admin';
+    const isDenormalizedOwner = order.farmer && order.farmer.toString() === req.user._id.toString();
+    const sameFarmUser = req.user.farmId && order.farm && order.farm.toString() === req.user.farmId.toString();
+
+    let isFarmOwner = false;
+    if (!isAdmin && !isDenormalizedOwner && !sameFarmUser) {
+      // Fallback to checking actual farm owner against current user
+      const farm = await Farm.findById(order.farm).select('owner');
+      isFarmOwner = !!farm && farm.owner?.toString() === req.user._id.toString();
+    }
+
+    if (!(isAdmin || isDenormalizedOwner || sameFarmUser || isFarmOwner)) {
       return res.status(403).json({ msg: 'Not authorized' });
     }
 

@@ -68,6 +68,11 @@ export const orderIdValidator = [
   param('id').isMongoId().withMessage('Invalid order ID'),
 ];
 
+// Order ID param validator (alias for clarity where needed)
+export const orderIdParamValidator = [
+  param('id').isMongoId().withMessage('Invalid order ID'),
+];
+
 // Farm ID validation
 export const farmIdValidator = [
   param('farmId').isMongoId().withMessage('Invalid farm ID'),

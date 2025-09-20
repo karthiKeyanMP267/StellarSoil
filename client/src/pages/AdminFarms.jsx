@@ -528,7 +528,9 @@ export default function AdminFarms() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center text-sm text-beige-600">
                           <MapPinIcon className="h-4 w-4 mr-1" />
-                          {farm.location}
+                          {farm.address || (farm.location?.coordinates ? 
+                            `${farm.location.coordinates[1].toFixed(6)}, ${farm.location.coordinates[0].toFixed(6)}` : 
+                            'Location not specified')}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -637,7 +639,11 @@ export default function AdminFarms() {
                         <p className="text-beige-600"><span className="font-medium">Name:</span> {selectedFarm.name}</p>
                         <p className="text-beige-600"><span className="font-medium">Crop Type:</span> {selectedFarm.cropType}</p>
                         <p className="text-beige-600"><span className="font-medium">Size:</span> {selectedFarm.size} acres</p>
-                        <p className="text-beige-600"><span className="font-medium">Location:</span> {selectedFarm.location}</p>
+                        <p className="text-beige-600"><span className="font-medium">Location:</span> {selectedFarm.address || 
+                          (selectedFarm.location?.coordinates ? 
+                            `${selectedFarm.location.coordinates[1].toFixed(6)}, ${selectedFarm.location.coordinates[0].toFixed(6)}` : 
+                            'Location not specified')}
+                        </p>
                       </div>
                     </div>
                     
