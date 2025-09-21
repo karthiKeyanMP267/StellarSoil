@@ -303,6 +303,11 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(403).json({ msg: 'Not authorized' });
     }
 
+    // Enforce COD flow: cannot mark delivered via status update unless verified
+    if (status === 'delivered' && order.paymentMethod === 'cod' && !order?.deliveryVerification?.verified) {
+      return res.status(400).json({ msg: 'COD orders must be verified with the code before marking as delivered' });
+    }
+
     order.orderStatus = status;
     order.statusHistory.push({ status });
     await order.save();
@@ -367,15 +372,19 @@ export const verifyOrderDelivery = async (req, res) => {
       return res.status(404).json({ msg: 'Order not found' });
     }
 
-    // Check if this is a farmer verifying delivery
-    if (req.user.role === 'farmer') {
-      // Verify farmer owns the farm
-      if (order.farm.toString() !== req.user.farmId.toString()) {
-        return res.status(403).json({ msg: 'Not authorized to verify this order' });
-      }
-    } 
-    // If it's a user confirming their own order receipt (optional feature)
-    else if (order.buyer.toString() !== req.user._id.toString()) {
+    // Authorization: buyer can verify their own order; farmer/admin can verify if they own/operate the farm
+    const isBuyer = order.buyer.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+    const isDenormalizedOwner = order.farmer && order.farmer.toString() === req.user._id.toString();
+    const sameFarmUser = req.user.farmId && order.farm && order.farm.toString() === req.user.farmId.toString();
+    let isFarmOwner = false;
+    if (!isAdmin && !isDenormalizedOwner && !sameFarmUser && req.user.role === 'farmer') {
+      const farm = await Farm.findById(order.farm).select('owner');
+      isFarmOwner = !!farm && farm.owner?.toString() === req.user._id.toString();
+    }
+
+    const isAuthorized = isBuyer || isAdmin || isDenormalizedOwner || sameFarmUser || isFarmOwner;
+    if (!isAuthorized) {
       return res.status(403).json({ msg: 'Not authorized to verify this order' });
     }
 

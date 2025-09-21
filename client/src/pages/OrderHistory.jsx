@@ -6,7 +6,8 @@ import {
   ClockIcon,
   TruckIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  ClipboardIcon
 } from '@heroicons/react/24/outline';
 import RealTimeDeliveryTracking from '../components/RealTimeDeliveryTracking';
 
@@ -186,6 +187,31 @@ const OrderHistory = () => {
                             {order.deliveryType === 'delivery' ? '🚚 Home Delivery' : '🏪 Store Pickup'}
                           </div>
                         </div>
+
+                        {/* Verification Code (COD) */}
+                        {order.paymentMethod === 'cod' && !order?.deliveryVerification?.verified && order?.verificationCode?.code && (
+                          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-yellow-900">Verification Code</p>
+                              <p className="font-mono text-lg tracking-widest text-yellow-800">{order.verificationCode.code}</p>
+                              <p className="text-xs text-yellow-700 mt-1">Show this code to the delivery person to complete the order.</p>
+                            </div>
+                            <button
+                              onClick={() => navigator.clipboard?.writeText(order.verificationCode.code)}
+                              className="inline-flex items-center px-3 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-900 rounded-md text-sm font-medium border border-yellow-300 transition-colors"
+                              title="Copy code"
+                            >
+                              <ClipboardIcon className="h-4 w-4 mr-2" />
+                              Copy
+                            </button>
+                          </div>
+                        )}
+                        {order.paymentMethod === 'cod' && order?.deliveryVerification?.verified && (
+                          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm flex items-center">
+                            <CheckCircleIcon className="h-5 w-5 mr-2" />
+                            Verification completed
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

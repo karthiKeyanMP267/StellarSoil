@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react';
 import API from '../api/api';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { useNotification } from '../components/ui/Notification';
 
 export default function FarmerDeliveries() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(null);
+  const [verifying, setVerifying] = useState(null);
+  const [codes, setCodes] = useState({});
+  const notify = useNotification();
 
   const fetchOrders = async () => {
     try {
@@ -28,10 +32,35 @@ export default function FarmerDeliveries() {
       setSaving(orderId);
       await API.put(`/orders/${orderId}/status`, { status });
       await fetchOrders();
+      notify.success(`Order updated to ${status.replace(/_/g,' ')}`);
     } catch (e) {
-      alert(e?.response?.data?.msg || 'Failed to update status');
+      notify.error(e?.response?.data?.msg || 'Failed to update status');
     } finally {
       setSaving(null);
+    }
+  };
+
+  const verifyCode = async (orderId) => {
+    const code = codes[orderId]?.trim();
+    if (!code) return alert('Enter the verification code');
+    try {
+      setVerifying(orderId);
+      await API.post('/orders/verify-delivery', { orderId, verificationCode: code });
+      await fetchOrders();
+      notify.success('Verification successful. Order delivered.');
+    } catch (e) {
+      notify.error(e?.response?.data?.msg || 'Failed to verify code');
+    } finally {
+      setVerifying(null);
+    }
+  };
+
+  const regenerateCode = async (orderId) => {
+    try {
+      await API.post(`/orders/${orderId}/regenerate-code`);
+      notify.success('New verification code sent to the customer');
+    } catch (e) {
+      notify.error(e?.response?.data?.msg || 'Failed to regenerate code');
     }
   };
 
@@ -75,18 +104,47 @@ export default function FarmerDeliveries() {
                     </span>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  {o.orderStatus !== 'ready' && (
-                    <Button size="small" variant="outline" disabled={saving===o._id} onClick={() => updateStatus(o._id, 'ready')}>Mark Ready</Button>
-                  )}
-                  {o.orderStatus !== 'out_for_delivery' && (
-                    <Button size="small" variant="outline" disabled={saving===o._id} onClick={() => updateStatus(o._id, 'out_for_delivery')}>Out for Delivery</Button>
-                  )}
-                  {o.orderStatus !== 'delivered' && (
-                    <Button size="small" variant="primary" disabled={saving===o._id} onClick={() => updateStatus(o._id, 'delivered')}>Delivered</Button>
-                  )}
-                </div>
+                {['delivered','cancelled'].includes(o.orderStatus) ? (
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${o.orderStatus==='delivered' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {o.orderStatus === 'delivered' ? 'Delivered' : 'Cancelled'}
+                  </span>
+                ) : (
+                  <div className="flex gap-2 items-start">
+                    {o.orderStatus !== 'ready' && (
+                      <Button size="small" variant="outline" disabled={saving===o._id} onClick={() => updateStatus(o._id, 'ready')}>Mark Ready</Button>
+                    )}
+                    {o.orderStatus !== 'out_for_delivery' && (
+                      <Button size="small" variant="outline" disabled={saving===o._id} onClick={() => updateStatus(o._id, 'out_for_delivery')}>Out for Delivery</Button>
+                    )}
+                    {o.orderStatus !== 'delivered' && (
+                      <Button size="small" variant="primary" disabled={saving===o._id || (o.paymentMethod==='cod' && !o?.deliveryVerification?.verified)} onClick={() => updateStatus(o._id, 'delivered')}>
+                        Delivered
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
+              {/* COD verification UI */}
+              {o.paymentMethod === 'cod' && !o?.deliveryVerification?.verified && ['ready','out_for_delivery'].includes(o.orderStatus) && (
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter verification code"
+                    className="border rounded px-3 py-2 text-sm"
+                    value={codes[o._id] || ''}
+                    onChange={(e) => setCodes(prev => ({ ...prev, [o._id]: e.target.value }))}
+                  />
+                  <Button size="small" variant="outline" disabled={verifying===o._id} onClick={() => verifyCode(o._id)}>
+                    {verifying===o._id ? 'Verifying…' : 'Verify Code'}
+                  </Button>
+                  <Button size="small" variant="ghost" onClick={() => regenerateCode(o._id)}>Regenerate Code</Button>
+                </div>
+              )}
+              {o?.deliveryVerification?.verified && (
+                <div className="mt-3 p-2 text-sm rounded bg-green-50 border border-green-200 text-green-700">
+                  COD verified and order delivered
+                </div>
+              )}
             </div>
           ))}
         </div>
