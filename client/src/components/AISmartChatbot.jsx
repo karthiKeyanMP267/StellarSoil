@@ -174,7 +174,7 @@ const AISmartChatbot = ({ userRole = 'customer' }) => {
               price: item.product?.price || item.price,
               quantity: item.quantity,
               unit: item.product.unit,
-              image: item.product.image || '/placeholder.jpg',
+              image: item.product.image || '/images/product-generic.svg',
               farmerId: item.product.farmer || '',
               category: item.product.category || ''
             }));
@@ -246,7 +246,7 @@ const AISmartChatbot = ({ userRole = 'customer' }) => {
               price: newItem.product.price || newItem.price,
               quantity: quantity,
               unit: newItem.product.unit || 'kg',
-              image: newItem.product.image || '/placeholder.jpg'
+              image: newItem.product.image || '/images/product-generic.svg'
             });
           }
         }
@@ -274,7 +274,7 @@ const AISmartChatbot = ({ userRole = 'customer' }) => {
           price: 0, // We don't know the price
           quantity: quantity,
           unit: 'kg',
-          image: '/placeholder.jpg'
+          image: '/images/product-generic.svg'
         };
         
         // Add to local cart context

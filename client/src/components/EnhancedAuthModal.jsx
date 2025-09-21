@@ -110,20 +110,20 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
         setSuccess(t('auth.loginSuccess'));
         setTimeout(() => onClose(), 1000);
       } else if (mode === 'register') {
-        const formData = new FormData();
-        formData.append('name', form.name);
-        formData.append('email', form.email);
-        formData.append('password', form.password);
-        formData.append('role', role);
-        
+        // Build plain object; authApi.register will create FormData and attach file under key 'kisanId'
+        const payload = {
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          role,
+        };
         if (role === 'farmer') {
-          formData.append('kisanId', form.kisanId);
-          if (kisanIdFile) {
-            formData.append('kisanIdFile', kisanIdFile);
+          if (!kisanIdFile) {
+            throw { response: { data: { msg: 'Kisan ID document is required for farmer registration' } } };
           }
+          payload.kisanId = kisanIdFile;
         }
-        
-        await authApi.register(formData);
+        await authApi.register(payload);
         setSuccess(t('auth.registerSuccess'));
         setTimeout(() => {
           setMode('login');
@@ -131,7 +131,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
         }, 2000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || t('auth.errors.general'));
+      const apiErr = err?.response?.data;
+      if (apiErr?.errors && Array.isArray(apiErr.errors) && apiErr.errors.length > 0) {
+        setError(apiErr.errors.map(e => e.message).join('\n'));
+      } else {
+        setError(apiErr?.msg || t('auth.errors.general'));
+      }
     } finally {
       setLoading(false);
     }
@@ -151,11 +156,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
     });
   };
 
-  const roleOptions = [
+  const roleOptionsAll = [
     { value: 'user', label: t('auth.signup.roles.user'), icon: '👤', color: 'from-beige-400 to-cream-400' },
     { value: 'farmer', label: t('auth.signup.roles.farmer'), icon: '👨‍🌾', color: 'from-sage-400 to-earth-400' },
     { value: 'admin', label: t('auth.signup.roles.admin'), icon: '👨‍💼', color: 'from-earth-400 to-beige-400' }
   ];
+  const roleOptions = mode === 'register' ? roleOptionsAll.filter(r => r.value !== 'admin') : roleOptionsAll;
 
   return (
     <AnimatePresence>

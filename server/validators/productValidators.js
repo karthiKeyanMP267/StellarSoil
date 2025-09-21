@@ -18,7 +18,7 @@ export const createProductValidator = [
     .custom(value => value > 0).withMessage('Quantity must be greater than 0'),
   body('unit')
     .notEmpty().withMessage('Unit is required')
-    .isIn(['kg', 'g', 'lb', 'piece', 'bunch', 'dozen']).withMessage('Invalid unit'),
+    .isIn(['kg', 'g', 'lb', 'piece', 'bunch', 'dozen', 'liter', 'liters']).withMessage('Invalid unit'),
   body('category')
     .notEmpty().withMessage('Category is required'),
   body('isOrganic')
@@ -47,7 +47,7 @@ export const updateProductValidator = [
     .custom(value => value > 0).withMessage('Quantity must be greater than 0'),
   body('unit')
     .optional()
-    .isIn(['kg', 'g', 'lb', 'piece', 'bunch', 'dozen']).withMessage('Invalid unit'),
+    .isIn(['kg', 'g', 'lb', 'piece', 'bunch', 'dozen', 'liter', 'liters']).withMessage('Invalid unit'),
   body('isOrganic')
     .optional()
     .isBoolean().withMessage('isOrganic must be a boolean'),

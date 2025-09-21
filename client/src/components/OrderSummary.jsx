@@ -11,10 +11,13 @@ import {
 const OrderSummary = ({ order, onClose }) => {
   const [loading, setLoading] = useState(false);
 
+  // Normalize shape: if multi, flatten for display
+  const isMulti = order?.multi && Array.isArray(order.orders);
+  const displayOrders = isMulti ? order.orders : [order];
+  const allItems = displayOrders.flatMap(o => o.items.map(i => ({ ...i })));
+
   const calculateSubtotal = () => {
-    return order.items.reduce((total, item) => {
-      return total + (item.price * item.quantity);
-    }, 0);
+    return displayOrders.reduce((sum, o) => sum + (o.items || []).reduce((t, item) => t + (item.price * item.quantity), 0), 0);
   };
 
   const subtotal = calculateSubtotal();
@@ -33,7 +36,7 @@ const OrderSummary = ({ order, onClose }) => {
       
       // Create a simple text representation for now
       const invoiceText = `
-        INVOICE #${order._id.substring(0, 8)}
+        INVOICE #${(displayOrders[0]?._id || '').toString().substring(0, 8)}${isMulti ? ' (+more)' : ''}
         StellarSoil - Farm Fresh Products
         Date: ${new Date().toLocaleDateString()}
         
@@ -42,14 +45,14 @@ const OrderSummary = ({ order, onClose }) => {
         Email: ${order.user?.email || 'N/A'}
         
         ITEMS
-        ${order.items.map(item => `${item.name} (${item.quantity} ${item.unit}) - ₹${item.price * item.quantity}`).join('\n        ')}
+        ${allItems.map(item => `${item.name || item?.product?.name || 'Item'} (${item.quantity} ${item.unit}) - ₹${item.price * item.quantity}`).join('\n        ')}
         
         SUBTOTAL: ₹${subtotal.toFixed(2)}
         DISCOUNT: ₹${discount.toFixed(2)}
         TOTAL: ₹${total.toFixed(2)}
         
-        PAYMENT METHOD: ${order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
-        STATUS: ${order.status}
+        PAYMENT METHOD: ${displayOrders.every(o => o.paymentMethod !== 'cod') ? 'Online Payment' : 'Cash on Delivery'}
+        STATUS: ${displayOrders.map(o => o.status || o.orderStatus).join(', ')}
         
         Thank you for shopping with StellarSoil!
       `;
@@ -129,22 +132,20 @@ const OrderSummary = ({ order, onClose }) => {
           <h3 className="text-lg font-semibold text-gray-800 mb-3">Order Details</h3>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <p className="text-sm text-gray-500">Order ID</p>
-              <p className="font-medium">{order._id?.substring(0, 8) || 'N/A'}</p>
+              <p className="text-sm text-gray-500">Order ID{isMulti ? 's' : ''}</p>
+              <p className="font-medium">{isMulti ? displayOrders.map(o => o._id.substring(0,8)).join(', ') : (order._id?.substring(0, 8) || 'N/A')}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Payment Method</p>
-              <p className="font-medium">
-                {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
-              </p>
+              <p className="font-medium">{displayOrders.every(o => o.paymentMethod !== 'cod') ? 'Online Payment' : 'Cash on Delivery'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Status</p>
-              <p className="font-medium capitalize">{order.status}</p>
+              <p className="font-medium capitalize">{isMulti ? 'Multiple' : (order.status || order.orderStatus)}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Delivery Type</p>
-              <p className="font-medium capitalize">{order.deliveryType}</p>
+              <p className="font-medium capitalize">{displayOrders[0]?.deliveryType}</p>
             </div>
           </div>
         </div>
@@ -153,18 +154,18 @@ const OrderSummary = ({ order, onClose }) => {
         <div className="border-t border-gray-200 pt-6 mb-6 print:border-t-black">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Items</h3>
           <div className="space-y-4">
-            {order.items.map((item, index) => (
+            {allItems.map((item, index) => (
               <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
                 <div className="flex items-start space-x-3">
                   <div className="w-12 h-12 bg-beige-100 rounded-lg flex items-center justify-center overflow-hidden">
                     {item.image ? (
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      <img src={item.image} alt={item.name || item?.product?.name || 'Item'} className="w-full h-full object-cover" />
                     ) : (
                       <ShoppingBagIcon className="h-6 w-6 text-beige-500" />
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-800">{item.name}</p>
+                    <p className="font-medium text-gray-800">{item.name || item?.product?.name || 'Item'}</p>
                     <p className="text-sm text-gray-600">
                       {item.quantity} {item.unit} × ₹{item.price}
                     </p>
@@ -226,17 +227,21 @@ const OrderSummary = ({ order, onClose }) => {
         )}
 
         {/* Verification Code for COD */}
-        {order.paymentMethod === 'cod' && order.verificationCode && (
+        {displayOrders.some(o => o.paymentMethod === 'cod' && o.verificationCode) && (
           <div className="border-t border-gray-200 pt-6 mb-6 print:border-t-black">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Verification Code</h3>
-            <div className="bg-amber-50 print:bg-white print:border print:border-amber-300 border border-amber-200 p-4 rounded-xl">
-              <p className="text-amber-700 mb-2">Show this code to the delivery person:</p>
-              <div className="bg-white p-4 rounded-lg border-2 border-amber-300 flex items-center justify-center">
-                <span className="text-3xl font-mono font-bold tracking-widest text-amber-900">
-                  {order.verificationCode?.code || "N/A"}
-                </span>
+              <div className="space-y-3">
+                {displayOrders.filter(o => o.paymentMethod === 'cod' && o.verificationCode).map((o) => (
+                  <div key={o._id} className="bg-amber-50 print:bg-white print:border print:border-amber-300 border border-amber-200 p-4 rounded-xl">
+                    <p className="text-amber-700 mb-2">Order #{o._id.substring(0,8)} code:</p>
+                    <div className="bg-white p-4 rounded-lg border-2 border-amber-300 flex items-center justify-center">
+                      <span className="text-3xl font-mono font-bold tracking-widest text-amber-900">
+                        {o.verificationCode?.code || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
           </div>
         )}
 

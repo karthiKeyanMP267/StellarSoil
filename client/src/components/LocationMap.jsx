@@ -213,7 +213,7 @@ const LocationMap = ({
       <div className="flex items-start space-x-4">
         <div className="relative">
           <img
-            src={farm.image || '/placeholder.jpg'}
+            src={farm.image || '/images/farm-generic.svg'}
             alt={farm.name}
             className="w-16 h-16 rounded-xl object-cover"
           />
@@ -439,7 +439,7 @@ const LocationMap = ({
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">
                 <img
-                  src={selectedFarm.image || '/placeholder.jpg'}
+                  src={selectedFarm.image || '/images/farm-generic.svg'}
                   alt={selectedFarm.name}
                   className="w-16 h-16 rounded-xl object-cover"
                 />

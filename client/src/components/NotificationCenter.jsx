@@ -65,7 +65,7 @@ const NotificationCenter = () => {
         ...(filter !== 'all' && { isRead: filter === 'read' ? 'true' : 'false' })
       });
 
-      const response = await API.get(`/api/notifications?${params}`, {
+      const response = await API.get(`/notifications?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -81,7 +81,7 @@ const NotificationCenter = () => {
   const fetchUnreadCount = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await API.get('/api/notifications/count', {
+      const response = await API.get('/notifications/count', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUnreadCount(response.data.unreadCount || 0);
@@ -93,7 +93,7 @@ const NotificationCenter = () => {
   const markAsRead = async (notificationId) => {
     try {
       const token = localStorage.getItem('token');
-      await API.patch(`/api/notifications/${notificationId}/read`, {}, {
+      await API.patch(`/notifications/${notificationId}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -116,7 +116,7 @@ const NotificationCenter = () => {
   const markAllAsRead = async () => {
     try {
       const token = localStorage.getItem('token');
-      await API.patch('/api/notifications/read-all', {}, {
+      await API.patch('/notifications/read-all', {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -134,7 +134,7 @@ const NotificationCenter = () => {
   const deleteNotification = async (notificationId) => {
     try {
       const token = localStorage.getItem('token');
-      await API.delete(`/api/notifications/${notificationId}`, {
+      await API.delete(`/notifications/${notificationId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

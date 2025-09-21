@@ -96,7 +96,7 @@ const Favorites = () => {
                 <div key={favorite._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 group">
                   <div className="relative">
                     <img
-                      src={favorite.image || '/placeholder.jpg'}
+                      src={favorite.image || '/images/product-generic.svg'}
                       alt={favorite.name || 'Product'}
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />

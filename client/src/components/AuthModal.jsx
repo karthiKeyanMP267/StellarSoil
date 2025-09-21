@@ -76,7 +76,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
         alert('Registration successful! Please login.');
       }
     } catch (err) {
-      setError(err.response?.data?.msg || 'An error occurred');
+      const apiErr = err?.response?.data;
+      if (apiErr?.errors && Array.isArray(apiErr.errors) && apiErr.errors.length > 0) {
+        setError(apiErr.errors.map(e => e.message).join('\n'));
+      } else {
+        setError(apiErr?.msg || 'An error occurred');
+      }
     } finally {
       setLoading(false);
     }

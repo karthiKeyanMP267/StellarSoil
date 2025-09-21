@@ -13,6 +13,8 @@ export const getFarmStats = async (req, res) => {
 };
 import Farm from '../models/Farm.js';
 import User from '../models/User.js';
+import Order from '../models/Order.js';
+import Product from '../models/Product.js';
 
 // Get farm profile
 export const getFarmProfile = async (req, res) => {
@@ -293,3 +295,136 @@ export const getAllFarms = async (req, res) => {
 };
 
 // End of file
+// Per-farmer detailed stats for dashboard
+export const getMyFarmStats = async (req, res) => {
+  try {
+    // Ensure farmer user
+    if (!req.user || req.user.role !== 'farmer') {
+      return res.status(403).json({ msg: 'Forbidden' });
+    }
+
+    // Resolve farmId for this farmer
+    const farm = await Farm.findOne({ owner: req.user._id }).select('_id');
+    if (!farm) {
+      return res.json({
+        totalProducts: 0,
+        activeListings: 0,
+        completedOrders: 0,
+        totalRevenue: 0,
+        pendingOrders: 0,
+        monthlyEarnings: 0
+      });
+    }
+
+    const farmId = farm._id;
+    const userId = req.user._id;
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Products
+    const [totalProducts, activeListings] = await Promise.all([
+      Product.countDocuments({ farm: farmId }),
+      Product.countDocuments({ farm: farmId, isActive: true })
+    ]);
+
+    // Orders filters: prefer denormalized farmer, but also fall back to farm id for legacy
+    const farmerOrFarmMatch = { $or: [ { farmer: userId }, { farm: farmId } ] };
+
+    const completedOrders = await Order.countDocuments({
+      ...farmerOrFarmMatch,
+      orderStatus: 'delivered'
+    });
+
+    // Total revenue (net: totalAmount - discount) for delivered orders
+    const revenueAgg = await Order.aggregate([
+      { $match: { ...farmerOrFarmMatch, orderStatus: 'delivered' } },
+      { $group: { _id: null, total: { $sum: { $subtract: [ '$totalAmount', { $ifNull: [ '$discount', 0 ] } ] } } } }
+    ]);
+    const totalRevenue = revenueAgg[0]?.total || 0;
+
+    // Pending orders (not delivered/cancelled)
+    const pendingStatuses = ['placed','confirmed','processing','ready','out_for_delivery'];
+    const pendingOrders = await Order.countDocuments({
+      ...farmerOrFarmMatch,
+      orderStatus: { $in: pendingStatuses }
+    });
+
+    // Monthly earnings for delivered orders since month start
+    const monthlyAgg = await Order.aggregate([
+      { $match: { ...farmerOrFarmMatch, orderStatus: 'delivered', createdAt: { $gte: monthStart } } },
+      { $group: { _id: null, total: { $sum: { $subtract: [ '$totalAmount', { $ifNull: [ '$discount', 0 ] } ] } } } }
+    ]);
+    const monthlyEarnings = monthlyAgg[0]?.total || 0;
+
+    res.json({
+      totalProducts,
+      activeListings,
+      completedOrders,
+      totalRevenue,
+      pendingOrders,
+      monthlyEarnings
+    });
+  } catch (err) {
+    console.error('Error fetching my farm stats:', err);
+    res.status(500).json({ msg: 'Error fetching farm stats' });
+  }
+};
+
+// Per-farmer Today summary KPIs
+export const getMyTodaySummary = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'farmer') {
+      return res.status(403).json({ msg: 'Forbidden' });
+    }
+
+    const farm = await Farm.findOne({ owner: req.user._id }).select('_id');
+    if (!farm) {
+      return res.json({ newOrdersToday: 0, revenueToday: 0, pendingDeliveries: 0, customerInquiries: 0 });
+    }
+
+    const farmId = farm._id;
+    const userId = req.user._id;
+
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const farmerOrFarmMatch = { $or: [ { farmer: userId }, { farm: farmId } ] };
+
+    // New orders created today
+    const newOrdersToday = await Order.countDocuments({
+      ...farmerOrFarmMatch,
+      createdAt: { $gte: startOfDay }
+    });
+
+    // Revenue today:
+    // - Prepaid orders paid today (approx by createdAt today when paymentStatus is paid)
+    // - COD orders delivered today (deliveryVerification.verifiedAt today)
+    const prepaidAgg = await Order.aggregate([
+      { $match: { ...farmerOrFarmMatch, paymentStatus: 'paid', createdAt: { $gte: startOfDay } } },
+      { $group: { _id: null, total: { $sum: { $subtract: [ '$totalAmount', { $ifNull: [ '$discount', 0 ] } ] } } } }
+    ]);
+
+    const codAgg = await Order.aggregate([
+      { $match: { ...farmerOrFarmMatch, paymentMethod: 'cod', orderStatus: 'delivered', 'deliveryVerification.verifiedAt': { $gte: startOfDay } } },
+      { $group: { _id: null, total: { $sum: { $subtract: [ '$totalAmount', { $ifNull: [ '$discount', 0 ] } ] } } } }
+    ]);
+
+    const revenueToday = (prepaidAgg[0]?.total || 0) + (codAgg[0]?.total || 0);
+
+    // Pending deliveries (delivery flow statuses)
+    const pendingStatuses = ['confirmed','processing','ready','out_for_delivery'];
+    const pendingDeliveries = await Order.countDocuments({
+      ...farmerOrFarmMatch,
+      orderStatus: { $in: pendingStatuses },
+      deliveryType: 'delivery'
+    });
+
+    // Customer inquiries: Not currently tracked; return 0 for now
+    const customerInquiries = 0;
+
+    res.json({ newOrdersToday, revenueToday, pendingDeliveries, customerInquiries });
+  } catch (err) {
+    console.error('Error fetching today summary:', err);
+    res.status(500).json({ msg: 'Error fetching today summary' });
+  }
+};

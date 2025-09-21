@@ -10,7 +10,7 @@ const FarmerOrderNotification = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await API.get('/api/orders/farmer-orders');
+  const response = await API.get('/orders/farmer-orders');
         // Count orders that are not delivered or cancelled
         const pending = response.data.filter(order => 
           !['delivered', 'cancelled'].includes(order.orderStatus)

@@ -463,7 +463,7 @@ function Marketplace() {
                         viewMode === 'list' ? 'w-48 flex-shrink-0' : 'aspect-square'
                       }`}>
                         <motion.img
-                          src={product.image || '/api/placeholder/300/300'}
+                          src={product.image || '/images/product-generic.svg'}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           loading="lazy"
@@ -692,7 +692,7 @@ function Marketplace() {
                 
                 <div className="grid md:grid-cols-2 gap-8">
                   <img
-                    src={showQuickView.image || '/api/placeholder/400/400'}
+                    src={showQuickView.image || '/images/product-generic.svg'}
                     alt={showQuickView.name}
                     className="w-full aspect-square object-cover rounded-2xl"
                   />

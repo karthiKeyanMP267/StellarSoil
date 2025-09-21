@@ -18,13 +18,8 @@ export const createOrder = async (req, res) => {
       discountCode 
     } = req.body;
 
-    // Validate and calculate total amount
-    let totalAmount = 0;
-    let discount = 0;
-    const orderItems = [];
-  let farmId = null;
-  let farmerId = null;
-
+    // Validate items, group by farm, and calculate totals
+    const groups = new Map(); // farmId -> { items: [], subtotal: number }
     for (let item of items) {
       const product = await Product.findById(item.productId);
       if (!product) {
@@ -34,46 +29,35 @@ export const createOrder = async (req, res) => {
         return res.status(400).json({ msg: `Insufficient stock for ${product.name}` });
       }
 
-      orderItems.push({
+      const farmKey = product.farm.toString();
+      if (!groups.has(farmKey)) {
+        groups.set(farmKey, { items: [], subtotal: 0 });
+      }
+      const g = groups.get(farmKey);
+      g.items.push({
         product: product._id,
         quantity: item.quantity,
         price: product.price,
         unit: product.unit
       });
+      g.subtotal += product.price * item.quantity;
 
-      totalAmount += product.price * item.quantity;
-      
-  // Store farmId (assumes single-farm cart)
-  farmId = product.farm;
-
-      // Update stock
-      await Product.findByIdAndUpdate(product._id, {
-        $inc: { stock: -item.quantity }
-      });
+      // Update stock immediately (simple approach; for production, use transactions)
+      await Product.findByIdAndUpdate(product._id, { $inc: { stock: -item.quantity } });
     }
 
-    // Apply discount logic if needed
+    // Compute overall discount once
+    let overallSubtotal = 0;
+    for (const [, g] of groups) overallSubtotal += g.subtotal;
+    let overallDiscount = 0;
     if (discountCode) {
-      // Example discount logic - replace with your actual implementation
-      if (discountCode === 'WELCOME10') {
-        discount = totalAmount * 0.1; // 10% discount
-      } else if (discountCode === 'FARM20') {
-        discount = totalAmount * 0.2; // 20% discount
-      }
-      // Cap the discount if needed
-      discount = Math.min(discount, 500); // Max ₹500 discount
+      if (discountCode === 'WELCOME10') overallDiscount = overallSubtotal * 0.1;
+      else if (discountCode === 'FARM20') overallDiscount = overallSubtotal * 0.2;
+      overallDiscount = Math.min(overallDiscount, 500);
     }
 
-    // For COD orders, generate a verification code
-    let verificationCode = null;
-    if (paymentMethod === 'cod') {
-      const code = generateAlphanumericOTP(6);
-      verificationCode = {
-        code,
-        generatedAt: new Date(),
-        verified: false
-      };
-    }
+    // For COD orders, prepare per-order verification
+    const isCOD = paymentMethod === 'cod';
 
     // Debug information to help diagnose the issue
     console.log('Creating order with buyer:', {
@@ -84,49 +68,77 @@ export const createOrder = async (req, res) => {
       authHeader: req.headers.authorization ? 'Present' : 'Missing'
     });
     
-    // Resolve farmer (owner) for denormalized storage
-    if (farmId) {
+    // Create one order per farm group
+    const ordersCreated = [];
+    for (const [farmKey, g] of groups) {
+      let farmerId = null;
       try {
-        const farmDoc = await Farm.findById(farmId).select('owner');
+        const farmDoc = await Farm.findById(farmKey).select('owner');
         farmerId = farmDoc?.owner || null;
       } catch (e) {
         console.warn('Failed to resolve farm owner for order:', e?.message);
       }
-    }
 
-    const order = await Order.create({
-      buyer: req.user._id, // Use _id instead of id
-      farm: farmId, // Assuming all items are from same farm
-      farmer: farmerId || undefined,
-      items: orderItems,
-      totalAmount,
-      discount,
-      discountCode: discount > 0 ? discountCode : null,
-      deliveryType,
-      deliveryAddress,
-      deliverySlot,
-      paymentMethod,
-      verificationCode,
-      deliveryVerification: {
-        required: paymentMethod === 'cod',
-        verified: false
-      },
-      statusHistory: [{ status: 'placed' }]
-    });
+      // Allocate proportional discount
+      const proportionalDiscount = overallSubtotal > 0
+        ? Math.round((g.subtotal / overallSubtotal) * overallDiscount)
+        : 0;
 
-    // If it's a COD order, send the verification code to the user
-    if (paymentMethod === 'cod' && verificationCode) {
-      try {
-        // Send notification to the user with the verification code
-        await notificationService.sendVerificationCodeNotification(
-          req.user._id, 
-          order._id,
-          verificationCode.code
-        );
-      } catch (notifError) {
-        console.error('Failed to send verification code notification:', notifError);
-        // Continue anyway as the order is created
+      const verificationCode = isCOD
+        ? { code: generateAlphanumericOTP(6), generatedAt: new Date(), verified: false }
+        : null;
+
+      const order = await Order.create({
+        buyer: req.user._id,
+        farm: farmKey,
+        farmer: farmerId || undefined,
+        items: g.items,
+        totalAmount: g.subtotal,
+        discount: proportionalDiscount,
+        discountCode: proportionalDiscount > 0 ? discountCode : null,
+        deliveryType,
+        deliveryAddress,
+        deliverySlot,
+        paymentMethod,
+        verificationCode,
+        deliveryVerification: {
+          required: isCOD,
+          verified: false
+        },
+        statusHistory: [{ status: 'placed' }]
+      });
+
+      // Notify buyer with verification code if COD
+      if (isCOD && verificationCode) {
+        try {
+          await notificationService.sendVerificationCodeNotification(
+            req.user._id,
+            order._id,
+            verificationCode.code
+          );
+        } catch (notifError) {
+          console.error('Failed to send verification code notification:', notifError);
+        }
       }
+
+      // Notify farmer of the order
+      try {
+        const farm = await Farm.findById(farmKey).populate('owner');
+        const buyer = await User.findById(req.user._id);
+        if (farm && farm.owner) {
+          await notificationService.sendFarmerOrderNotification(
+            farm.owner._id,
+            order._id,
+            buyer?.name,
+            g.subtotal,
+            deliveryAddress
+          );
+        }
+      } catch (notifError) {
+        console.error('Failed to send farmer notification:', notifError);
+      }
+
+      ordersCreated.push(order);
     }
     
     // Clear the user's cart after successful order creation
@@ -148,29 +160,11 @@ export const createOrder = async (req, res) => {
       // Continue anyway as the order was created successfully
     }
     
-    try {
-      // Get the farm details to find the owner
-      const farm = await Farm.findById(farmId).populate('owner');
-      
-      // Get the user details
-      const buyer = await User.findById(req.user._id);
-      
-      if (farm && farm.owner) {
-        // Send notification to farmer
-        await notificationService.sendFarmerOrderNotification(
-          farm.owner._id,
-          order._id,
-          buyer.name,
-          totalAmount,
-          deliveryAddress
-        );
-      }
-    } catch (notifError) {
-      console.error('Failed to send farmer notification:', notifError);
-      // Continue anyway as the order is created
+    // Respond: single object for one order, multi payload otherwise
+    if (ordersCreated.length === 1) {
+      return res.status(201).json(ordersCreated[0]);
     }
-
-    res.status(201).json(order);
+    return res.status(201).json({ multi: true, orders: ordersCreated });
   } catch (err) {
     console.error('Error creating order:', err);
     res.status(500).json({ msg: 'Error creating order' });

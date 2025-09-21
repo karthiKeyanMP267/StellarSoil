@@ -101,11 +101,11 @@ export default function FarmerDashboard() {
   const loadFarmData = async () => {
     try {
       // Load farm's products
-      const productsRes = await API.get('/api/products/farm');
+  const productsRes = await API.get('/products/mine');
       setProducts(productsRes.data);
 
       // Load farm's orders
-      const ordersRes = await API.get(`/api/orders/farm/${user.farmId}`);
+  const ordersRes = await API.get(`/orders/farm/${user.farmId}`);
       setOrders(ordersRes.data);
 
       // Calculate enhanced stats

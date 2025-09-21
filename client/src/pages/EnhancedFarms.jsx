@@ -43,7 +43,7 @@ const Farms = () => {
       location: "Gurgaon, Haryana",
       latitude: 28.4595,
       longitude: 77.0266,
-      image: "/hero-farm.jpg",
+  image: "/images/farm-generic.svg",
       rating: 4.8,
       phone: "+91 98765 43210",
       hours: "6 AM - 8 PM",
@@ -52,9 +52,9 @@ const Farms = () => {
       hasDelivery: true,
       description: "Premium organic vegetables and fruits grown with sustainable farming practices.",
       products: [
-        { id: 101, name: "Organic Tomatoes", price: 80, image: "/placeholder.jpg", category: "vegetables" },
-        { id: 102, name: "Fresh Spinach", price: 40, image: "/placeholder.jpg", category: "leafy greens" },
-        { id: 103, name: "Organic Carrots", price: 60, image: "/placeholder.jpg", category: "vegetables" }
+  { id: 101, name: "Organic Tomatoes", price: 80, image: "/images/product-generic.svg", category: "vegetables" },
+  { id: 102, name: "Fresh Spinach", price: 40, image: "/images/product-generic.svg", category: "leafy greens" },
+  { id: 103, name: "Organic Carrots", price: 60, image: "/images/product-generic.svg", category: "vegetables" }
       ]
     },
     {
@@ -63,7 +63,7 @@ const Farms = () => {
       location: "Noida, UP",
       latitude: 28.5355,
       longitude: 77.3910,
-      image: "/hero-farm.jpg",
+  image: "/images/farm-generic.svg",
       rating: 4.6,
       phone: "+91 98765 43211",
       hours: "5 AM - 7 PM",
@@ -72,9 +72,9 @@ const Farms = () => {
       hasDelivery: true,
       description: "Fresh seasonal vegetables delivered daily to your doorstep.",
       products: [
-        { id: 201, name: "Fresh Potatoes", price: 30, image: "/placeholder.jpg", category: "vegetables" },
-        { id: 202, name: "Green Peas", price: 70, image: "/placeholder.jpg", category: "vegetables" },
-        { id: 203, name: "Fresh Onions", price: 25, image: "/placeholder.jpg", category: "vegetables" }
+  { id: 201, name: "Fresh Potatoes", price: 30, image: "/images/product-generic.svg", category: "vegetables" },
+  { id: 202, name: "Green Peas", price: 70, image: "/images/product-generic.svg", category: "vegetables" },
+  { id: 203, name: "Fresh Onions", price: 25, image: "/images/product-generic.svg", category: "vegetables" }
       ]
     },
     {
@@ -83,7 +83,7 @@ const Farms = () => {
       location: "Faridabad, Haryana",
       latitude: 28.4089,
       longitude: 77.3178,
-      image: "/hero-farm.jpg",
+  image: "/images/farm-generic.svg",
       rating: 4.9,
       phone: "+91 98765 43212",
       hours: "7 AM - 6 PM",
@@ -92,9 +92,9 @@ const Farms = () => {
       hasDelivery: false,
       description: "Certified organic farm specializing in exotic vegetables and herbs.",
       products: [
-        { id: 301, name: "Organic Broccoli", price: 120, image: "/placeholder.jpg", category: "vegetables" },
-        { id: 302, name: "Fresh Herbs Mix", price: 50, image: "/placeholder.jpg", category: "herbs" },
-        { id: 303, name: "Baby Corn", price: 90, image: "/placeholder.jpg", category: "vegetables" }
+  { id: 301, name: "Organic Broccoli", price: 120, image: "/images/product-generic.svg", category: "vegetables" },
+  { id: 302, name: "Fresh Herbs Mix", price: 50, image: "/images/product-generic.svg", category: "herbs" },
+  { id: 303, name: "Baby Corn", price: 90, image: "/images/product-generic.svg", category: "vegetables" }
       ]
     }
   ];

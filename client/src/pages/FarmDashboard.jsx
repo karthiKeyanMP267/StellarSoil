@@ -42,6 +42,12 @@ export default function FarmDashboard() {
     pendingOrders: 0,
     monthlyEarnings: 0
   });
+  const [todaySummary, setTodaySummary] = useState({
+    newOrdersToday: 0,
+    revenueToday: 0,
+    pendingDeliveries: 0,
+    customerInquiries: 0
+  });
   
   const [farmLocation, setFarmLocation] = useState(null);
   const [showFarmRegistration, setShowFarmRegistration] = useState(false);
@@ -95,27 +101,24 @@ export default function FarmDashboard() {
     documents: []
   });
 
-  // Fetch farm statistics
+  // Fetch per-farmer statistics and today's summary
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchAll = async () => {
+      if (!user || user.role !== 'farmer') return;
       try {
-        const response = await API.get('/farms/stats');
-        setStats(response.data);
-      } catch (error) {
-        console.error('Error fetching farm stats:', error);
-        setStats({
-          totalProducts: 12,
-          activeListings: 8,
-          completedOrders: 45,
-          totalRevenue: 125000,
-          pendingOrders: 3,
-          monthlyEarnings: 25000
-        });
+        const [statsRes, summaryRes] = await Promise.all([
+          API.get('/farms/me/stats'),
+          API.get('/farms/me/summary')
+        ]);
+        if (statsRes?.data) setStats(statsRes.data);
+        if (summaryRes?.data) setTodaySummary(summaryRes.data);
+      } catch (err) {
+        console.error('Error fetching dashboard stats:', err);
+        // Graceful fallback (keep zeros rather than mock numbers)
       }
     };
-
-    fetchStats();
-  }, []);
+    fetchAll();
+  }, [user]);
 
   // Get live location for farm
   useEffect(() => {
@@ -252,7 +255,11 @@ export default function FarmDashboard() {
       // trigger re-fetch via effect
     } catch (err) {
       console.error('Save product failed:', err);
-      error('Save Failed', err?.response?.data?.msg || 'Unable to save product');
+      const valErrors = err?.response?.data?.errors;
+      const detailed = Array.isArray(valErrors)
+        ? valErrors.map((e) => e.msg || e.message).filter(Boolean).join(', ')
+        : (err?.response?.data?.msg || err?.message);
+      error('Save Failed', detailed || 'Unable to save product');
     }
   };
 
@@ -703,19 +710,19 @@ export default function FarmDashboard() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-beige-600">New Orders</span>
-                    <span className="font-semibold text-beige-800">3</span>
+                    <span className="font-semibold text-beige-800">{todaySummary.newOrdersToday}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-beige-600">Revenue Today</span>
-                    <span className="font-semibold text-green-600">₹1,200</span>
+                    <span className="font-semibold text-green-600">₹{todaySummary.revenueToday?.toLocaleString?.() || todaySummary.revenueToday}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-beige-600">Pending Deliveries</span>
-                    <span className="font-semibold text-orange-600">2</span>
+                    <span className="font-semibold text-orange-600">{todaySummary.pendingDeliveries}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-beige-600">Customer Inquiries</span>
-                    <span className="font-semibold text-blue-600">5</span>
+                    <span className="font-semibold text-blue-600">{todaySummary.customerInquiries}</span>
                   </div>
                 </div>
               </Card>
@@ -921,7 +928,20 @@ export default function FarmDashboard() {
             <TextArea label="Description" rows={3} value={productForm.description} onChange={(e) => setProductForm(v => ({ ...v, description: e.target.value }))} placeholder="Describe this product (min 10 characters)" />
             <div className="grid md:grid-cols-3 gap-4">
               <Input label="Price (₹)" type="number" value={productForm.price} onChange={(e) => setProductForm(v => ({ ...v, price: e.target.value }))} required />
-              <Select label="Unit" value={productForm.unit} onChange={(e) => setProductForm(v => ({ ...v, unit: e.target.value }))} options={[{ value: 'kg', label: 'kg' }, { value: 'g', label: 'g' }, { value: 'lb', label: 'lb' }, { value: 'piece', label: 'piece' }, { value: 'bunch', label: 'bunch' }, { value: 'dozen', label: 'dozen' }]} />
+              <Select
+                label="Unit"
+                value={productForm.unit}
+                onChange={(e) => setProductForm(v => ({ ...v, unit: e.target.value }))}
+                options={[
+                  { value: 'kg', label: 'kg' },
+                  { value: 'g', label: 'g' },
+                  { value: 'lb', label: 'lb' },
+                  { value: 'piece', label: 'piece' },
+                  { value: 'bunch', label: 'bunch' },
+                  { value: 'dozen', label: 'dozen' },
+                  { value: 'liters', label: 'liters' }
+                ]}
+              />
               <Input label="Stock" type="number" value={productForm.stock} onChange={(e) => setProductForm(v => ({ ...v, stock: e.target.value }))} required />
             </div>
             <div className="grid md:grid-cols-2 gap-4">

@@ -11,11 +11,12 @@ export const registerValidator = [
   body('password')
     .notEmpty().withMessage('Password is required')
     .isLength({ min: 6 }).withMessage('Password should be at least 6 characters'),
-  body('phone')
-    .notEmpty().withMessage('Phone number is required')
-    .matches(/^[0-9]{10}$/).withMessage('Please enter a valid 10-digit phone number'),
   body('role')
-    .isIn(['customer', 'farmer', 'doctor', 'admin']).withMessage('Invalid role'),
+    .isIn(['user', 'farmer']).withMessage('Invalid role'),
+  // Phone is optional during registration; when provided, validate format
+  body('phone')
+    .optional()
+    .matches(/^[0-9]{10}$/).withMessage('Please enter a valid 10-digit phone number'),
 ];
 
 // Login validation

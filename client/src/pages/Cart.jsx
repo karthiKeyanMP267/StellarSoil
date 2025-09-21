@@ -75,7 +75,7 @@ const Cart = () => {
               cartId: 'local',
               productId: item.id,
               name: item.name,
-              image: item.image || '/placeholder.jpg',
+              image: item.image || '/images/product-generic.svg',
               price: item.price || 0,
               unit: item.unit || 'kg',
               quantity: item.quantity || 1,
@@ -392,7 +392,7 @@ const Cart = () => {
                       <div className="relative">
                         <div className="w-32 h-32 rounded-2xl overflow-hidden shadow-2xl group-hover:shadow-amber-500/30 transition-all duration-500">
                           <img
-                            src={item.image || '/placeholder.jpg'}
+                            src={item.image || '/images/product-generic.svg'}
                             alt={item.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />

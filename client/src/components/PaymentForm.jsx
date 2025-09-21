@@ -74,8 +74,8 @@ const PaymentForm = ({ cart, onSuccess, onError }) => {
     setLoading(true);
     try {
       // Initialize payment
-      const { data } = await API.post('/api/payments/initialize', {
-        cartId: cart._id
+      const { data } = await API.post('/payment/initialize', {
+        cartIds: Array.from(new Set(cart.items.map(i => i.cartId))).filter(Boolean)
       });
 
       const options = {
@@ -97,8 +97,8 @@ const PaymentForm = ({ cart, onSuccess, onError }) => {
             };
 
             // Verify payment and create order
-            const orderResponse = await API.post('/api/payments/verify', {
-              cartId: cart._id,
+            const orderResponse = await API.post('/payment/verify', {
+              cartIds: Array.from(new Set(cart.items.map(i => i.cartId))).filter(Boolean),
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
@@ -185,7 +185,8 @@ const PaymentForm = ({ cart, onSuccess, onError }) => {
         deliveryType: deliveryDetails.type,
         deliveryAddress: deliveryDetails.address,
         deliverySlot,
-        paymentMethod: 'cod'
+        paymentMethod: 'cod',
+        cartIds: Array.from(new Set(cart.items.map(i => i.cartId))).filter(Boolean)
       });
 
       if (onSuccess) {

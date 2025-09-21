@@ -126,7 +126,7 @@ const OrderHistory = () => {
                         {order.items.map((item, index) => (
                           <div key={item._id || index} className="flex items-center space-x-4">
                             <img
-                              src={item.product?.image || '/placeholder.jpg'}
+                              src={item.product?.image || '/images/product-generic.svg'}
                               alt={item.product?.name || 'Product'}
                               className="w-16 h-16 rounded-lg object-cover"
                             />

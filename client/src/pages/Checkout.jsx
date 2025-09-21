@@ -74,13 +74,21 @@ const Checkout = () => {
   };
 
   const handleViewOrder = () => {
-    navigate(`/orders/${order._id}`);
+    if (!order) return;
+    if (order.multi && Array.isArray(order.orders)) {
+      // Navigate to first order for details
+      navigate(`/orders/${order.orders[0]._id}`);
+    } else {
+      navigate(`/orders/${order._id}`);
+    }
   };
 
   const handleCloseSummary = () => {
     setShowSummary(false);
-    // Optional: navigate to order details after closing summary
-    if (order && order._id) {
+    if (!order) return;
+    if (order.multi && Array.isArray(order.orders) && order.orders.length > 0) {
+      navigate(`/orders/${order.orders[0]._id}`);
+    } else if (order._id) {
       navigate(`/orders/${order._id}`);
     }
   };
@@ -368,7 +376,7 @@ const Checkout = () => {
                   <div key={`${item.cartId}-${item.product._id}`} className="flex items-start space-x-4 pb-4 border-b border-amber-100 last:border-0 last:pb-0">
                     <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
                       <img 
-                        src={item.product.image || '/placeholder.jpg'} 
+                        src={item.product.image || '/images/product-generic.svg'} 
                         alt={item.product.name}
                         className="w-full h-full object-cover"
                       />

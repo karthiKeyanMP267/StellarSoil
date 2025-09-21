@@ -10,7 +10,9 @@ import {
   uploadFarmImages,
   deleteFarmImage,
   getAllFarms,
-  getFarmStats
+  getFarmStats,
+  getMyFarmStats,
+  getMyTodaySummary
 } from '../controllers/farmController.js';
 
 const router = express.Router();
@@ -25,6 +27,9 @@ router.get('/:id', getFarmById);
 router.post('/:id/reviews', protect, addFarmReview);
 router.get('/profile/me', protect, farmer, getFarmProfile);
 router.put('/profile/me', protect, farmer, updateFarmProfile);
+// Farmer-specific stats endpoints
+router.get('/me/stats', protect, farmer, getMyFarmStats);
+router.get('/me/summary', protect, farmer, getMyTodaySummary);
 
 // Image upload routes
 router.post('/images', protect, farmer, upload.array('images', 5), uploadFarmImages);

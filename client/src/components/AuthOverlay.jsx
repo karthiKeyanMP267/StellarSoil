@@ -30,13 +30,23 @@ export default function AuthOverlay({ isOpen, onClose }) {
         login(res.data.user, res.data.accessToken);
         onClose();
       } else {
+        // This lightweight overlay doesn't support file upload; block farmer registration here
+        if (form.role === 'farmer') {
+          setError('Farmer registration requires uploading a Kisan ID document. Please use the main sign-up form.');
+          return;
+        }
         await authApi.register(form);
         setIsLogin(true);
         setForm({ ...form, password: '' });
         setError('Registration successful! Please log in.');
       }
     } catch (err) {
-      setError(err.response?.data?.msg || (isLogin ? 'Login failed' : 'Registration failed'));
+      const apiErr = err?.response?.data;
+      if (apiErr?.errors && Array.isArray(apiErr.errors) && apiErr.errors.length > 0) {
+        setError(apiErr.errors.map(e => e.message).join('\n'));
+      } else {
+        setError(apiErr?.msg || (isLogin ? 'Login failed' : 'Registration failed'));
+      }
     } finally {
       setLoading(false);
     }
@@ -128,8 +138,9 @@ export default function AuthOverlay({ isOpen, onClose }) {
                     >User</button>
                     <button
                       type="button"
-                      className={`px-3 py-1 rounded-lg border ${form.role === 'farmer' ? 'bg-green-100 border-green-400' : 'bg-white border-gray-300'}`}
-                      onClick={() => setForm(f => ({ ...f, role: 'farmer' }))}
+                      className={`px-3 py-1 rounded-lg border ${form.role === 'farmer' ? 'bg-green-50 border-green-300 text-gray-400' : 'bg-white border-gray-200 text-gray-400'}`}
+                      onClick={() => setForm(f => ({ ...f, role: isLogin ? 'farmer' : 'user' }))}
+                      title={!isLogin ? 'Use the main sign-up form to register as Farmer' : undefined}
                     >Farmer</button>
                   </div>
                   <div>
