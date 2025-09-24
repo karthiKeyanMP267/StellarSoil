@@ -22,8 +22,16 @@ const runPythonScript = (scriptName, args = []) => {
     return new Promise((resolve, reject) => {
         // Add error handling for script existence
         const scriptPath = path.join(__dirname, '..', 'ml_service', scriptName);
-        
-        const pythonProcess = spawn('python', [
+        // Determine Python executable
+        const isWin = process.platform === 'win32';
+        const PYTHON_EXEC = process.env.PYTHON_EXEC || process.env.PYTHON_PATH || (isWin ? 'py' : 'python');
+        const pyArgs = [];
+        // If using Windows launcher, force Python 3
+        if (isWin && PYTHON_EXEC === 'py') {
+            pyArgs.push('-3');
+        }
+        const pythonProcess = spawn(PYTHON_EXEC, [
+            ...pyArgs,
             scriptPath,
             ...args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg))
         ]);
@@ -70,7 +78,8 @@ router.get('/health', async (req, res) => {
     try {
         await Promise.all([
             runPythonScript('crop_recommendation.py', ['health']),
-            runPythonScript('price_prediction.py', ['health'])
+            runPythonScript('price_prediction.py', ['health']),
+            runPythonScript('stock_prediction.py', ['health'])
         ]);
         res.json({ status: 'healthy' });
     } catch (error) {
@@ -101,6 +110,7 @@ router.post('/crop-recommendation', protect, async (req, res) => {
         }
 
         const result = await runPythonScript('crop_recommendation.py', [
+            'predict',
             soil_data
         ]);
 
@@ -135,6 +145,7 @@ router.post('/price-prediction', protect, async (req, res) => {
         }
 
         const result = await runPythonScript('price_prediction.py', [
+            'predict',
             crop,
             days_ahead.toString()
         ]);
@@ -211,6 +222,41 @@ router.get('/price-factors/:crop', protect, async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: 'Error getting price factors',
+            error: error.message 
+        });
+    }
+});
+
+// New: Predict stock depletion and inventory forecast
+router.post('/stock-prediction', protect, async (req, res) => {
+    try {
+        const { product_name, current_stock, days_ahead = 30, sales_history } = req.body || {};
+
+        if (product_name === undefined || current_stock === undefined) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'product_name and current_stock are required' 
+            });
+        }
+
+        const payload = {
+            product_name,
+            current_stock: Number(current_stock),
+            days_ahead: Number.isInteger(days_ahead) ? days_ahead : parseInt(days_ahead, 10) || 30,
+            sales_history: Array.isArray(sales_history) ? sales_history : []
+        };
+
+        const result = await runPythonScript('stock_prediction.py', [
+            'predict',
+            payload
+        ]);
+
+        res.json(result);
+    } catch (error) {
+        console.error('Stock prediction error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error generating stock predictions',
             error: error.message 
         });
     }

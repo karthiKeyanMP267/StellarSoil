@@ -71,7 +71,8 @@ const Notification = ({
       const interval = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 100) {
-            onRemove(id);
+            // Defer removal to next tick to avoid setState during render warnings
+            setTimeout(() => onRemove(id), 0);
             return 0;
           }
           return prev - 100;

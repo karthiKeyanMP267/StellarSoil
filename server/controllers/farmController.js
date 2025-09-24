@@ -19,8 +19,8 @@ import Product from '../models/Product.js';
 // Get farm profile
 export const getFarmProfile = async (req, res) => {
   try {
-    const farm = await Farm.findOne({ owner: req.user._id })
-      .populate('owner', 'name email phone');
+    const farm = await Farm.findOne({ ownerId: req.user._id })
+      .populate('ownerId', 'name email phone');
     
     if (!farm) {
       return res.status(404).json({ msg: 'Farm profile not found' });
@@ -57,7 +57,8 @@ export const updateFarmProfile = async (req, res) => {
       website
     } = req.body;
 
-    let farm = await Farm.findOne({ owner: req.user._id });
+  const ownerId = req.user._id;
+  let farm = await Farm.findOne({ ownerId });
     
     // Build GeoJSON location if coordinates provided, else keep existing later
     let geoLocation;
@@ -81,15 +82,26 @@ export const updateFarmProfile = async (req, res) => {
       ? (allowedTypes.includes(farmType) ? farmType : 'mixed')
       : undefined;
 
-    // Combine farm size if provided as separate parts
-    let farmSizeStr;
+    // Map farm size to schema shape { value, unit } with allowed units only
+    let farmSizeObj;
     if (req.body.farmSize) {
-      const unit = req.body.unit || req.body.farmSizeUnit || 'acres';
-      farmSizeStr = `${req.body.farmSize} ${unit}`;
+      const rawUnit = (req.body.unit || req.body.farmSizeUnit || '').toLowerCase();
+      let unit;
+      if (rawUnit.includes('acre')) unit = 'acre';
+      else if (rawUnit.includes('hect')) unit = 'hectare';
+      else if (rawUnit.includes('bigha')) unit = 'bigha';
+      else if (rawUnit.includes('katha')) unit = 'katha';
+      // Only set if unit is one of the allowed
+      if (unit) {
+        const value = parseFloat(req.body.farmSize);
+        if (!Number.isNaN(value)) {
+          farmSizeObj = { value, unit };
+        }
+      }
     }
 
     const farmData = {
-      owner: req.user._id, // Explicitly set the owner
+      ownerId, // Explicitly set the owner
       name: farmName,
       farmType: normalizedType,
       description,
@@ -98,41 +110,43 @@ export const updateFarmProfile = async (req, res) => {
       contactPhone: resolvedPhone,
       email,
       website,
-      farmSize: farmSizeStr,
+      ...(farmSizeObj ? { farmSize: farmSizeObj } : {}),
       specialties,
       certifications,
       images: images || []
     };
 
-    if (!farm) {
-      // Create new farm if it doesn't exist
-      farm = new Farm(farmData);
-    } else {
-      // Update existing farm
-      if (farmName !== undefined) farm.name = farmName;
-  if (normalizedType !== undefined) farm.farmType = normalizedType;
-      if (description !== undefined) farm.description = description;
-      if (geoLocation) farm.location = geoLocation;
-      if (resolvedAddress !== undefined) farm.address = resolvedAddress;
-      if (resolvedPhone !== undefined) farm.contactPhone = resolvedPhone;
-      if (email !== undefined) farm.email = email;
-      if (website !== undefined) farm.website = website;
-  if (farmSizeStr !== undefined) farm.farmSize = farmSizeStr;
-      farm.specialties = specialties;
-      farm.certifications = certifications;
-      farm.owner = req.user._id; // Ensure owner is set
-      if (images) {
-        farm.images = images;
-      }
-    }
+    // Debug log to verify ownerId presence
+    try {
+      console.log('updateFarmProfile: user._id =', req.user?._id, 'farmData.ownerId =', farmData.ownerId);
+    } catch {}
 
-    const updatedFarm = await farm.save();
+    // Upsert farm atomically
+    const update = {
+      $set: {
+        ...(farmName !== undefined ? { name: farmName } : {}),
+        ...(normalizedType !== undefined ? { farmType: normalizedType } : {}),
+        ...(description !== undefined ? { description } : {}),
+        ...(geoLocation ? { location: geoLocation } : {}),
+        ...(resolvedAddress !== undefined ? { address: resolvedAddress } : {}),
+        ...(resolvedPhone !== undefined ? { contactPhone: resolvedPhone } : {}),
+        ...(email !== undefined ? { email } : {}),
+        ...(website !== undefined ? { website } : {}),
+        ...(farmSizeObj ? { farmSize: farmSizeObj } : {}),
+        ...(specialties !== undefined ? { specialties } : {}),
+        ...(certifications !== undefined ? { certifications } : {}),
+        ...(images ? { images } : {})
+      },
+      $setOnInsert: { ownerId }
+    };
+    const updatedFarm = await Farm.findOneAndUpdate(
+      { ownerId },
+      update,
+      { new: true, upsert: true, runValidators: true }
+    );
     
     // Update user's farm info
-    const updates = { farmName };
-    if (!req.user.farmId || req.user.farmId.toString() !== updatedFarm._id.toString()) {
-      updates.farmId = updatedFarm._id;
-    }
+    const updates = { farmName, farmId: updatedFarm._id };
     await User.findByIdAndUpdate(req.user._id, updates);
 
     res.json({
@@ -152,7 +166,7 @@ export const uploadFarmImages = async (req, res) => {
       return res.status(400).json({ msg: 'No files uploaded' });
     }
 
-    const farm = await Farm.findOne({ owner: req.user._id });
+  const farm = await Farm.findOne({ ownerId: req.user._id });
     if (!farm) {
       return res.status(404).json({ msg: 'Farm profile not found' });
     }
@@ -182,7 +196,7 @@ export const deleteFarmImage = async (req, res) => {
       return res.status(400).json({ msg: 'Image path is required' });
     }
 
-    const farm = await Farm.findOne({ owner: req.user._id });
+  const farm = await Farm.findOne({ ownerId: req.user._id });
     if (!farm) {
       return res.status(404).json({ msg: 'Farm profile not found' });
     }
@@ -218,7 +232,7 @@ export const getNearbyFarms = async (req, res) => {
           $maxDistance: parseInt(radius)
         }
       }
-    }).populate('owner', 'name');
+  }).populate('ownerId', 'name');
 
     res.json(farms);
   } catch (err) {
@@ -231,7 +245,7 @@ export const getNearbyFarms = async (req, res) => {
 export const getFarmById = async (req, res) => {
   try {
     const farm = await Farm.findById(req.params.id)
-      .populate('owner', 'name')
+      .populate('ownerId', 'name')
       .select('-businessHours.monday -businessHours.tuesday -businessHours.wednesday -businessHours.thursday -businessHours.friday -businessHours.saturday -businessHours.sunday');
 
     if (!farm) {
@@ -304,7 +318,7 @@ export const getMyFarmStats = async (req, res) => {
     }
 
     // Resolve farmId for this farmer
-    const farm = await Farm.findOne({ owner: req.user._id }).select('_id');
+  const farm = await Farm.findOne({ ownerId: req.user._id }).select('_id');
     if (!farm) {
       return res.json({
         totalProducts: 0,
@@ -377,7 +391,7 @@ export const getMyTodaySummary = async (req, res) => {
       return res.status(403).json({ msg: 'Forbidden' });
     }
 
-    const farm = await Farm.findOne({ owner: req.user._id }).select('_id');
+  const farm = await Farm.findOne({ ownerId: req.user._id }).select('_id');
     if (!farm) {
       return res.json({ newOrdersToday: 0, revenueToday: 0, pendingDeliveries: 0, customerInquiries: 0 });
     }

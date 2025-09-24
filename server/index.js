@@ -1,35 +1,14 @@
 // server/index.js
-import express from 'express';
-import dotenv from 'dotenv';
-import multer from 'multer';
-import cookieParser from 'cookie-parser';
-import connectDB from './config/db.js';
-import { corsOptions, limiter, helmetConfig } from './config/security.js';
+const express = require('express');
+const dotenv = require('dotenv');
+const multer = require('multer');
+const cookieParser = require('cookie-parser');
+const connectDB = require('./config/db');
+const { corsOptions, limiter, helmetConfig } = require('./config/security');
 
-import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import authRoutes from './routes/authRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
-import productRoutes from './routes/productRoutes.js';
-import orderRoutes from './routes/orderRoutes.js';
-import farmRoutes from './routes/farmRoutes.js';
-import cartRoutes from './routes/cartRoutes.js';
-import mlRoutes from './routes/mlRoutes.js';
-import marketRoutes from './routes/marketRoutes.js';
-import paymentRoutes from './routes/paymentRoutes.js';
-import farmManagementRoutes from './routes/farmManagementRoutes.js';
-import doctorRoutes from './routes/doctorRoutes.js';
-import appointmentRoutes from './routes/appointmentRoutes.js';
-import weatherRoutes from './routes/weatherRoutes.js';
-import notificationRoutes from './routes/notificationRoutes.js';
-import analyticsRoutes from './routes/analyticsRoutes.js';
-import favoritesRoutes from './routes/favoritesRoutes.js';
-import chatRoutes from './routes/chatRoutes.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const cors = require('cors');
+const path = require('path');
+const { pathToFileURL } = require('url');
 
 // Load environment variables from the correct path
 const envPath = path.resolve(__dirname, '.env');
@@ -54,36 +33,71 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Apply rate limiting to all routes
 app.use('/api/', limiter);
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve uploaded files from server/uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Ensure uploads directory exists
-import fs from 'fs';
-import notificationService from './services/notificationService.js';
+const fs = require('fs');
+let notificationService = require('./services/notificationService');
+notificationService = notificationService && notificationService.default ? notificationService.default : notificationService;
 
 const uploadsDir = path.join(__dirname, 'uploads');
 const kisanIdsDir = path.join(uploadsDir, 'kisan-ids');
+const certificatesDir = path.join(uploadsDir, 'certificates');
+const tempDir = path.join(uploadsDir, 'temp');
+
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 if (!fs.existsSync(kisanIdsDir)) fs.mkdirSync(kisanIdsDir);
+if (!fs.existsSync(certificatesDir)) fs.mkdirSync(certificatesDir);
+if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/farms', farmRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/ml', mlRoutes);
-app.use('/api/market', marketRoutes);
-app.use('/api/payment', paymentRoutes);
-app.use('/api/farm-management', farmManagementRoutes);
-app.use('/api/doctors', doctorRoutes);
-app.use('/api/appointments', appointmentRoutes);
-app.use('/api/weather', weatherRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/favorites', favoritesRoutes);
-app.use('/api/chat', chatRoutes);
+// Helper to load routers that may be ESM or CJS
+const loadRouterSync = (p) => {
+  try {
+    const mod = require(p);
+    return mod && mod.default ? mod.default : mod;
+  } catch (e) {
+    return null;
+  }
+};
+
+const loadRouterAsync = async (p) => {
+  const fileUrl = pathToFileURL(path.resolve(__dirname, p + (p.endsWith('.js') ? '' : '.js'))).href;
+  const mod = await import(fileUrl);
+  return (mod && (mod.default || mod.router)) ? (mod.default || mod.router) : mod;
+};
+
+// Mount routes (support both CJS require and ESM import)
+const mountRoutes = async () => {
+  const mappings = [
+    ['/api/auth', './routes/authRoutes'],
+    ['/api/admin', './routes/adminRoutes'],
+    ['/api/products', './routes/productRoutes'],
+    ['/api/orders', './routes/orderRoutes'],
+    ['/api/farms', './routes/farmRoutes'],
+    ['/api/certificates', './routes/certificateRoutes'],
+    ['/api/cart', './routes/cartRoutes'],
+    ['/api/ml', './routes/mlRoutes'],
+    ['/api/market', './routes/marketRoutes'],
+    ['/api/payment', './routes/paymentRoutes'],
+    ['/api/farm-management', './routes/farmManagementRoutes'],
+    ['/api/doctors', './routes/doctorRoutes'],
+    ['/api/appointments', './routes/appointmentRoutes'],
+    ['/api/weather', './routes/weatherRoutes'],
+    ['/api/notifications', './routes/notificationRoutes'],
+    ['/api/analytics', './routes/analyticsRoutes'],
+    ['/api/favorites', './routes/favoritesRoutes'],
+    ['/api/chat', './routes/chatRoutes']
+  ];
+
+  for (const [mountPath, rel] of mappings) {
+    let router = loadRouterSync(rel);
+    if (!router) {
+      router = await loadRouterAsync(rel);
+    }
+    app.use(mountPath, router);
+  }
+};
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -108,9 +122,17 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  
-  // Start notification service periodic tasks
-  notificationService.startPeriodicTasks();
-});
+
+(async () => {
+  try {
+    await mountRoutes();
+    const server = app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+      // Start notification service periodic tasks
+      try { notificationService.startPeriodicTasks(); } catch (e) { console.warn('Notification tasks not started:', e?.message); }
+    });
+  } catch (e) {
+    console.error('Failed to mount routes:', e);
+    process.exit(1);
+  }
+})();

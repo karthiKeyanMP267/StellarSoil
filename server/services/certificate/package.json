@@ -1,0 +1,9 @@
+{
+  "name": "certificate-validation-system",
+  "version": "1.0.0",
+  "description": "A package.json for installing dependencies needed for the certificate validation system",
+  "dependencies": {
+    "pdf-parse": "^1.1.1",
+    "csv-parser": "^3.0.0"
+  }
+}

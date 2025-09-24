@@ -1,17 +1,17 @@
-import rateLimit from 'express-rate-limit';
-import helmet from 'helmet';
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 // Rate limiting configuration
-export const limiter = rateLimit({
+const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // limit each IP to 100 requests per windowMs
     message: 'Too many requests from this IP, please try again after 15 minutes'
 });
 
 // CORS configuration
-export const corsOptions = {
+const corsOptions = {
     origin: process.env.NODE_ENV === 'production' 
-        ? process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176']
+        ? (process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'])
         : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -20,11 +20,11 @@ export const corsOptions = {
 };
 
 // Helmet security configuration
-export const helmetConfig = helmet({
+const helmetConfig = helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            connectSrc: ["'self'", "http://localhost:5000", "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176", "ws://localhost:*"],
+            connectSrc: ["'self'", "http://localhost:5000", "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176", "ws://localhost:*"] ,
             imgSrc: ["'self'", "data:", "https:", "blob:"],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https:"],
@@ -44,3 +44,9 @@ export const helmetConfig = helmet({
     hidePoweredBy: true,
     frameguard: { action: 'deny' }
 });
+
+module.exports = {
+    limiter,
+    corsOptions,
+    helmetConfig
+};

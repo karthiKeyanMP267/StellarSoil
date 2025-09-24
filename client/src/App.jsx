@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
 import EnhancedFarms from './pages/EnhancedFarms';
 import FarmDashboard from './pages/FarmDashboard';
+import FarmCertificateManager from './components/FarmCertificateManager';
 import FarmProfile from './pages/FarmProfile';
 import FarmerAnalytics from './pages/FarmerAnalytics';
 import FarmerCustomers from './pages/FarmerCustomers';
@@ -17,6 +18,7 @@ import AdminRoute from './components/AdminRoute';
 import FarmerRoute from './components/FarmerRoute';
 import UserRoute from './components/UserRoute';
 import HomeRedirect from './components/HomeRedirect';
+import FarmerProfileGuard from './components/FarmerProfileGuard';
 import PurchaseProduce from './pages/PurchaseProduce';
 import Cart from './pages/Cart';
 import Favorites from './pages/Favorites';
@@ -63,7 +65,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <NotificationProvider>
-        <div className="min-h-screen bg-gradient-to-br from-beige-50 via-cream-50 to-sage-50 relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-beige-50 via-cream-50 to-sage-50 relative">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-beige-400 to-cream-400 rounded-full blur-3xl"></div>
@@ -82,6 +84,7 @@ const App = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.4, ease: "easeInOut" }}
+                  className="pt-20 min-h-screen"
                 >
                   <Routes location={location}>
                     {/* Public Routes */}
@@ -109,12 +112,14 @@ const App = () => {
                     <Route path="/admin/farms" element={<AdminRoute><AdminFarms /></AdminRoute>} />
                     <Route path="/admin/verifications" element={<AdminRoute><AdminPanel /></AdminRoute>} />
                     
-                    {/* Farmer Routes */}
-                    <Route path="/farmer" element={<FarmerRoute><FarmDashboard /></FarmerRoute>} />
-                    <Route path="/farmer/profile" element={<FarmerRoute><FarmProfile /></FarmerRoute>} />
-                    <Route path="/farmer/analytics" element={<FarmerRoute><FarmerAnalytics /></FarmerRoute>} />
-                    <Route path="/farmer/customers" element={<FarmerRoute><FarmerCustomers /></FarmerRoute>} />
-                    <Route path="/farmer/deliveries" element={<FarmerRoute><FarmerDeliveries /></FarmerRoute>} />
+                    {/* Farmer Routes - Wrapped with FarmerProfileGuard to ensure profile completion */}
+                    <Route path="/farmer" element={<FarmerRoute><FarmerProfileGuard><FarmDashboard /></FarmerProfileGuard></FarmerRoute>} />
+                    <Route path="/farmer/certificates" element={<FarmerRoute><FarmerProfileGuard><FarmCertificateManager /></FarmerProfileGuard></FarmerRoute>} />
+                    <Route path="/farmer/certificates/:farmId" element={<FarmerRoute><FarmerProfileGuard><FarmCertificateManager /></FarmerProfileGuard></FarmerRoute>} />
+                    <Route path="/farmer/profile" element={<FarmerRoute><FarmerProfileGuard><FarmProfile /></FarmerProfileGuard></FarmerRoute>} />
+                    <Route path="/farmer/analytics" element={<FarmerRoute><FarmerProfileGuard><FarmerAnalytics /></FarmerProfileGuard></FarmerRoute>} />
+                    <Route path="/farmer/customers" element={<FarmerRoute><FarmerProfileGuard><FarmerCustomers /></FarmerProfileGuard></FarmerRoute>} />
+                    <Route path="/farmer/deliveries" element={<FarmerRoute><FarmerProfileGuard><FarmerDeliveries /></FarmerProfileGuard></FarmerRoute>} />
                     
                     {/* User Shopping Routes */}
                     <Route path="/farms" element={<EnhancedFarms />} />

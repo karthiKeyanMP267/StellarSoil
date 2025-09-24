@@ -4,6 +4,9 @@ export const useGoogleTranslate = () => {
   const [isTranslateActive, setIsTranslateActive] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
     const checkTranslateStatus = () => {
       // Check if the Google Translate banner is visible
       const banner = document.querySelector('.goog-te-banner-frame');
@@ -31,28 +34,41 @@ export const useGoogleTranslate = () => {
     checkTranslateStatus();
 
     // Set up mutation observer to watch for changes
-    const observer = new MutationObserver(() => {
+    let observer;
+    try {
+      observer = new MutationObserver(() => {
       checkTranslateStatus();
-    });
+      });
+    } catch (e) {
+      // MutationObserver may not be available in some environments
+      observer = null;
+    }
 
     // Watch for changes in the document body and head
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style']
-    });
-
-    observer.observe(document.head, {
-      childList: true,
-      subtree: true
-    });
+    if (observer) {
+      try {
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class', 'style']
+        });
+        observer.observe(document.head, {
+          childList: true,
+          subtree: true
+        });
+      } catch (e) {
+        // ignore observer errors
+      }
+    }
 
     // Also check periodically as a fallback
     const interval = setInterval(checkTranslateStatus, 1000);
 
     return () => {
-      observer.disconnect();
+      if (observer) {
+        observer.disconnect();
+      }
       clearInterval(interval);
     };
   }, [isTranslateActive]);

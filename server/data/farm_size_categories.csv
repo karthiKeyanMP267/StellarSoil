@@ -1,0 +1,6 @@
+Category,Size Range (hectares),Multiplier
+Marginal,0-1,1.1
+Small,1-2,1.05
+SemiMedium,2-4,1.0
+Medium,4-10,0.95
+Large,10-+,0.9

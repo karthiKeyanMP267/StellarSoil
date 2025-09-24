@@ -8,6 +8,8 @@ import { Card, StatCard } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input, TextArea, Select, FileUpload } from '../components/ui/Form';
 import { Modal } from '../components/ui/Modal';
+import LiveMarketPriceWidget from '../components/LiveMarketPriceWidget';
+import LiveStockPredictionWidget from '../components/LiveStockPredictionWidget';
 import API from '../api/api';
 import {
   MapPinIcon,
@@ -503,6 +505,17 @@ export default function FarmDashboard() {
           />
         </motion.div>
 
+        {/* Market Price & Stock Prediction Widgets */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6"
+        >
+          <LiveMarketPriceWidget />
+          <LiveStockPredictionWidget />
+        </motion.div>
+
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Farm Map & Location */}
@@ -631,6 +644,14 @@ export default function FarmDashboard() {
                   >
                     <PlusIcon className="h-4 w-4 mr-2" />
                     Add New Product
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => navigate('/farmer/certificates')}
+                  >
+                    <CheckCircleIcon className="h-4 w-4 mr-2" />
+                    Manage Certifications
                   </Button>
                   <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/farmer/analytics')}>
                     <ChartBarIcon className="h-4 w-4 mr-2" />

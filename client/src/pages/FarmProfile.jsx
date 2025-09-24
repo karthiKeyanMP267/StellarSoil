@@ -89,8 +89,8 @@ export default function FarmProfile() {
   const lng = Array.isArray(coords) ? coords[0] : null;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="max-w-5xl mx-auto px-4 py-10 min-h-screen pb-20">
+      <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-emerald-600">
             {farm.name}
