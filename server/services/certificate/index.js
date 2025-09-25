@@ -3,10 +3,8 @@
  * Exports all components of the certificate validation system
  */
 
-const CertificateOCRService = require('../ocr/CertificateOCRService');
-const FarmerCertificateScorer = require('./FarmerCertificateScorer');
+import CertificateOCRServiceImport from '../ocr/CertificateOCRService.js';
+import FarmerCertificateScorerImport from './FarmerCertificateScorer.js';
 
-module.exports = {
-  CertificateOCRService: new CertificateOCRService(),
-  FarmerCertificateScorer: new FarmerCertificateScorer()
-};
+export const CertificateOCRService = new CertificateOCRServiceImport();
+export const FarmerCertificateScorer = new FarmerCertificateScorerImport();

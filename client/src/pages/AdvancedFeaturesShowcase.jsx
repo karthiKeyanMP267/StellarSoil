@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
+import { LoadingState } from '../components/ui/AsyncStates';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   SparklesIcon,
@@ -15,12 +16,13 @@ import {
 } from '@heroicons/react/24/outline';
 
 // Import all the new advanced components
-import ARCropVisualizer from '../components/ARCropVisualizer';
-import BlockchainFarmVerification from '../components/BlockchainFarmVerification';
-import VoiceControlledFarmAssistant from '../components/VoiceControlledFarmAssistant';
-import SocialCommerceIntegration from '../components/SocialCommerceIntegration';
-import PredictiveAnalyticsDashboard from '../components/PredictiveAnalyticsDashboard';
-import IoTFarmMonitoringHub from '../components/IoTFarmMonitoringHub';
+// Heavy / advanced feature modules lazy loaded
+const ARCropVisualizer = lazy(() => import('../components/ARCropVisualizer'));
+const BlockchainFarmVerification = lazy(() => import('../components/BlockchainFarmVerification'));
+const VoiceControlledFarmAssistant = lazy(() => import('../components/VoiceControlledFarmAssistant'));
+const SocialCommerceIntegration = lazy(() => import('../components/SocialCommerceIntegration'));
+const PredictiveAnalyticsDashboard = lazy(() => import('../components/PredictiveAnalyticsDashboard'));
+const IoTFarmMonitoringHub = lazy(() => import('../components/IoTFarmMonitoringHub'));
 
 // Import previous features
 import PersonalizedShoppingAssistant from '../components/PersonalizedShoppingAssistant';
@@ -28,10 +30,10 @@ import NutritionalTracking from '../components/NutritionalTracking';
 import SeasonalSubscriptionBox from '../components/SeasonalSubscriptionBox';
 import CropHealthMonitoring from '../components/CropHealthMonitoring';
 import MarketDemandForecasting from '../components/MarketDemandForecasting';
-import SustainabilityScoreTracker from '../components/SustainabilityScoreTracker';
-import SmartNotificationSystem from '../components/SmartNotificationSystem';
-import AIChatbotAssistant from '../components/AIChatbotAssistant';
-import RealTimeDeliveryTracking from '../components/RealTimeDeliveryTracking';
+const SustainabilityScoreTracker = lazy(() => import('../components/SustainabilityScoreTracker'));
+const SmartNotificationSystem = lazy(() => import('../components/SmartNotificationSystem'));
+const AIChatbotAssistant = lazy(() => import('../components/AIChatbotAssistant'));
+const RealTimeDeliveryTracking = lazy(() => import('../components/RealTimeDeliveryTracking'));
 
 const AdvancedFeaturesShowcase = () => {
   const [activeFeature, setActiveFeature] = useState(null);
@@ -430,14 +432,16 @@ const AdvancedFeaturesShowcase = () => {
 
                 {/* Feature Component */}
                 <div className="p-6">
-                  {(() => {
-                    const feature = allFeatures.find(f => f.id === activeFeature);
-                    if (feature && feature.component) {
-                      const FeatureComponent = feature.component;
-                      return <FeatureComponent />;
-                    }
-                    return null;
-                  })()}
+                  <Suspense fallback={<LoadingState messageKey="common.loadingData" />}> 
+                    {(() => {
+                      const feature = allFeatures.find(f => f.id === activeFeature);
+                      if (feature && feature.component) {
+                        const FeatureComponent = feature.component;
+                        return <FeatureComponent />;
+                      }
+                      return null;
+                    })()}
+                  </Suspense>
                 </div>
               </div>
             </motion.div>

@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -35,8 +36,9 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import UserProfile from './pages/UserProfile';
-import AdvancedFeaturesShowcase from './pages/AdvancedFeaturesShowcase';
-import FeaturesPage from './pages/FeaturesPage';
+// Lazy loaded feature pages
+const AdvancedFeaturesShowcase = lazy(() => import('./pages/AdvancedFeaturesShowcase'));
+const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
 
 // Enhanced Components
 import About from './pages/About';
@@ -48,8 +50,9 @@ import NotFound from './pages/NotFound';
 // Import NotificationProvider and i18n
 import { NotificationProvider } from './components/ui/Notification';
 import { ThemeProvider } from './context/ThemeContext';
-import AIChatbotAssistant from './components/AIChatbotAssistant';
-import SmartNotificationSystem from './components/SmartNotificationSystem';
+// Lazy heavy / rarely interacted components
+const AIChatbotAssistant = lazy(() => import('./components/AIChatbotAssistant'));
+const SmartNotificationSystem = lazy(() => import('./components/SmartNotificationSystem'));
 import './i18n/i18n';
 
 // Import Focus Test Component (for testing only)
@@ -75,7 +78,9 @@ const App = () => {
         
           <div className="relative z-10">
             <Navbar />
-            <SmartNotificationSystem />
+            <Suspense fallback={null}>
+              <SmartNotificationSystem />
+            </Suspense>
             <ErrorBoundary>
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
@@ -86,6 +91,7 @@ const App = () => {
                   transition={{ duration: 0.4, ease: "easeInOut" }}
                   className="pt-20 min-h-screen"
                 >
+                  <Suspense fallback={<div className="pt-24 text-center text-sage-600 animate-pulse">Loading...</div>}>
                   <Routes location={location}>
                     {/* Public Routes */}
                     <Route path="/" element={<EnhancedLandingPage />} />
@@ -95,7 +101,7 @@ const App = () => {
                     <Route path="/privacy" element={<PrivacyPolicyPage />} />
                     <Route path="/marketplace" element={<Marketplace />} />
                     <Route path="/features" element={<AdvancedFeaturesShowcase />} />
-                    <Route path="/features" element={<FeaturesPage />} />
+                    <Route path="/feature-list" element={<FeaturesPage />} />
                   
                     {/* Legacy Routes for compatibility */}
                     <Route path="/about-old" element={<AboutPage />} />
@@ -132,12 +138,15 @@ const App = () => {
                     
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  </Suspense>
                 </motion.div>
               </AnimatePresence>
             </ErrorBoundary>
             
             {/* AI Chatbot Assistant - Global */}
-            <AIChatbotAssistant />
+            <Suspense fallback={null}>
+              <AIChatbotAssistant />
+            </Suspense>
             
             {/* Focus Test Component - Testing Only */}
             {/* <FocusTestComponent /> */}

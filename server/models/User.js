@@ -30,6 +30,8 @@ const userSchema = new mongoose.Schema(
       coordinates: { type: [Number], default: [0, 0] }
     },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
+    ,
+    preferredLanguage: { type: String, enum: ['en', 'ta', 'hi'], default: 'en' }
   },
   { timestamps: true }
 );

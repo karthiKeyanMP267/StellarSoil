@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const farmSchema = new mongoose.Schema(
   {
@@ -77,4 +77,4 @@ farmSchema.index({ location: '2dsphere' });
 farmSchema.index({ certificationScore: -1 });
 
 const Farm = mongoose.model('Farm', farmSchema);
-module.exports = Farm;
+export default Farm;

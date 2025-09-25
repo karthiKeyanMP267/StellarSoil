@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -57,7 +57,7 @@ const SmartNotificationSystem = ({ userId }) => {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  const loadNotifications = () => {
+  const loadNotifications = useCallback(() => {
     // Base notifications that all users can receive
     let mockNotifications = [
       {
@@ -165,9 +165,9 @@ const SmartNotificationSystem = ({ userId }) => {
 
     setNotifications(mockNotifications);
     setUnreadCount(mockNotifications.filter(n => !n.read).length);
-  };
+  }, [user]);
 
-  const addNewNotification = () => {
+  const addNewNotification = useCallback(() => {
     // Define role-specific notifications
     const userNotifications = [
       {
@@ -253,7 +253,7 @@ const SmartNotificationSystem = ({ userId }) => {
 
     // Show toast notification
     showToast(newNotification);
-  };
+  }, [user]);
 
   const playNotificationSound = () => {
     // Create a simple notification sound

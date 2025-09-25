@@ -33,27 +33,40 @@ const LiveMarketPriceWidget = () => {
       }
       setPriceData(data);
     } catch (err) {
-      console.error('Error fetching price predictions:', err);
-      // Non-blocking fallback mock data for demo UX
-      const mock = {
-        success: true,
-        crop: selectedCrop,
-        current_price: Math.floor(Math.random() * 80) + 20,
-        predictions: {
-          '7d': Math.floor(Math.random() * 100) + 20,
-          '15d': Math.floor(Math.random() * 100) + 20,
-          '30d': Math.floor(Math.random() * 100) + 20
-        },
-        trend: Math.random() > 0.5 ? 'up' : 'down',
-        confidence: Math.floor(Math.random() * 30) + 70,
-        factors: [
-          'Seasonal demand',
-          'Supply constraints',
-          'Weather patterns'
-        ]
-      };
-      setPriceData(mock);
-      setWarning('Live API unavailable; showing demo forecast.');
+      console.error('Error fetching price predictions (POST):', err);
+      // Try public GET endpoint as a fallback (no auth required)
+      try {
+        const url = `/ml/price-prediction?crop=${encodeURIComponent(selectedCrop)}&days_ahead=${encodeURIComponent(daysAhead)}`;
+        const response = await API.get(url);
+        const data = response.data;
+        if (data?.success === false) {
+          throw new Error(data?.error || 'Prediction failed');
+        }
+        setPriceData(data);
+        setWarning('Using fallback GET endpoint.');
+      } catch (e2) {
+        console.error('Error fetching price predictions (GET):', e2);
+        // Non-blocking fallback mock data for demo UX
+        const mock = {
+          success: true,
+          crop: selectedCrop,
+          current_price: Math.floor(Math.random() * 80) + 20,
+          predictions: {
+            '7d': Math.floor(Math.random() * 100) + 20,
+            '15d': Math.floor(Math.random() * 100) + 20,
+            '30d': Math.floor(Math.random() * 100) + 20
+          },
+          trend: Math.random() > 0.5 ? 'up' : 'down',
+          confidence: Math.floor(Math.random() * 30) + 70,
+          factors: [
+            'Seasonal demand',
+            'Supply constraints',
+            'Weather patterns'
+          ]
+        };
+        setPriceData(mock);
+        setWarning('Live API unavailable; showing demo forecast.');
+      }
     } finally {
       setLoading(false);
     }

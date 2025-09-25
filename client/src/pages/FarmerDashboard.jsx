@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { LoadingState } from '../components/ui/AsyncStates';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
@@ -27,7 +28,9 @@ import API from '../api/api';
 // Import new farmer feature components
 import CropHealthMonitoring from '../components/CropHealthMonitoring';
 import MarketDemandForecasting from '../components/MarketDemandForecasting';
-import SustainabilityScoreTracker from '../components/SustainabilityScoreTracker';
+import FarmCertificates from '../components/FarmCertificates';
+// Lazy heavy analytics-style component
+const SustainabilityScoreTracker = lazy(() => import('../components/SustainabilityScoreTracker'));
 
 export default function FarmerDashboard() {
   const { t } = useTranslation();
@@ -664,9 +667,10 @@ export default function FarmerDashboard() {
               transition={{ duration: 0.3 }}
             >
               <div className="grid lg:grid-cols-3 gap-8">
+
                 {/* Map */}
                 <div className="lg:col-span-2">
-                  <Card className="p-0 overflow-hidden h-[600px]">
+                  <Card className="p-0 overflow-hidden h-[600px] mb-8">
                     <div className="bg-gradient-to-r from-beige-500 to-earth-500 text-white p-4">
                       <h2 className="text-xl font-bold flex items-center">
                         <MapPinIcon className="h-6 w-6 mr-2" />
@@ -681,6 +685,10 @@ export default function FarmerDashboard() {
                     </div>
                     <div id="farmer-map" className="w-full h-full" />
                   </Card>
+                  {/* Certificates Section */}
+                  {user?.farmId && (
+                    <FarmCertificates farmId={user.farmId} />
+                  )}
                 </div>
 
                 {/* Farms List and Info */}
@@ -874,7 +882,9 @@ export default function FarmerDashboard() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <SustainabilityScoreTracker farmId={user?.farmId} />
+              <Suspense fallback={<LoadingState messageKey="common.loadingSustainability" />}> 
+                <SustainabilityScoreTracker farmId={user?.farmId} />
+              </Suspense>
             </motion.div>
           )}
         </AnimatePresence>

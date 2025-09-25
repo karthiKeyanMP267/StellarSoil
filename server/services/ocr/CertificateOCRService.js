@@ -1,12 +1,18 @@
-const path = require('path');
-const fs = require('fs');
-const { execSync } = require('child_process');
-const { promisify } = require('util');
-const pdf = require('pdf-parse');
+import path from 'path';
+import fs from 'fs';
+import { execSync } from 'child_process';
+import { promisify } from 'util';
+import pdf from 'pdf-parse';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
 const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 const existsAsync = promisify(fs.exists);
 const mkdirAsync = promisify(fs.mkdir);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * CertificateOCRService - A service for processing certificate documents
@@ -179,4 +185,4 @@ class CertificateOCRService {
   }
 }
 
-module.exports = CertificateOCRService;
+export default CertificateOCRService;

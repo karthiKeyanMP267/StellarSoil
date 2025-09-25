@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -74,14 +74,14 @@ const EnhancedNavbar = () => {
   }, [location.pathname]);
 
   // Enhanced search functionality
-  const handleSearch = (e) => {
+  const handleSearch = useCallback((e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setShowSearch(false);
       setSearchQuery('');
     }
-  };
+  }, [searchQuery, navigate]);
 
   // Quick action suggestions based on user role
   useEffect(() => {
@@ -125,15 +125,15 @@ const EnhancedNavbar = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     navigate('/');
-  };
+  }, [logout, navigate]);
 
-  const openModal = (mode) => {
+  const openModal = useCallback((mode) => {
     setAuthMode(mode);
     setShowAuthModal(true);
-  };
+  }, []);
 
   const handleCloseModal = () => {
     setShowAuthModal(false);
@@ -226,14 +226,16 @@ const EnhancedNavbar = () => {
     }
   ];
 
-  let navigation = [...baseNavigation];
-  if (user) {
-    if (user.role === 'user') navigation = [...navigation, ...userNavigation];
-    if (user.role === 'farmer') navigation = [...navigation, ...farmerNavigation];
-    if (user.role === 'admin') navigation = [...navigation, ...adminNavigation];
-  }
-  
-  navigation = navigation.filter(item => !item.requiresAuth || (item.requiresAuth && user));
+  const navigation = useMemo(() => {
+    let nav = [...baseNavigation];
+    if (user) {
+      if (user.role === 'user') nav = [...nav, ...userNavigation];
+      if (user.role === 'farmer') nav = [...nav, ...farmerNavigation];
+      if (user.role === 'admin') nav = [...nav, ...adminNavigation];
+    }
+    return nav.filter(item => !item.requiresAuth || (item.requiresAuth && user));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, location.pathname, t]);
 
   return (
     <motion.div
@@ -346,6 +348,8 @@ const EnhancedNavbar = () => {
                             )}
                             onFocus={handleFocus}
                             onBlur={handleBlur}
+                            aria-current={item.current ? 'page' : undefined}
+                            aria-label={item.name}
                           >
                             <motion.div 
                               className="flex items-center space-x-2"
@@ -396,6 +400,7 @@ const EnhancedNavbar = () => {
                                     rotate: [0, 5, -5, 0],
                                     transition: { duration: 0.3 }
                                   }}
+                                  aria-label={`${notifications} unread`}
                                 >
                                   {notifications}
                                 </motion.span>
@@ -427,6 +432,7 @@ const EnhancedNavbar = () => {
                       ))}
                       
                       {/* Enhanced Search Bar */}
+                      
                       <motion.div 
                         className="relative ml-4"
                         initial={{ opacity: 0, scale: 0.8 }}

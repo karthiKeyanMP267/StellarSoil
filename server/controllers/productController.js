@@ -1,5 +1,5 @@
 // Ensure we have a proper Mongoose model for Product regardless of ESM/CJS
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 // Helper to ensure we have the Product model regardless of ESM/CJS load order
 const getProductModel = async () => {
   if (mongoose.models && mongoose.models.Product) return mongoose.models.Product;
@@ -8,10 +8,10 @@ const getProductModel = async () => {
   const Product = mod && mod.default ? mod.default : mod;
   return Product;
 };
-const Farm = require('../models/Farm');
+import Farm from '../models/Farm.js';
 
 // Get products for the authenticated farmer
-const getMyProducts = async (req, res) => {
+export const getMyProducts = async (req, res) => {
   try {
     const Product = await getProductModel();
     const farm = await Farm.findOne({ ownerId: req.user._id }).select('_id');
@@ -27,7 +27,7 @@ const getMyProducts = async (req, res) => {
 };
 
 // Create a new product
-const createProduct = async (req, res) => {
+export const createProduct = async (req, res) => {
   try {
     const Product = await getProductModel();
     const farm = await Farm.findOne({ ownerId: req.user._id });
@@ -52,7 +52,7 @@ const createProduct = async (req, res) => {
 
 // Get products by location and radius
 // Now considers certification score for visibility
-const getNearbyProducts = async (req, res) => {
+export const getNearbyProducts = async (req, res) => {
   const { longitude, latitude, radius = 10000, minScore = 0 } = req.query; // radius in meters, minScore is minimum certification score
   try {
     const Product = await getProductModel();
@@ -341,10 +341,10 @@ const getTopCertifiedProducts = async (req, res) => {
 };
 
 // Export as module
-module.exports = {
-  getMyProducts,
-  createProduct,
-  getNearbyProducts,
+// ...existing code...
+export {
+ 
+ 
   searchProducts,
   updateProduct,
   deleteProduct,

@@ -1,14 +1,21 @@
-// server/index.js
-const express = require('express');
-const dotenv = require('dotenv');
-const multer = require('multer');
-const cookieParser = require('cookie-parser');
-const connectDB = require('./config/db');
-const { corsOptions, limiter, helmetConfig } = require('./config/security');
 
-const cors = require('cors');
-const path = require('path');
-const { pathToFileURL } = require('url');
+// server/index.js (ESM)
+import express from 'express';
+import dotenv from 'dotenv';
+import multer from 'multer';
+import cookieParser from 'cookie-parser';
+import connectDB from './config/db.js';
+import { corsOptions, limiter, helmetConfig } from './config/security.js';
+import cors from 'cors';
+import path from 'path';
+import { pathToFileURL, fileURLToPath } from 'url';
+import fs from 'fs';
+import notificationServiceImport from './services/notificationService.js';
+
+const notificationService = notificationServiceImport?.default || notificationServiceImport;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables from the correct path
 const envPath = path.resolve(__dirname, '.env');
@@ -37,10 +44,6 @@ app.use('/api/', limiter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Ensure uploads directory exists
-const fs = require('fs');
-let notificationService = require('./services/notificationService');
-notificationService = notificationService && notificationService.default ? notificationService.default : notificationService;
-
 const uploadsDir = path.join(__dirname, 'uploads');
 const kisanIdsDir = path.join(uploadsDir, 'kisan-ids');
 const certificatesDir = path.join(uploadsDir, 'certificates');
@@ -51,23 +54,14 @@ if (!fs.existsSync(kisanIdsDir)) fs.mkdirSync(kisanIdsDir);
 if (!fs.existsSync(certificatesDir)) fs.mkdirSync(certificatesDir);
 if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
 
-// Helper to load routers that may be ESM or CJS
-const loadRouterSync = (p) => {
-  try {
-    const mod = require(p);
-    return mod && mod.default ? mod.default : mod;
-  } catch (e) {
-    return null;
-  }
-};
-
+// Helper to load routers as ESM
 const loadRouterAsync = async (p) => {
   const fileUrl = pathToFileURL(path.resolve(__dirname, p + (p.endsWith('.js') ? '' : '.js'))).href;
   const mod = await import(fileUrl);
   return (mod && (mod.default || mod.router)) ? (mod.default || mod.router) : mod;
 };
 
-// Mount routes (support both CJS require and ESM import)
+// Mount routes (ESM only)
 const mountRoutes = async () => {
   const mappings = [
     ['/api/auth', './routes/authRoutes'],
@@ -91,10 +85,7 @@ const mountRoutes = async () => {
   ];
 
   for (const [mountPath, rel] of mappings) {
-    let router = loadRouterSync(rel);
-    if (!router) {
-      router = await loadRouterAsync(rel);
-    }
+    const router = await loadRouterAsync(rel);
     app.use(mountPath, router);
   }
 };

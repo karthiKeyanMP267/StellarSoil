@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "server",
   "version": "1.0.0",
   "description": "",
@@ -7,7 +8,12 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "backfill:farmer-orders": "node ./scripts/backfillFarmerOnOrders.js",
-    "check:ocr": "node ./test-ocr.js"
+    "check:ocr": "node ./test-ocr.js",
+    "smoke:chat": "node ./test/chatController.smoke.js",
+    "smoke:flows": "node ./test/chatFlows.smoke.js"
+    ,"smoke:features": "node ./test/chatFeatureSuite.smoke.js"
+  ,
+  "smoke:listing-offline": "node ./test/chatListingOffline.smoke.js"
   },
   "keywords": [],
   "author": "",

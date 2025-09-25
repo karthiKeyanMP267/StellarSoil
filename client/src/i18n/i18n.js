@@ -29,6 +29,9 @@ const resources = {
       // Common
       common: {
         loading: 'Loading...',
+        loadingData: 'Loading data...',
+        loadingMetrics: 'Loading metrics…',
+        loadingSustainability: 'Loading sustainability metrics…',
         error: 'Error',
         success: 'Success',
         save: 'Save',

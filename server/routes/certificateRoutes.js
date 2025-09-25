@@ -1,10 +1,16 @@
-const express = require('express');
+import express from 'express';
+import * as certificateController from '../controllers/certificateController.js';
+import * as authMiddleware from '../middleware/authMiddleware.js';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const router = express.Router();
-const certificateController = require('../controllers/certificateController');
-const authMiddleware = require('../middleware/authMiddleware');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
 // Configure multer for file upload
 const certificateStorage = multer.diskStorage({
@@ -52,30 +58,34 @@ const upload = multer({
 
 // Upload a certificate for a farm
 router.post(
-  '/:farmId/upload',
+  '/farms/:farmId/certificates',
   authMiddleware.protect, // Must be logged in
+  authMiddleware.farmer, // Must be a farmer
   upload.single('certificate'), // Single file upload
   certificateController.uploadCertificate
 );
 
 // Get all certificates for a farm
 router.get(
-  '/:farmId',
+  '/farms/:farmId/certificates',
+  authMiddleware.protect, // Must be logged in
   certificateController.getFarmCertificates
 );
 
 // Delete a certificate from a farm
 router.delete(
-  '/:farmId/:certificateId',
+  '/farms/:farmId/certificates/:certificateId',
   authMiddleware.protect, // Must be logged in
+  authMiddleware.farmer, // Must be a farmer
   certificateController.deleteCertificate
 );
 
 // Reprocess a certificate (re-run OCR & scoring)
 router.post(
-  '/:farmId/:certificateId/reprocess',
-  authMiddleware.protect,
+  '/farms/:farmId/certificates/:certificateId/reprocess',
+  authMiddleware.protect, // Must be logged in
+  authMiddleware.farmer, // Must be a farmer
   certificateController.reprocessCertificate
 );
 
-module.exports = router;
+export default router;

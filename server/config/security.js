@@ -1,10 +1,10 @@
-const rateLimit = require('express-rate-limit');
-const helmet = require('helmet');
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 
 // Rate limiting configuration
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    max: process.env.NODE_ENV === 'production' ? 100 : 1000, // much higher for dev
     message: 'Too many requests from this IP, please try again after 15 minutes'
 });
 
@@ -45,8 +45,4 @@ const helmetConfig = helmet({
     frameguard: { action: 'deny' }
 });
 
-module.exports = {
-    limiter,
-    corsOptions,
-    helmetConfig
-};
+export { limiter, corsOptions, helmetConfig };

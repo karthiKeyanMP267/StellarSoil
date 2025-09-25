@@ -12,6 +12,26 @@ This is the backend server for StellarSoil, providing API endpoints for the agri
 - MongoDB database integration
 - Express.js REST API
 
+### Multilingual Chatbot (English / Tamil / Hindi)
+
+The chat controller now auto-detects Tamil (ta) and Hindi (hi) messages and translates them to English for AI intent parsing, then translates responses back.
+
+Request body additions for `/api/chat/send` (example route name):
+```
+{
+  "message": "30 கிலோ தக்காளி ஆர்டர் பண்ணு", 
+  "userRole": "customer", 
+  "preferLanguage": "ta"
+}
+```
+If `preferLanguage` is omitted the service replies in the detected language automatically.
+
+Direct commands like:
+* Customer: "order 30 kg tomato" (or equivalent in Tamil/Hindi) → auto adds to cart (skips confirmation) if product & quantity identified.
+* Farmer: "list 50 kg tomato 25 rupees" → auto creates/updates listing if all data present.
+
+If the translation library `@vitalets/google-translate-api` is missing, the system gracefully falls back to English-only mode.
+
 ## Prerequisites
 
 - Node.js (v14 or higher)

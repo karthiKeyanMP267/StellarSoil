@@ -1,6 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const csv = require('csv-parser');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 /**
  * FarmerCertificateScorer - A scoring system for farmer certificates based on Indian 
@@ -31,7 +32,9 @@ class FarmerCertificateScorer {
    * Loads farm size categories and their score multipliers from CSV
    */
   loadFarmSizeCategories() {
-    const categoriesPath = path.join(__dirname, '../../data/farm_size_categories.csv');
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const categoriesPath = path.join(__dirname, '../../data/farm_size_categories.csv');
     const categories = {};
     
     try {
@@ -200,14 +203,20 @@ class FarmerCertificateScorer {
     
     // Extract crops
     const cropPatterns = [
-      /crop[s]?\s*[:\-]?\s*([^\n\r]+)/i,
-      /product[s]?\s*[:\-]?\s*([^\n\r]+)/i
+      // Capture crops/products line but stop before common trailing labels like 'and area(s) of', 'area of', 'area', etc.
+      /crop[s]?\s*[:\-]?\s*([^\n\r]*?)(?=\s*(?:and\s+area\(s\)\s+of|and\s+area\s+of|area\(s\)\s+of|area\s+of|area)\b|$)/i,
+      /product[s]?\s*[:\-]?\s*([^\n\r]*?)(?=\s*(?:and\s+area\(s\)\s+of|and\s+area\s+of|area\(s\)\s+of|area\s+of|area)\b|$)/i
     ];
     
     for (const pattern of cropPatterns) {
       const match = originalText.match(pattern);
       if (match && match[1]) {
-        features.crops = match[1].trim()
+        const cleaned = match[1]
+          .replace(/\bof\b.*$/i, '') // remove trailing fragments after 'of' if any
+          .replace(/\(s\)/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+        features.crops = cleaned
           .split(/[,&\/]/)
           .map(crop => crop.trim())
           .filter(crop => crop.length > 0);
@@ -527,4 +536,4 @@ class FarmerCertificateScorer {
   }
 }
 
-module.exports = FarmerCertificateScorer;
+export default FarmerCertificateScorer;
