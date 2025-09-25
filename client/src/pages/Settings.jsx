@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import API from '../api/api';
 import {
   Cog6ToothIcon,
   BellIcon,
@@ -60,6 +61,12 @@ const Settings = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(null);
   const [saveStatus, setSaveStatus] = useState(null);
 
+  // Region Defaults state and effects
+  const [regionForm, setRegionForm] = useState({ state: '', district: '', market: '', variety: '' });
+  const [regionSaving, setRegionSaving] = useState(false);
+  const [regionMessage, setRegionMessage] = useState(null);
+
+
   const sections = [
     { id: 'general', name: '⚙️ General', icon: Cog6ToothIcon },
     { id: 'notifications', name: '🔔 Notifications', icon: BellIcon },
@@ -101,6 +108,49 @@ const Settings = () => {
       setSaveStatus('success');
       setTimeout(() => setSaveStatus(null), 3000);
     }, 1500);
+  };
+
+  // Load initial region defaults from server if authenticated
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const me = await API.get('/auth/me');
+        const r = me?.data?.user?.defaultRegion || me?.data?.region;
+        if (r) {
+          setRegionForm({
+            state: r.state || '',
+            district: r.district || '',
+            market: r.market || '',
+            variety: r.variety || ''
+          });
+        }
+      } catch (e) {
+        // Non-fatal: keep fields empty
+      }
+    })();
+  }, []);
+
+  const saveRegionDefaults = async () => {
+    setRegionSaving(true);
+    setRegionMessage(null);
+    try {
+      await API.put('/auth/profile', { defaultRegion: regionForm });
+      setRegionMessage({ type: 'success', text: 'Region defaults saved.' });
+      // Optionally refresh
+      try { 
+        await API.get('/auth/me');
+        // Notify other components (e.g., LiveMarketPriceWidget) to refresh region
+        window.dispatchEvent(new CustomEvent('region-defaults-updated'));
+      } catch {}
+    } catch (err) {
+      const msg = err?.response?.data?.msg || err?.message || 'Failed to save region';
+      setRegionMessage({ type: 'error', text: msg });
+    } finally {
+      setRegionSaving(false);
+      setTimeout(() => setRegionMessage(null), 3000);
+    }
   };
 
   const confirmAction = (action) => {
@@ -189,35 +239,65 @@ const Settings = () => {
                     <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-700 to-orange-700 mb-8 tracking-wide">⚙️ General Settings</h2>
                     
                     <div className="space-y-8">
-                      {/* Language & Region */}
-                      <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-200/50 p-6">
-                        <h3 className="text-2xl font-black text-amber-900 mb-6 flex items-center">
-                          <GlobeAltIcon className="h-8 w-8 mr-3" />
-                          🌍 Language & Region
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Region Defaults (structured) */}
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200/60 p-6">
+                        <h3 className="text-2xl font-black text-green-900 mb-2">📍 Region Defaults</h3>
+                        <p className="text-green-800 font-medium mb-4">Used by live market prices and recommendations. Leave blank to auto-detect from your address.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-amber-900 font-bold mb-3 text-lg">🗣️ Language</label>
-                            <select 
-                              value={settings.appearance.language}
-                              onChange={(e) => handleSelect('appearance', 'language', e.target.value)}
-                              className="w-full px-4 py-3 bg-white/80 border border-amber-200 rounded-xl text-amber-900 font-medium text-lg focus:ring-4 focus:ring-amber-400/50"
-                            >
-                              <option value="en">🇺🇸 English</option>
-                              <option value="hi">🇮🇳 हिंदी (Hindi)</option>
-                              <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
-                              <option value="es">🇪🇸 Español</option>
-                              <option value="fr">🇫🇷 Français</option>
-                            </select>
+                            <label className="block text-green-900 font-bold mb-1">State</label>
+                            <input
+                              type="text"
+                              value={regionForm.state}
+                              onChange={(e) => setRegionForm((p) => ({ ...p, state: e.target.value }))}
+                              className="w-full px-4 py-3 bg-white border border-green-200 rounded-xl text-green-900 font-medium"
+                              placeholder="e.g., Tamil Nadu"
+                            />
                           </div>
                           <div>
-                            <label className="block text-amber-900 font-bold mb-3 text-lg">🕐 Timezone</label>
-                            <select className="w-full px-4 py-3 bg-white/80 border border-amber-200 rounded-xl text-amber-900 font-medium text-lg focus:ring-4 focus:ring-amber-400/50">
-                              <option>🇮🇳 Asia/Kolkata (IST)</option>
-                              <option>🇺🇸 America/New_York (EST)</option>
-                              <option>🇬🇧 Europe/London (GMT)</option>
-                            </select>
+                            <label className="block text-green-900 font-bold mb-1">District</label>
+                            <input
+                              type="text"
+                              value={regionForm.district}
+                              onChange={(e) => setRegionForm((p) => ({ ...p, district: e.target.value }))}
+                              className="w-full px-4 py-3 bg-white border border-green-200 rounded-xl text-green-900 font-medium"
+                              placeholder="e.g., Coimbatore"
+                            />
                           </div>
+                          <div>
+                            <label className="block text-green-900 font-bold mb-1">Market</label>
+                            <input
+                              type="text"
+                              value={regionForm.market}
+                              onChange={(e) => setRegionForm((p) => ({ ...p, market: e.target.value }))}
+                              className="w-full px-4 py-3 bg-white border border-green-200 rounded-xl text-green-900 font-medium"
+                              placeholder="e.g., Coimbatore"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-green-900 font-bold mb-1">Variety (optional)</label>
+                            <input
+                              type="text"
+                              value={regionForm.variety}
+                              onChange={(e) => setRegionForm((p) => ({ ...p, variety: e.target.value }))}
+                              className="w-full px-4 py-3 bg-white border border-green-200 rounded-xl text-green-900 font-medium"
+                              placeholder="e.g., Hybrid"
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-4 flex items-center gap-3">
+                          <button
+                            onClick={saveRegionDefaults}
+                            disabled={regionSaving}
+                            className={`px-6 py-3 rounded-xl font-bold text-white transition-all duration-300 shadow ${regionSaving ? 'bg-green-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                          >
+                            {regionSaving ? 'Saving…' : 'Save Region Defaults'}
+                          </button>
+                          {regionMessage && (
+                            <span className={`text-sm font-semibold ${regionMessage.type === 'success' ? 'text-green-700' : 'text-red-600'}`}>
+                              {regionMessage.text}
+                            </span>
+                          )}
                         </div>
                       </div>
 

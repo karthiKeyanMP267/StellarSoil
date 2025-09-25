@@ -29,7 +29,7 @@ export const getAllFarmsAdmin = async (req, res) => {
     }
 
     const farms = await Farm.find()
-      .populate('owner', 'name email phone isVerified')
+      .populate('ownerId', 'name email phone isVerified')
       .sort({ createdAt: -1 });
 
     res.json(farms);

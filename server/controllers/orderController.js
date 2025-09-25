@@ -73,8 +73,9 @@ export const createOrder = async (req, res) => {
     for (const [farmKey, g] of groups) {
       let farmerId = null;
       try {
-        const farmDoc = await Farm.findById(farmKey).select('owner');
-        farmerId = farmDoc?.owner || null;
+        // Prefer ownerId; fall back to legacy owner if present
+        const farmDoc = await Farm.findById(farmKey).select('ownerId owner');
+        farmerId = farmDoc?.ownerId || farmDoc?.owner || null;
       } catch (e) {
         console.warn('Failed to resolve farm owner for order:', e?.message);
       }
@@ -123,11 +124,12 @@ export const createOrder = async (req, res) => {
 
       // Notify farmer of the order
       try {
-        const farm = await Farm.findById(farmKey).populate('owner');
+        const farm = await Farm.findById(farmKey).populate('ownerId');
         const buyer = await User.findById(req.user._id);
-        if (farm && farm.owner) {
+        const farmerOwner = farm?.ownerId || farm?.owner; // support legacy data
+        if (farm && farmerOwner) {
           await notificationService.sendFarmerOrderNotification(
-            farm.owner._id,
+            farmerOwner._id || farmerOwner,
             order._id,
             buyer?.name,
             g.subtotal,
@@ -224,8 +226,9 @@ export const getOrderById = async (req, res) => {
       if (order.farmer) {
         isFarmer = order.farmer.toString() === req.user._id.toString();
       } else {
-        const farm = await Farm.findById(order.farm).select('owner');
-        isFarmer = !!farm && farm.owner?.toString() === req.user._id.toString();
+        // Farm schema uses ownerId
+        const farm = await Farm.findById(order.farm).select('ownerId');
+        isFarmer = !!farm && farm.ownerId?.toString() === req.user._id.toString();
       }
     }
     const isAdmin = req.user.role === 'admin';
@@ -255,7 +258,8 @@ export const getFarmerOrders = async (req, res) => {
     }
 
     // Fallback for legacy orders without the farmer field
-    const farms = await Farm.find({ owner: req.user._id }).select('_id');
+  // Farms may have ownerId (new) or owner (legacy)
+  const farms = await Farm.find({ $or: [ { ownerId: req.user._id }, { owner: req.user._id } ] }).select('_id');
     const farmIds = farms.map(f => f._id);
     const fallbackOrders = farmIds.length
       ? await Order.find({ farm: { $in: farmIds } })
@@ -289,8 +293,8 @@ export const updateOrderStatus = async (req, res) => {
     let isFarmOwner = false;
     if (!isAdmin && !isDenormalizedOwner && !sameFarmUser) {
       // Fallback to checking actual farm owner against current user
-      const farm = await Farm.findById(order.farm).select('owner');
-      isFarmOwner = !!farm && farm.owner?.toString() === req.user._id.toString();
+      const farm = await Farm.findById(order.farm).select('ownerId');
+      isFarmOwner = !!farm && farm.ownerId?.toString() === req.user._id.toString();
     }
 
     if (!(isAdmin || isDenormalizedOwner || sameFarmUser || isFarmOwner)) {
@@ -373,8 +377,8 @@ export const verifyOrderDelivery = async (req, res) => {
     const sameFarmUser = req.user.farmId && order.farm && order.farm.toString() === req.user.farmId.toString();
     let isFarmOwner = false;
     if (!isAdmin && !isDenormalizedOwner && !sameFarmUser && req.user.role === 'farmer') {
-      const farm = await Farm.findById(order.farm).select('owner');
-      isFarmOwner = !!farm && farm.owner?.toString() === req.user._id.toString();
+      const farm = await Farm.findById(order.farm).select('ownerId');
+      isFarmOwner = !!farm && farm.ownerId?.toString() === req.user._id.toString();
     }
 
     const isAuthorized = isBuyer || isAdmin || isDenormalizedOwner || sameFarmUser || isFarmOwner;
@@ -470,7 +474,7 @@ export const regenerateVerificationCode = async (req, res) => {
 
     // Only the buyer or farm owner can regenerate codes
     const isBuyer = order.buyer.toString() === req.user._id.toString();
-    const isFarmer = req.user.role === 'farmer' && order.farm.toString() === req.user.farmId.toString();
+  const isFarmer = req.user.role === 'farmer' && order.farm.toString() === req.user.farmId?.toString();
     
     if (!isBuyer && !isFarmer) {
       return res.status(403).json({ msg: 'Not authorized' });

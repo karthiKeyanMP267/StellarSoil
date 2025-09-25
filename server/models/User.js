@@ -31,7 +31,14 @@ const userSchema = new mongoose.Schema(
     },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
     ,
-    preferredLanguage: { type: String, enum: ['en', 'ta', 'hi'], default: 'en' }
+    preferredLanguage: { type: String, enum: ['en', 'ta', 'hi'], default: 'en' },
+    // Structured default market region for live price queries
+    defaultRegion: {
+      state: { type: String },
+      district: { type: String },
+      market: { type: String },
+      variety: { type: String }
+    }
   },
   { timestamps: true }
 );

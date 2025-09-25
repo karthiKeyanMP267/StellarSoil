@@ -3,7 +3,7 @@
  * Backfill farmer field on legacy orders.
  *
  * This script finds orders missing the `farmer` field and sets it
- * by resolving the farm's owner (order.farm -> Farm.owner).
+ * by resolving the farm's owner (order.farm -> Farm.ownerId or legacy Farm.owner).
  *
  * Usage (Windows PowerShell):
  *   # Ensure MONGO_URI is set in your environment or .env
@@ -44,8 +44,8 @@ async function backfill() {
       if (!orders.length) break;
 
       const farmIds = [...new Set(orders.map(o => o.farm).filter(Boolean).map(id => id.toString()))];
-      const farms = await Farm.find({ _id: { $in: farmIds } }).select('_id owner').lean();
-      const ownerByFarm = new Map(farms.map(f => [f._id.toString(), f.owner]));
+  const farms = await Farm.find({ _id: { $in: farmIds } }).select('_id ownerId owner').lean();
+  const ownerByFarm = new Map(farms.map(f => [f._id.toString(), f.ownerId || f.owner]));
 
       const bulkOps = [];
       for (const o of orders) {

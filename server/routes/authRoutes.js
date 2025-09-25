@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, getAllUsers, deleteUser, approveFarmer, refreshToken, updateProfile } from '../controllers/authController.js';
+import { register, login, getAllUsers, deleteUser, approveFarmer, refreshToken, updateProfile, getMe } from '../controllers/authController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
 import validateRequest from '../middleware/validationMiddleware.js';
@@ -12,6 +12,7 @@ router.post('/register', upload.single('kisanId'), registerValidator, validateRe
 router.post('/login', loginValidator, validateRequest, login);
 router.post('/refresh-token', refreshToken);
 router.put('/profile', protect, profileUpdateValidator, validateRequest, updateProfile);
+router.get('/me', protect, getMe);
 
 // Admin: manage users
 router.get('/users', protect, admin, getAllUsers);

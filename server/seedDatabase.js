@@ -194,7 +194,7 @@ const seedDatabase = async () => {
     const farmer = users.find(u => u.role === 'farmer');
     const farmData = sampleFarms.map(farm => ({
       ...farm,
-      owner: farmer._id
+      ownerId: farmer._id
     }));
     const farms = await Farm.insertMany(farmData);
     console.log('Created sample farms');

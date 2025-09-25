@@ -1,5 +1,7 @@
 import User from '../models/User.js';
+import Farm from '../models/Farm.js';
 import jwt from 'jsonwebtoken';
+import { extractRegionFromAddress } from '../services/regionUtil.js';
 
 const generateToken = (user) => {
   // Access token with shorter expiry (1 hour)
@@ -163,6 +165,62 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
+// Return current user with farm and parsed region details
+export const getMe = async (req, res) => {
+  try {
+    const userId = req.user?._id || req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, msg: 'Unauthorized' });
+    }
+
+    // Fresh fetch to include latest fields (but exclude password)
+    const user = await User.findById(userId).select('-password');
+    if (!user) return res.status(404).json({ success: false, msg: 'User not found' });
+
+    // Resolve farm by explicit reference or ownership
+    let farm = null;
+    if (user.farmId) {
+      farm = await Farm.findById(user.farmId).lean();
+    }
+    if (!farm) {
+      farm = await Farm.findOne({ ownerId: user._id }).lean();
+    }
+
+    // Prefer structured defaultRegion if present; fallback to parsed address
+    const parsed = extractRegionFromAddress(user.address || farm?.address || '');
+    const region = {
+      state: user.defaultRegion?.state || parsed.state,
+      district: user.defaultRegion?.district || parsed.district,
+      market: user.defaultRegion?.market || parsed.market,
+      variety: user.defaultRegion?.variety || undefined
+    };
+
+    return res.json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified,
+        address: user.address || undefined,
+        farmId: user.farmId || undefined,
+        defaultRegion: user.defaultRegion || undefined
+      },
+      farm: farm ? {
+        id: farm._id,
+        name: farm.name,
+        address: farm.address,
+        ownerId: farm.ownerId
+      } : null,
+      region
+    });
+  } catch (err) {
+    console.error('getMe error:', err);
+    return res.status(500).json({ success: false, msg: 'Failed to fetch profile' });
+  }
+};
+
 export const approveFarmer = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -224,7 +282,7 @@ export const refreshToken = async (req, res) => {
 // Update user profile
 export const updateProfile = async (req, res) => {
   try {
-    const { name, email, phone, address } = req.body;
+    const { name, email, phone, address, defaultRegion } = req.body;
     const userId = req.user._id;
 
     // Check if email is already taken by another user
@@ -236,14 +294,25 @@ export const updateProfile = async (req, res) => {
     }
 
     // Update user
+    const update = {
+      name: name || undefined,
+      email: email || undefined,
+      phone: phone || undefined,
+      address: address || undefined
+    };
+    if (defaultRegion && typeof defaultRegion === 'object') {
+      const clean = {};
+      const fields = ['state','district','market','variety'];
+      for (const k of fields) {
+        const v = typeof defaultRegion[k] === 'string' ? defaultRegion[k].trim() : defaultRegion[k];
+        if (v) clean[k] = v;
+      }
+      update.defaultRegion = Object.keys(clean).length ? clean : undefined;
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { 
-        name: name || undefined,
-        email: email || undefined,
-        phone: phone || undefined,
-        address: address || undefined
-      },
+      update,
       { new: true, runValidators: true }
     ).select('-password');
 

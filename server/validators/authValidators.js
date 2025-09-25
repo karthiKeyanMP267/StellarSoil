@@ -45,6 +45,11 @@ export const profileUpdateValidator = [
   body('pincode')
     .optional()
     .matches(/^[0-9]{6}$/).withMessage('Please enter a valid 6-digit pincode'),
+  // Structured region fields are optional strings
+  body('defaultRegion.state').optional({ checkFalsy: true }).trim().isString().isLength({ min: 2 }).withMessage('State must be at least 2 characters'),
+  body('defaultRegion.district').optional({ checkFalsy: true }).trim().isString().isLength({ min: 2 }).withMessage('District must be at least 2 characters'),
+  body('defaultRegion.market').optional({ checkFalsy: true }).trim().isString().isLength({ min: 2 }).withMessage('Market must be at least 2 characters'),
+  body('defaultRegion.variety').optional({ checkFalsy: true }).trim().isString().isLength({ min: 1 }).withMessage('Variety must be at least 1 character'),
 ];
 
 // Param validation

@@ -196,12 +196,6 @@ const EnhancedNavbar = () => {
       href: '/farmer', 
       current: location.pathname === '/farmer',
       icon: BuildingStorefrontIcon
-    },
-    { 
-      name: t('nav.profile'), 
-      href: '/farmer/profile', 
-      current: location.pathname === '/farmer/profile',
-      icon: UserCircleIcon
     }
   ];
 

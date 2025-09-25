@@ -24,6 +24,33 @@ router.get('/market-prices', async (req, res) => {
   }
 });
 
+// Live price + simple forecast for a commodity (public)
+// GET /api/market/live-price?commodity=tomatoes&days=30&state=Tamil%20Nadu&district=Coimbatore&market=Coimbatore
+router.get('/live-price', async (req, res) => {
+  try {
+    const { commodity, days, state, district, market, variety } = req.query;
+    if (!commodity) {
+      return res.status(400).json({ success: false, message: 'commodity is required' });
+    }
+    const data = await marketPriceService.getLivePriceAndForecast(commodity, { days, state, district, market, variety });
+    return res.json(data);
+  } catch (error) {
+    console.error('Error fetching live price:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch live price', error: error.message });
+  }
+});
+
+// List available commodities (Agmarknet-backed, with fallback)
+router.get('/commodities', async (req, res) => {
+  try {
+    const commodities = await marketPriceService.getCommodities();
+    res.json({ success: true, commodities });
+  } catch (error) {
+    console.error('Error fetching commodities:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch commodities', error: error.message });
+  }
+});
+
 // Get commonly bought items
 router.get('/commonly-bought', async (req, res) => {
   try {
