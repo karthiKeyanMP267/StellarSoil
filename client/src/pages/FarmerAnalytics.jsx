@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import API from '../api/api';
-import { Card } from '../components/ui/Card';
+import { Card } from '../components/Card';
 
 export default function FarmerAnalytics() {
   const [orders, setOrders] = useState([]);

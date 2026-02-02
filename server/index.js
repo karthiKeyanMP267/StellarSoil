@@ -75,13 +75,9 @@ const mountRoutes = async () => {
     ['/api/market', './routes/marketRoutes'],
     ['/api/payment', './routes/paymentRoutes'],
     ['/api/farm-management', './routes/farmManagementRoutes'],
-    ['/api/doctors', './routes/doctorRoutes'],
-    ['/api/appointments', './routes/appointmentRoutes'],
-    ['/api/weather', './routes/weatherRoutes'],
     ['/api/notifications', './routes/notificationRoutes'],
     ['/api/analytics', './routes/analyticsRoutes'],
-    ['/api/favorites', './routes/favoritesRoutes'],
-    ['/api/chat', './routes/chatRoutes']
+    ['/api/favorites', './routes/favoritesRoutes']
   ];
 
   for (const [mountPath, rel] of mappings) {

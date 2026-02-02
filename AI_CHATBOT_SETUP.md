@@ -63,7 +63,7 @@ This interactive demo allows you to:
 ```bash
 # Terminal 1 - Server
 cd server
-npm start
+npm run dev
 
 # Terminal 2 - Client  
 cd client

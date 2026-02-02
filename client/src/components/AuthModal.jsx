@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Modal from './Modal';
+import { Modal } from './Modal';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/api';
 import { signInWithGoogle, isFirebaseConfigured } from '../services/firebase';

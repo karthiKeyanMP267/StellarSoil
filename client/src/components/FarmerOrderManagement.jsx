@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
-import { useNotification } from '../components/ui/Notification';
+import { useNotification } from './Notification';
 import API from '../api/api';
 import StaticMapView from './StaticMapView';
 import AddressDisplay from './AddressDisplay';

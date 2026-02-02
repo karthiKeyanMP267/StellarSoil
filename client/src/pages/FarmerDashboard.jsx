@@ -1,11 +1,11 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { LoadingState } from '../components/ui/AsyncStates';
+import { LoadingState } from '../components/AsyncStates';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../components/ui/Notification';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import { useNotification } from '../components/Notification';
+import { Card } from '../components/Card';
+import { Button } from '../components/Button';
 import { 
   MapPinIcon,
   PlusIcon,

@@ -7,13 +7,13 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "backfill:farmer-orders": "node ./scripts/backfillFarmerOnOrders.js",
-    "check:ocr": "node ./test-ocr.js",
-    "smoke:chat": "node ./test/chatController.smoke.js",
-    "smoke:flows": "node ./test/chatFlows.smoke.js"
-    ,"smoke:features": "node ./test/chatFeatureSuite.smoke.js"
-  ,
-  "smoke:listing-offline": "node ./test/chatListingOffline.smoke.js"
+    "init:db": "node scripts/initDatabase.js",
+    "seed:admin": "node seedAdmin.js",
+    "seed:db": "node seedDatabase.js",
+    "setup": "npm run init:db && npm run seed:admin",
+    "migrate:models": "node scripts/migrateModels.js",
+    "test:geo": "node scripts/testGeoQueries.js",
+    "backfill:farmer-orders": "node ./scripts/backfillFarmerOnOrders.js"
   },
   "keywords": [],
   "author": "",

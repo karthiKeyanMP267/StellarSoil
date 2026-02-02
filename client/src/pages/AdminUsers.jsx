@@ -13,9 +13,9 @@ import {
   AdjustmentsHorizontalIcon,
   ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
-import { Button } from '../components/ui/Button';
-import { Card, StatCard } from '../components/ui/Card';
-import { Input } from '../components/ui/Form';
+import { Button } from '../components/Button';
+import { Card, StatCard } from '../components/Card';
+import { Input } from '../components/Form';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);

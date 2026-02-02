@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../components/ui/Notification';
+import { useNotification } from '../components/Notification';
 import LocationMap from '../components/LocationMap';
-import { Card, StatCard } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { Input, TextArea, Select, FileUpload } from '../components/ui/Form';
-import { Modal } from '../components/ui/Modal';
+import { Card, StatCard } from '../components/Card';
+import { Button } from '../components/Button';
+import { Input, TextArea, Select, FileUpload } from '../components/Form';
+import { Modal } from '../components/Modal';
 import LiveMarketPriceWidget from '../components/LiveMarketPriceWidget';
 import LiveStockPredictionWidget from '../components/LiveStockPredictionWidget';
 import API from '../api/api';
@@ -550,8 +550,9 @@ export default function FarmDashboard() {
                       hasDelivery: true
                     }]}
                     userLocation={farmLocation}
-                    height="400px"
+                    height="500px"
                     showUserLocation={false}
+                    className="w-full"
                   />
                 ) : (
                   <div className="h-96 bg-beige-100 rounded-xl flex items-center justify-center">

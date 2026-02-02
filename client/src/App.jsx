@@ -11,7 +11,10 @@ import FarmProfile from './pages/FarmProfile';
 import FarmerAnalytics from './pages/FarmerAnalytics';
 import FarmerCustomers from './pages/FarmerCustomers';
 import FarmerDeliveries from './pages/FarmerDeliveries';
+import FarmerOrderTracking from './pages/FarmerOrderTracking';
 import ErrorBoundary from './components/ErrorBoundary';
+import ProductDiscovery from './pages/ProductDiscovery';
+import FarmDiscovery from './pages/FarmDiscovery';
 
 import AdminPanel from './components/AdminPanel';
 
@@ -26,6 +29,7 @@ import Favorites from './pages/Favorites';
 import OrderHistory from './pages/OrderHistory';
 import Checkout from './pages/Checkout';
 import OrderDetails from './pages/OrderDetails';
+import UserOrderTracking from './pages/UserOrderTracking';
 import AdminUsers from './pages/AdminUsers';
 
 // Import focus prevention hooks
@@ -36,9 +40,6 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import UserProfile from './pages/UserProfile';
-// Lazy loaded feature pages
-const AdvancedFeaturesShowcase = lazy(() => import('./pages/AdvancedFeaturesShowcase'));
-const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
 
 // Enhanced Components
 import About from './pages/About';
@@ -48,15 +49,9 @@ import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 
 // Import NotificationProvider and i18n
-import { NotificationProvider } from './components/ui/Notification';
+import { NotificationProvider } from './components/Notification';
 import { ThemeProvider } from './context/ThemeContext';
-// Lazy heavy / rarely interacted components
-const AIChatbotAssistant = lazy(() => import('./components/AIChatbotAssistant'));
-const SmartNotificationSystem = lazy(() => import('./components/SmartNotificationSystem'));
 import './i18n/i18n';
-
-// Import Focus Test Component (for testing only)
-// import FocusTestComponent from './components/FocusTestComponent';
 
 const App = () => {
   const location = useLocation();
@@ -78,9 +73,6 @@ const App = () => {
         
           <div className="relative z-10">
             <Navbar />
-            <Suspense fallback={null}>
-              <SmartNotificationSystem />
-            </Suspense>
             <ErrorBoundary>
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
@@ -100,8 +92,6 @@ const App = () => {
                     <Route path="/faq" element={<FAQ />} />
                     <Route path="/privacy" element={<PrivacyPolicyPage />} />
                     <Route path="/marketplace" element={<Marketplace />} />
-                    <Route path="/features" element={<AdvancedFeaturesShowcase />} />
-                    <Route path="/feature-list" element={<FeaturesPage />} />
                   
                     {/* Legacy Routes for compatibility */}
                     <Route path="/about-old" element={<AboutPage />} />
@@ -126,14 +116,18 @@ const App = () => {
                     <Route path="/farmer/analytics" element={<FarmerRoute><FarmerProfileGuard><FarmerAnalytics /></FarmerProfileGuard></FarmerRoute>} />
                     <Route path="/farmer/customers" element={<FarmerRoute><FarmerProfileGuard><FarmerCustomers /></FarmerProfileGuard></FarmerRoute>} />
                     <Route path="/farmer/deliveries" element={<FarmerRoute><FarmerProfileGuard><FarmerDeliveries /></FarmerProfileGuard></FarmerRoute>} />
+                    <Route path="/farmer/track/:orderId" element={<FarmerRoute><FarmerProfileGuard><FarmerOrderTracking /></FarmerProfileGuard></FarmerRoute>} />
                     
                     {/* User Shopping Routes */}
                     <Route path="/farms" element={<EnhancedFarms />} />
+                    <Route path="/discover-products" element={<UserRoute><ProductDiscovery /></UserRoute>} />
+                    <Route path="/discover-farms" element={<UserRoute><FarmDiscovery /></UserRoute>} />
                     <Route path="/purchase/:farmId/:productId" element={<UserRoute><PurchaseProduce /></UserRoute>} />
                     <Route path="/cart" element={<UserRoute><Cart /></UserRoute>} />
                     <Route path="/favorites" element={<UserRoute><Favorites /></UserRoute>} />
                     <Route path="/orders" element={<UserRoute><OrderHistory /></UserRoute>} />
                     <Route path="/orders/:id" element={<UserRoute><OrderDetails /></UserRoute>} />
+                    <Route path="/track/:orderId" element={<UserRoute><UserOrderTracking /></UserRoute>} />
                     <Route path="/checkout" element={<UserRoute><Checkout /></UserRoute>} />
                     
                     <Route path="*" element={<NotFound />} />
@@ -142,14 +136,6 @@ const App = () => {
                 </motion.div>
               </AnimatePresence>
             </ErrorBoundary>
-            
-            {/* AI Chatbot Assistant - Global */}
-            <Suspense fallback={null}>
-              <AIChatbotAssistant />
-            </Suspense>
-            
-            {/* Focus Test Component - Testing Only */}
-            {/* <FocusTestComponent /> */}
           </div>
         </div>
       </NotificationProvider>

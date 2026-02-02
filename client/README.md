@@ -2,15 +2,6 @@
 
 This is the frontend application for StellarSoil, an agriculture marketplace platform connecting farmers and buyers.
 
-## Features
-
-- Multi-role authentication system (Admin, Farmer, User)
-- Secure file upload for farmer verification
-- Admin dashboard for managing farmer verifications
-- Role-based access control
-- Responsive and modern UI with TailwindCSS
-- Protected routes based on user roles
-
 ## Prerequisites
 
 - Node.js (v14 or higher)

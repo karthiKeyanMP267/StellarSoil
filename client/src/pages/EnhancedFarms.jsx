@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../components/ui/Notification';
+import { useNotification } from '../components/Notification';
 import LocationMap from '../components/LocationMap';
-import { Card, ProductCard } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import { Card, ProductCard } from '../components/Card';
+import { Button } from '../components/Button';
 import API from '../api/api';
 import { 
   MapPinIcon,

@@ -1,5 +1,5 @@
 import Notification from '../models/Notification.js';
-import weatherService from './weatherService.js';
+
 import { SensorData, PestAlert } from '../models/FarmManagement.js';
 import User from '../models/User.js';
 
@@ -58,27 +58,6 @@ class NotificationService {
     } catch (error) {
       console.error('Error sending bulk notifications:', error);
       throw error;
-    }
-  }
-
-  // Weather-based notifications
-  async sendWeatherAlerts(lat, lon, userIds) {
-    try {
-      const alerts = await weatherService.getAgriculturalAlerts(lat, lon);
-      
-      if (alerts.length > 0) {
-        for (const alert of alerts) {
-          await this.sendBulkNotifications(userIds, {
-            type: 'weather',
-            title: `Weather Alert: ${alert.type}`,
-            message: alert.message,
-            priority: alert.severity === 'high' ? 'high' : 'medium',
-            data: { alert }
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error sending weather alerts:', error);
     }
   }
 

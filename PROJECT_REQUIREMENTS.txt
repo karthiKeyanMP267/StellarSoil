@@ -1,0 +1,365 @@
+# ==========================================
+# STELLARSOIL PROJECT REQUIREMENTS
+# Farm-to-Consumer Platform
+# ==========================================
+
+# ==========================================
+# 1. SYSTEM REQUIREMENTS
+# ==========================================
+Node.js >= 16.x
+MongoDB >= 4.4
+npm >= 8.x
+Git
+
+# Optional:
+Python >= 3.8 (for ML/certificate processing scripts)
+
+# ==========================================
+# 2. SERVER DEPENDENCIES (Node.js/Express)
+# ==========================================
+
+## Core Framework
+express@^4.18.2                 # Web framework
+dotenv@^16.3.1                  # Environment variables
+cors@^2.8.5                     # Cross-origin resource sharing
+helmet@^7.2.0                   # Security headers
+cookie-parser@^1.4.7            # Cookie parsing
+express-rate-limit@^7.5.1       # API rate limiting
+
+## Database
+mongoose@^7.4.3                 # MongoDB ODM
+sharedb@^3.3.2                  # Real-time collaboration
+sharedb-mongo@^3.0.1            # ShareDB MongoDB adapter
+
+## Authentication & Security
+bcryptjs@^2.4.3                 # Password hashing
+jsonwebtoken@^9.0.1             # JWT tokens
+express-validator@^7.2.1        # Input validation
+
+## File Upload & Processing
+multer@^1.4.5-lts.1             # File upload handling
+pdf-parse@^1.1.1                # PDF parsing (certificates)
+cloudinary@^2.7.0               # Image storage/CDN
+
+## External APIs
+axios@^1.11.0                   # HTTP client (gov prices, external APIs)
+node-fetch@^3.3.2               # Fetch API for Node
+@google/generative-ai@^0.24.1   # Google AI/Gemini
+firebase-admin@^12.5.0          # Firebase integration
+
+## Payments & Notifications
+razorpay@^2.9.6                 # Payment gateway
+resend@^3.2.0                   # Email service
+twilio@^4.14.1                  # SMS service
+
+## Utilities
+uuid@^13.0.0                    # UUID generation
+chalk@^5.6.2                    # Terminal colors
+csv-parser@^3.2.0               # CSV parsing
+ws@^8.13.0                      # WebSocket support
+
+## Development
+nodemon@^3.1.10                 # Auto-restart dev server
+
+# ==========================================
+# 3. CLIENT DEPENDENCIES (React/Vite)
+# ==========================================
+
+## Core Framework
+react@^18.2.0                   # UI framework
+react-dom@^18.2.0               # React DOM rendering
+react-router-dom@^6.14.2        # Client-side routing
+vite@^5.1.4                     # Build tool
+
+## UI Components
+@headlessui/react@^1.7.19       # Unstyled UI components
+@heroicons/react@^2.2.0         # Icon library
+@mui/material@^7.3.2            # Material-UI components
+@mui/icons-material@^7.3.2      # Material-UI icons
+lucide-react@^0.542.0           # Lucide icons
+
+## Styling
+@tailwindcss/forms@^0.5.4       # Tailwind form styles
+@tailwindcss/typography@^0.5.16 # Tailwind typography
+@tailwindcss/aspect-ratio@^0.4.2 # Aspect ratio utilities
+tailwindcss@^3.4.17             # CSS framework
+postcss@^8.4.49                 # CSS processor
+autoprefixer@^10.4.20           # CSS vendor prefixes
+
+## State & Data
+axios@^1.6.2                    # HTTP client
+
+## Internationalization
+i18next@^25.4.2                 # i18n framework
+react-i18next@^15.7.2           # React i18n bindings
+i18next-browser-languagedetector@^8.2.0 # Browser language detection
+i18next-http-backend@^3.0.2     # Backend for translations
+
+## Animations & UI Enhancement
+framer-motion@^12.23.12         # Animation library
+lottie-react@^2.4.1             # Lottie animations
+aos@^2.3.4                      # Animate on scroll
+react-spring@^10.0.1            # Spring physics animations
+@react-spring/web@^10.0.1       # Spring web bindings
+
+## Charts & Visualization
+chart.js@^4.5.0                 # Chart library
+react-chartjs-2@^5.3.0          # React Chart.js wrapper
+react-circular-progressbar@^2.2.0 # Circular progress bars
+
+## Notifications & Feedback
+notistack@^3.0.2                # Snackbar notifications
+react-toastify@^9.1.3           # Toast notifications
+
+## Firebase
+firebase@^10.14.1               # Firebase SDK
+
+## Utilities
+date-fns@^4.1.0                 # Date utilities
+react-intersection-observer@^9.16.0 # Intersection observer
+
+## Fonts
+@fontsource/inter@^5.0.8        # Inter font
+@fontsource/montserrat@^5.0.8   # Montserrat font
+
+## Development Tools
+@vitejs/plugin-react@^4.2.1     # Vite React plugin
+eslint@^8.57.0                  # Linting
+prettier@^3.2.5                 # Code formatting
+vitest@^1.3.1                   # Testing framework
+@testing-library/react@^14.2.1  # React testing utilities
+@testing-library/jest-dom@^6.1.4 # Jest DOM matchers
+cypress@^13.6.6                 # E2E testing
+
+# ==========================================
+# 4. PYTHON DEPENDENCIES (Optional)
+# ==========================================
+# For ML price prediction and certificate OCR
+# Install with: pip install -r requirements.txt
+
+pandas>=1.5.0                   # Data manipulation
+numpy>=1.24.0                   # Numerical computing
+scikit-learn>=1.2.0             # Machine learning
+opencv-python>=4.8.0            # Image processing (OCR)
+pytesseract>=0.3.10             # OCR engine
+Pillow>=10.0.0                  # Image handling
+joblib>=1.3.0                   # Model serialization
+
+# ==========================================
+# 5. ENVIRONMENT VARIABLES REQUIRED
+# ==========================================
+
+## Server (.env in /server)
+MONGO_URI=mongodb://localhost:27017/stellarsoil
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=your_secret_key_here
+
+## Email Service (optional)
+EMAIL_FROM=noreply@stellarsoil.com
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USER=your_email
+EMAIL_PASS=your_password
+RESEND_API_KEY=your_resend_key
+
+## Payment Gateway
+RAZORPAY_KEY_ID=your_razorpay_key
+RAZORPAY_KEY_SECRET=your_razorpay_secret
+
+## Firebase
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_PRIVATE_KEY=your_private_key
+FIREBASE_CLIENT_EMAIL=your_client_email
+
+## Government Data API (optional)
+GOV_DATA_API_KEY=your_api_key_here
+
+## Cloudinary (image storage)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+## SMS Service
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
+TWILIO_PHONE_NUMBER=your_phone_number
+
+## Google AI
+GEMINI_API_KEY=your_gemini_key
+
+## Client (.env in /client)
+VITE_API_URL=http://localhost:5000
+VITE_FIREBASE_API_KEY=your_firebase_key
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+
+# ==========================================
+# 6. DATABASE REQUIREMENTS
+# ==========================================
+
+## MongoDB Collections
+- users
+- farms
+- products
+- orders
+- carts
+- certificates
+- notifications
+- appointments
+- doctors
+- farmmanagements
+- pricehistories (for ML predictions)
+- govprices (cached government prices)
+
+## Required Indexes
+farms.location - 2dsphere (geo-spatial)
+farms.certificationScore - descending
+products.name - text
+products.description - text
+products.tags - text
+products.farm - ascending
+products.category - ascending
+products.isActive - ascending
+users.email - unique
+users.role - ascending
+
+# ==========================================
+# 7. EXTERNAL SERVICES NEEDED
+# ==========================================
+
+## Required
+- MongoDB Database (local or Atlas)
+- Node.js Runtime
+
+## Optional but Recommended
+- Cloudinary (image CDN)
+- Razorpay (payments)
+- Resend/SMTP (emails)
+- Firebase (push notifications)
+- Government Data API (price data)
+- Google Gemini AI (chatbot)
+- Twilio (SMS)
+
+# ==========================================
+# 8. BROWSER REQUIREMENTS
+# ==========================================
+
+## Minimum Browser Support
+- Chrome >= 90
+- Firefox >= 88
+- Safari >= 14
+- Edge >= 90
+
+## Required Browser Features
+- Geolocation API (for location-based search)
+- LocalStorage
+- Fetch API
+- WebSocket (for real-time features)
+- Service Workers (for PWA features)
+
+# ==========================================
+# 9. INSTALLATION STEPS
+# ==========================================
+
+1. Clone repository
+2. Install Node.js dependencies:
+   cd server && npm install
+   cd ../client && npm install
+
+3. Configure environment variables (.env files)
+
+4. Initialize MongoDB indexes:
+   cd server && npm run init:db
+
+5. Seed admin account:
+   npm run seed:admin
+
+6. (Optional) Seed test data:
+   npm run seed:db
+
+7. Start development servers:
+   Server: npm run dev (in /server)
+   Client: npm run dev (in /client)
+
+# ==========================================
+# 10. PRODUCTION DEPLOYMENT REQUIREMENTS
+# ==========================================
+
+## Server
+- Node.js hosting (Heroku, AWS, DigitalOcean, etc.)
+- MongoDB Atlas or self-hosted MongoDB
+- SSL certificate (HTTPS)
+- Domain name
+- Environment variables configured
+- CORS configured for production domain
+
+## Client
+- Static hosting (Netlify, Vercel, Cloudflare Pages)
+- Build command: npm run build
+- Publish directory: dist
+- Environment variables configured
+
+## Performance
+- CDN for static assets
+- Database indexes created
+- Rate limiting configured
+- Caching strategy implemented
+- Image optimization (via Cloudinary)
+
+# ==========================================
+# 11. KEY FEATURES IMPLEMENTED
+# ==========================================
+
+✅ User Authentication & Authorization
+✅ Farmer Registration with Kisan ID
+✅ Farm Profile Management
+✅ Certificate Upload & Scoring
+✅ Product Listing with Images
+✅ Geo-Based Product Discovery
+✅ Distance Calculation & Filtering
+✅ Certification-Based Sorting
+✅ Government Price Integration
+✅ ML Price Prediction
+✅ Shopping Cart
+✅ Order Management
+✅ Payment Integration (Razorpay)
+✅ Multi-Language Support (i18n)
+✅ Real-Time Notifications
+✅ Analytics Dashboard
+✅ Admin Panel
+✅ Doctor/Expert Consultation
+✅ Farm Management Tools
+✅ Marketplace with Filters
+✅ Favorites System
+✅ Review & Rating System
+
+# ==========================================
+# 12. TESTING REQUIREMENTS
+# ==========================================
+
+## Backend Testing
+- API endpoint testing
+- Database connection tests
+- Authentication tests
+- Geo-search accuracy tests
+
+## Frontend Testing
+- Component unit tests (Vitest)
+- E2E tests (Cypress)
+- Browser compatibility tests
+- Mobile responsiveness tests
+- Geolocation testing
+
+## Performance Testing
+- API response times
+- Database query optimization
+- Frontend load times
+- Image loading performance
+
+# ==========================================
+# END OF REQUIREMENTS
+# ==========================================

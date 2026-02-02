@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../components/ui/Notification';
+import { useNotification } from './Notification';
 import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
 import API from '../api/api';
 

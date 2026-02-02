@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ClockIcon, MapPinIcon, TruckIcon } from '@heroicons/react/24/outline';
 import API from '../api/api';
-import { useNotification } from './ui/Notification';
+import { useNotification } from './Notification';
 import StaticMapView from './StaticMapView';
 
 const DeliveryUpdates = ({ order, onOrderUpdate }) => {

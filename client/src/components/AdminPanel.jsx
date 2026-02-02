@@ -13,8 +13,8 @@ import {
   ShieldCheckIcon,
   ChartBarIcon
 } from '@heroicons/react/24/outline';
-import { Button } from './ui/Button';
-import { Card, StatCard } from './ui/Card';
+import { Button } from './Button';
+import { Card, StatCard } from './Card';
 
 const getUploadsBaseUrl = () => {
   const apiBase = API.defaults.baseURL || '/api';

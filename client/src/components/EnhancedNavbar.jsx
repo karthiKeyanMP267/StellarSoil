@@ -30,7 +30,6 @@ import AuthModal from './AuthModal';
 import EnhancedLanguageSelector from './EnhancedLanguageSelector';
 import EnhancedThemeToggle from './EnhancedThemeToggle';
 import useGoogleTranslate from '../hooks/useGoogleTranslate';
-import FocusKiller from './FocusKiller';
 import ThemeToggle from './ThemeToggle';
 
 function classNames(...classes) {

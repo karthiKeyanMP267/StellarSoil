@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import API from '../api/api';
-import { Card } from '../components/ui/Card';
+import { Card } from '../components/Card';
 
 export default function FarmerCustomers() {
   const [orders, setOrders] = useState([]);
