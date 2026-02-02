@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import API from '../api/api';
+import { requestFcmToken, isFirebaseConfigured } from '../services/firebase';
 import {
   Cog6ToothIcon,
   BellIcon,
@@ -60,6 +61,7 @@ const Settings = () => {
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(null);
   const [saveStatus, setSaveStatus] = useState(null);
+  const [pushStatus, setPushStatus] = useState(null);
 
   // Region Defaults state and effects
   const [regionForm, setRegionForm] = useState({ state: '', district: '', market: '', variety: '' });
@@ -77,12 +79,35 @@ const Settings = () => {
     { id: 'advanced', name: '🔧 Advanced', icon: ChartBarIcon }
   ];
 
-  const handleToggle = (section, key) => {
+  const handleToggle = async (section, key) => {
+    const nextValue = !settings[section][key];
+
+    if (section === 'notifications' && key === 'push' && nextValue) {
+      if (!isFirebaseConfigured) {
+        setPushStatus({ type: 'error', text: 'Firebase config missing. Add VITE_FIREBASE_* values in client env.' });
+        return;
+      }
+
+      const token = await requestFcmToken();
+      if (!token) {
+        setPushStatus({ type: 'error', text: 'Push permission denied or VAPID key missing.' });
+        return;
+      }
+
+      localStorage.setItem('fcmToken', token);
+      setPushStatus({ type: 'success', text: 'Push notifications enabled.' });
+    }
+
+    if (section === 'notifications' && key === 'push' && !nextValue) {
+      localStorage.removeItem('fcmToken');
+      setPushStatus({ type: 'info', text: 'Push notifications disabled.' });
+    }
+
     setSettings(prev => ({
       ...prev,
       [section]: {
         ...prev[section],
-        [key]: !prev[section][key]
+        [key]: nextValue
       }
     }));
   };
@@ -336,6 +361,18 @@ const Settings = () => {
                 {activeSection === 'notifications' && (
                   <div>
                     <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-700 to-orange-700 mb-8 tracking-wide">🔔 Notification Settings</h2>
+
+                    {pushStatus && (
+                      <div className={`mb-6 rounded-2xl border-2 p-4 font-semibold shadow-md ${
+                        pushStatus.type === 'success'
+                          ? 'border-green-200 bg-green-50 text-green-800'
+                          : pushStatus.type === 'info'
+                            ? 'border-blue-200 bg-blue-50 text-blue-800'
+                            : 'border-red-200 bg-red-50 text-red-800'
+                      }`}>
+                        {pushStatus.text}
+                      </div>
+                    )}
                     
                     <div className="space-y-6">
                       {[

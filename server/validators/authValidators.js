@@ -28,6 +28,21 @@ export const loginValidator = [
     .notEmpty().withMessage('Password is required'),
 ];
 
+// Google auth validation
+export const googleAuthValidator = [
+  body('idToken')
+    .notEmpty().withMessage('Google ID token is required'),
+  body('role')
+    .optional()
+    .isIn(['user']).withMessage('Invalid role')
+];
+
+export const resendVerificationValidator = [
+  body('email')
+    .notEmpty().withMessage('Email is required')
+    .isEmail().withMessage('Please provide a valid email address')
+];
+
 // Profile update validation
 export const profileUpdateValidator = [
   body('name')

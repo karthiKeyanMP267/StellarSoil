@@ -40,6 +40,7 @@ API.interceptors.response.use(
 // Auth endpoints
 export const authApi = {
   login: (data) => API.post('/auth/login', data),
+  googleAuth: (data) => API.post('/auth/google', data),
   register: (data) => {
     const formData = new FormData();
     for (const key in data) {

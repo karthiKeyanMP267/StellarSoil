@@ -16,6 +16,35 @@ import {
 import { Button } from './ui/Button';
 import { Card, StatCard } from './ui/Card';
 
+const getUploadsBaseUrl = () => {
+  const apiBase = API.defaults.baseURL || '/api';
+  return apiBase.replace(/\/api\/?$/, '');
+};
+
+const buildKisanIdUrl = (documentPath) => {
+  if (!documentPath) return null;
+  if (/^https?:\/\//i.test(documentPath)) return documentPath;
+
+  const uploadsBase = getUploadsBaseUrl();
+  const normalized = documentPath.replace(/\\/g, '/');
+  const uploadsIndex = normalized.indexOf('/uploads/');
+
+  if (uploadsIndex !== -1) {
+    return `${uploadsBase}${normalized.slice(uploadsIndex)}`;
+  }
+
+  if (normalized.startsWith('/uploads/')) {
+    return `${uploadsBase}${normalized}`;
+  }
+
+  if (normalized.startsWith('uploads/')) {
+    return `${uploadsBase}/${normalized}`;
+  }
+
+  const fileName = normalized.split('/').pop();
+  return fileName ? `${uploadsBase}/uploads/kisan-ids/${fileName}` : null;
+};
+
 export default function AdminPanel() {
   const [pendingFarmers, setPendingFarmers] = useState([]);
   const [stats, setStats] = useState({
@@ -341,6 +370,31 @@ export default function AdminPanel() {
                         <div>
                           <h4 className="text-lg font-semibold text-beige-900">{farmer.name}</h4>
                           <p className="text-beige-600">{farmer.email}</p>
+                          {farmer.kisanId?.documentPath ? (
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-beige-100 px-3 py-1 text-beige-700 font-medium">
+                                Kisan ID
+                                {farmer.kisanId?.verified ? (
+                                  <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <ClockIcon className="h-4 w-4 text-orange-500" />
+                                )}
+                              </span>
+                              <a
+                                href={buildKisanIdUrl(farmer.kisanId.documentPath)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-2 rounded-full border border-beige-200 bg-white px-3 py-1 font-semibold text-beige-700 shadow-sm transition hover:border-beige-300 hover:text-beige-900"
+                              >
+                                <EyeIcon className="h-4 w-4" />
+                                View Kisan ID
+                              </a>
+                            </div>
+                          ) : (
+                            <div className="mt-2 text-sm text-orange-600 font-medium">
+                              Kisan ID file not available
+                            </div>
+                          )}
                           <div className="flex items-center text-sm text-beige-500 mt-1">
                             <ClockIcon className="h-4 w-4 mr-1" />
                             Applied {new Date(farmer.createdAt).toLocaleDateString('en-US', {

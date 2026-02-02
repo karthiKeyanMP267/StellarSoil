@@ -23,6 +23,9 @@ const userSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: function() {
       return this.role !== 'farmer'; // Non-farmer accounts are verified by default
     }},
+    emailVerified: { type: Boolean, default: true },
+    emailVerificationTokenHash: { type: String },
+    emailVerificationExpires: { type: Date },
     address: { type: String },
     phone: { type: String },
     location: {

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Modal from './Modal';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/api';
+import { signInWithGoogle, isFirebaseConfigured } from '../services/firebase';
 import { 
   UserIcon, 
   EnvelopeIcon, 
@@ -27,11 +28,19 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
   });
   const [kisanIdFile, setKisanIdFile] = useState(null);
   const [error, setError] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleVerified, setGoogleVerified] = useState(false);
   const { login } = useAuth();
 
   useEffect(() => {
     setMode(initialMode);
   }, [initialMode]);
+
+  useEffect(() => {
+    if (role === 'farmer') {
+      setGoogleVerified(false);
+    }
+  }, [role]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -40,6 +49,59 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
 
   const handleFileChange = (e) => {
     setKisanIdFile(e.target.files[0]);
+  };
+
+  const isValidEmail = (value) => {
+    const normalized = (value || '').trim().toLowerCase();
+    const blockedDomains = new Set([
+      'example.com',
+      'example.org',
+      'example.net',
+      'test.com',
+      'test.org',
+      'fake.com',
+      'mailinator.com',
+      'tempmail.com',
+      '10minutemail.com',
+      'guerrillamail.com'
+    ]);
+
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    const domain = normalized.split('@')[1];
+    if (!normalized || !emailRegex.test(normalized)) return false;
+    if (domain && blockedDomains.has(domain)) return false;
+    return true;
+  };
+
+  const handleGoogleSignup = async () => {
+    setError('');
+
+    if (!isFirebaseConfigured) {
+      setError('Firebase config missing. Add VITE_FIREBASE_* values in client env.');
+      return;
+    }
+
+    try {
+      setGoogleLoading(true);
+      const { user, idToken } = await signInWithGoogle();
+      if (!user?.email || !idToken) {
+        setError('Google sign-in did not return an email.');
+        return;
+      }
+      const res = await authApi.googleAuth({ idToken, role: 'user' });
+      login(res.data.user, res.data.accessToken);
+      setGoogleVerified(true);
+      onClose();
+    } catch (err) {
+      const code = err?.code || err?.message;
+      if (code === 'auth/configuration-not-found') {
+        setError('Google Auth is not enabled for this Firebase project. Enable Google provider in Firebase Console → Authentication → Sign-in method, and add localhost to Authorized domains.');
+      } else {
+        setError(err?.message || 'Google sign-in failed');
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -59,6 +121,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
         console.log('Stored token after login:', localStorage.getItem('token'));
         onClose();
       } else if (mode === 'register') {
+        if (!isValidEmail(form.email)) {
+          setError('Please enter a valid email address');
+          return;
+        }
         // Build data object for registration
         const data = {
           name: form.name,
@@ -73,7 +139,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
         // If registration successful, switch to login mode
         setMode('login');
         setForm({ ...form, password: '' });
-        alert('Registration successful! Please login.');
+        alert('Registration successful! Please verify your email before logging in.');
       }
     } catch (err) {
       const apiErr = err?.response?.data;
@@ -262,10 +328,16 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
                 required
                 value={form.email}
                 onChange={handleChange}
+                readOnly={googleVerified}
                 className="block w-full pl-10 pr-4 py-3 bg-white/80 backdrop-blur-sm border border-beige-200 rounded-xl shadow-sm placeholder-beige-500 text-earth-800 focus:outline-none focus:ring-2 focus:ring-beige-400 focus:border-transparent transition-all duration-300 sm:text-sm hover:bg-white/90"
                 placeholder="Enter your email"
               />
             </div>
+            {googleVerified && (
+              <p className="mt-2 text-xs text-green-700 font-semibold">
+                Google verified email
+              </p>
+            )}
           </motion.div>
 
           <motion.div
@@ -344,6 +416,19 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
             )}
           </button>
         </form>
+
+        {mode === 'register' && role === 'user' && (
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={handleGoogleSignup}
+              disabled={googleLoading}
+              className="w-full py-3 px-6 rounded-2xl border-2 border-beige-200 bg-white text-earth-700 font-bold hover:bg-beige-50 transition-all duration-300 shadow-sm"
+            >
+              {googleLoading ? 'Connecting to Google...' : 'Continue with Google'}
+            </button>
+          </div>
+        )}
         
         <div className="mt-8 text-center text-sm">
           <span className="text-amber-700">
@@ -361,6 +446,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
                 kisanId: '',
                 role: 'user'
               });
+              setGoogleVerified(false);
               setRole('user'); // Reset role when switching modes
             }}
             className="text-amber-600 font-medium hover:text-amber-800 focus:outline-none focus:underline transition-colors duration-200 ml-1"

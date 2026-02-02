@@ -17,7 +17,6 @@ import {
   ArrowRightOnRectangleIcon,
   UserPlusIcon,
   Cog6ToothIcon,
-  BellIcon,
   SparklesIcon,
   MagnifyingGlassIcon,
   SunIcon,
@@ -546,99 +545,7 @@ const EnhancedNavbar = () => {
                           </Transition>
                         </Menu>
 
-                        {/* Enhanced Notifications */}
-                        <Menu as="div" className="relative">
-                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                            <Menu.Button className="relative p-2 text-gray-600 hover:text-sage-700 transition-colors duration-300 hover:bg-sage-50/70 rounded-lg no-focus-outline">
-                              <motion.div
-                                animate={{ 
-                                  rotate: [0, 8, -8, 0],
-                                  scale: [1, 1.05, 1]
-                                }}
-                                transition={{ duration: 3, repeat: Infinity }}
-                                whileHover={{
-                                  rotate: [0, 15, -15, 0],
-                                  scale: 1.1,
-                                  transition: { duration: 0.4 }
-                                }}
-                              >
-                                <BellIcon className="h-5 w-5" />
-                              </motion.div>
-                              
-                              {notifications > 0 && (
-                                <motion.span 
-                                  className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center border border-white/50"
-                                  animate={{ 
-                                    scale: [1, 1.15, 1],
-                                    boxShadow: [
-                                      '0 0 0px rgba(239,68,68,0)',
-                                      '0 0 12px rgba(239,68,68,0.5)',
-                                      '0 0 0px rgba(239,68,68,0)'
-                                    ]
-                                  }}
-                                  transition={{ duration: 2.5, repeat: Infinity }}
-                                  whileHover={{
-                                    scale: 1.25,
-                                    rotate: [0, 10, -10, 0],
-                                    transition: { duration: 0.3 }
-                                  }}
-                                >
-                                  {notifications}
-                                </motion.span>
-                              )}
-                            </Menu.Button>
-                          </motion.div>
-                          
-                          <Transition
-                            as={Fragment}
-                            enter="transition ease-out duration-200"
-                            enterFrom="transform opacity-0 scale-95"
-                            enterTo="transform opacity-100 scale-100"
-                            leave="transition ease-in duration-150"
-                            leaveFrom="transform opacity-100 scale-100"
-                            leaveTo="transform opacity-0 scale-95"
-                          >
-                            <Menu.Items className="absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-lg bg-white shadow-xl ring-1 ring-gray-200/50 border-0 no-focus-outline">
-                              <div className="py-2 max-h-96 overflow-y-auto">
-                                <div className="px-4 py-2 border-b border-gray-100">
-                                  <div className="flex items-center justify-between">
-                                    <p className="text-sm font-semibold text-gray-700">Notifications</p>
-                                    <button className="text-xs text-sage-600 hover:text-sage-700">Mark all read</button>
-                                  </div>
-                                </div>
-                                
-                                {/* Sample notifications */}
-                                <div className="space-y-1">
-                                  <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
-                                    <div className="flex items-start space-x-3">
-                                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-gray-700">New order received</p>
-                                        <p className="text-xs text-gray-500 mt-1">2 minutes ago</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
-                                    <div className="flex items-start space-x-3">
-                                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-gray-700">Payment confirmed</p>
-                                        <p className="text-xs text-gray-500 mt-1">1 hour ago</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div className="border-t border-gray-100 px-4 py-2">
-                                  <Link to="/notifications" className="text-sm text-sage-600 hover:text-sage-700">
-                                    View all notifications
-                                  </Link>
-                                </div>
-                              </div>
-                            </Menu.Items>
-                          </Transition>
-                        </Menu>
+                        {/* Notifications removed as per request */}
                       </>
                     )}
 
